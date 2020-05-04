@@ -1,3 +1,4 @@
+![PlayGotM](https://avatars1.githubusercontent.com/u/60827502?s=200&v=4) 
 # Official GDScript API for games on gotm.io
 This plugin serves as a polyfill when developing against the API locally. The API is currently in its infancy and only exposes basic user information.
 
