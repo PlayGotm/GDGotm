@@ -1,2 +1,7 @@
-# GdGotm
-GDScript API for gotm.io
+# Official GDScript API for games on gotm.io
+This plugin serves as a polyfill when developing against the API locally. The API is currently in its infancy and only exposes basic user information.
+
+The 'real' API calls are only available when running the game live on gotm.io. 
+
+## Installation
+Add Gotm.gd to your autoloads at "Project Settings -> AutoLoad". Do change the name from "Gotm".
