@@ -15,7 +15,7 @@ var user_id: String = ""
 
 
 # The API is live when the game runs on gotm.io.
-# Running the game in the web player (gotm.io/web-player) counts as live.
+# Running the game in the web player (gotm.io/web-player) also counts as live.
 static func is_live() -> bool:
 	return false
 
