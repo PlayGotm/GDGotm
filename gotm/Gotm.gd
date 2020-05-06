@@ -3,6 +3,8 @@ extends Node
 # Official GDScript API for games on gotm.io
 # This plugin serves as a polyfill while developing against the API locally.
 # The 'real' API calls are only available when running the game live on gotm.io. 
+# Add this script as a global autoload. Make sure the global autoload is named "Gotm". 
+# It must be named "Gotm" for it to work.
 
 # User has logged in or out.
 signal user_changed
