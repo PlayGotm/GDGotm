@@ -5,4 +5,4 @@ This plugin serves as a polyfill when developing against the API locally. The AP
 The 'real' API calls are only available when running the game live on gotm.io. 
 
 ## Installation
-Add Gotm.gd to your autoloads at "Project Settings -> AutoLoad". Do change the name from "Gotm".
+Add Gotm.gd to your autoloads at "Project Settings -> AutoLoad". Make sure the global autoload is named "Gotm". It must be named "Gotm" for it to work.
