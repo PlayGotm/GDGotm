@@ -1,3 +1,25 @@
+# MIT License
+#
+# Copyright (c) 2020-2020 Macaroni Studios AB
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+
 class_name _GotmImpl
 #warnings-disable
 
@@ -77,18 +99,176 @@ static func _init_search_string_encoders() -> Array:
 	return encoders
 
 
+# Initialize socket for fetching lobbies on local network.
+static func _init_socket() -> void:
+	var g = _get_gotm()
+	if not g._impl.sockets:
+		g._impl.sockets = []
+		var is_listening = false
+		for i in range(5):
+			var socket = PacketPeerUDP.new()
+			if socket.has_method("set_broadcast_enabled"):
+				socket.set_broadcast_enabled(true)
+			if not is_listening:
+				is_listening = socket.listen(8075 + i) == OK
+			socket.set_dest_address("255.255.255.255", 8075 + i)
+			g._impl.sockets.push_back(socket)
+		
+		if not is_listening:
+			push_error("Failed to listen for lobbies. All ports 8075-8079 are busy.")
+
+
 # Attach some global state to autoloaded Gotm instance.
-static func _initialize() -> void:
+static func _initialize(GotmLobbyT, GotmUserT) -> void:
 	var g = _get_gotm()
 		
 	g._impl = {
 		"lobbies": [],
 		"chars": "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-",
 		"rng": RandomNumberGenerator.new(),
-		"last_lobby_created": 0,
-		"search_string_encoders": _init_search_string_encoders()
+		"search_string_encoders": _init_search_string_encoders(),
+		"sockets": null,
+		"lobby_requests": {},
+		"GotmLobbyT": GotmLobbyT,
+		"GotmUserT": GotmUserT,
+		"is_listening": false
 	}
 	g._impl.rng.randomize()
+	g.user._impl.id = _generate_id()
+
+
+static func _process() -> void:
+	var g = _get_gotm()
+	
+	if g.lobby:
+		if OS.get_system_time_msecs() - g.lobby._impl.last_heartbeat > 2500:
+			_init_socket()
+			_put_sockets({
+				"op": "peer_heartbeat", 
+				"data": {
+					"lobby_id": g.lobby.id,
+					"id": g.user._impl.id
+				}
+			})
+			g.lobby._impl.last_heartbeat = OS.get_system_time_msecs()
+			
+	for socket in g._impl.sockets:
+		while socket.get_available_packet_count() > 0:
+			var v = socket.get_var()
+			print(v)
+			if v.op == "get_lobbies":
+				var data = null
+				if g.lobby and g.lobby.is_host():
+					data = {
+						"id": g.lobby.id,
+						"name": g.lobby.name,
+						"peers": [],
+						"invite_link": g.lobby.invite_link,
+						"_impl": g.lobby._impl
+					}
+				
+				_put_sockets({"op": "lobby", "data": data, "id": v.id})
+			elif v.op == "leave_lobby":
+				if g.lobby and v.data.lobby_id == g.lobby.id:
+					if g.lobby.is_host():
+						_put_sockets({
+							"op": "peer_left", 
+							"data": {
+								"lobby_id": g.lobby.id, 
+								"id": v.data.id
+							}
+						})
+					elif v.data.id == g.lobby.host._impl.id:
+						_leave_lobby(g.lobby)
+			elif v.op == "join_lobby":
+				var data = null
+				if g.lobby and g.lobby.is_host() and v.data.lobby_id == g.lobby.id:
+					_put_sockets({
+						"op": "peer_joined", 
+						"data": {
+							"lobby_id": g.lobby.id, 
+							"address": socket.get_packet_ip(),
+							"id": v.data.id
+						},
+						"id": v.id
+					})
+					
+					var peers = []
+					for peer in g.lobby.peers:
+						peers.push_back({"address": peer.address, "_impl": peer._impl})
+					data = {
+						"id": g.lobby.id,
+						"name": g.lobby.name,
+						"peers": peers,
+						"invite_link": g.lobby.invite_link,
+						"_impl": g.lobby._impl
+					}
+				_put_sockets({"op": "lobby", "data": data, "id": v.id})
+			elif v.op == "peer_left":
+				if g.lobby and v.data.lobby_id == g.lobby.id:
+					for peer in g.lobby.peers.duplicate():
+						if peer._impl.id == v.data.id:
+							g.lobby.peers.erase(peer)
+							g.lobby.emit_signal("peer_left", peer)
+			elif v.op == "peer_joined":
+				if g.lobby and v.data.lobby_id == g.lobby.id and not g._impl.lobby_requests.has(v.id):
+					var peer = g._impl.GotmUserT.new()
+					peer.address = v.data.address
+					peer._impl.id = v.data.id
+					g.lobby.peers.push_back(peer)
+					g.lobby.emit_signal("peer_joined", peer)
+					if g.lobby.is_host():
+						g.lobby._impl.heartbeats[v.data.id] = OS.get_system_time_msecs()
+			elif v.op == "peer_heartbeat":
+				if g.lobby and v.data.lobby_id == g.lobby.id:
+					g.lobby._impl.heartbeats[v.data.id] = OS.get_system_time_msecs()
+			elif v.op == "lobby":
+				if v.data and g._impl.lobby_requests.has(v.id):
+					var lobby = g._impl.GotmLobbyT.new()
+					var peers = []
+					if not v.data._impl.host_id.empty():
+						v.data.peers.push_back({
+							"address": socket.get_packet_ip(), 
+							"_impl": {
+								"id": v.data._impl.host_id
+							}
+						})
+					for peer in v.data.peers:
+						var p = g._impl.GotmUserT.new()
+						p.address = peer.address
+						p._impl = peer._impl
+						peers.push_back(p)
+						
+					lobby.hidden = false
+					lobby.locked = false
+					lobby.id = v.data.id
+					lobby.name = v.data.name
+					lobby.peers = peers
+					lobby.invite_link = v.data.invite_link
+					lobby._impl = v.data._impl
+					lobby._impl.address = socket.get_packet_ip()
+					lobby.me.address = "127.0.0.1"
+					lobby.host.address = socket.get_packet_ip()
+					lobby.host._impl.id = v.data._impl.host_id
+					g._impl.lobby_requests[v.id].push_back(lobby)
+					
+		if g.lobby:
+			for peer_id in g.lobby._impl.heartbeats.duplicate():
+				if OS.get_system_time_msecs() - g.lobby._impl.heartbeats[peer_id] > 10000:
+					if g.lobby.is_host():
+						_put_sockets({
+							"op": "peer_left", 
+							"data": {
+								"lobby_id": g.lobby.id, 
+								"id": peer_id
+							}
+						})
+						g.lobby._impl.heartbeats.erase(peer_id)
+					elif peer_id == g.lobby.host._impl.id:
+						_leave_lobby(g.lobby)
+						break
+				
+
 
 
 # Improve search experience a little by adding fuzziness.
@@ -155,6 +335,46 @@ static func _sort_lobbies(lobbies: Array, fetch) -> Array:
 	return sorted	
 
 
+static func _put_sockets(v: Dictionary):
+	_init_socket()
+	for socket in _get_gotm()._impl.sockets:
+		socket.put_var(v)
+
+
+static func _request_lobbies() -> Array:
+	var g = _get_gotm()
+	var request_id: String = _generate_id()
+	g._impl.lobby_requests[request_id] = []
+	_put_sockets({"op": "get_lobbies", "id": request_id})
+	yield(g.get_tree().create_timer(0.5), "timeout")
+	
+	var lobbies = g._impl.lobby_requests[request_id]
+	g._impl.lobby_requests.erase(request_id)
+	return lobbies
+
+
+static func _request_join(lobby_id: String):
+	var g = _get_gotm()
+	var request_id: String = _generate_id()
+	g._impl.lobby_requests[request_id] = []
+	_put_sockets({
+		"op": "join_lobby", 
+		"id": request_id, 
+		"data": {
+			"lobby_id": lobby_id,
+			"id": g.user._impl.id
+		}
+	})
+	yield(g.get_tree().create_timer(0.5), "timeout")
+	
+	var lobbies = g._impl.lobby_requests[request_id]
+	g._impl.lobby_requests.erase(request_id)
+	for lobby in lobbies:
+		if lobby:
+			return lobby
+	return null
+
+
 static func _fetch_lobbies(fetch, count: int, type: String) -> Array:
 	var g = _get_gotm()
 	
@@ -166,13 +386,11 @@ static func _fetch_lobbies(fetch, count: int, type: String) -> Array:
 		fetch._impl.start_lobby = -1
 	
 	
-	
 	# Apply filter options
 	var lobbies: Array = []
-	for lobby in g._impl.lobbies:
+	for lobby in yield(_request_lobbies(), "completed") + g._impl.lobbies:
 		if _match_lobby(lobby, fetch):
 			lobbies.push_back(lobby)
-	
 	
 	# Apply sort options
 	lobbies = _sort_lobbies(lobbies, fetch)
@@ -204,20 +422,6 @@ static func _fetch_lobbies(fetch, count: int, type: String) -> Array:
 	return result
 
 
-static func _generate_address(lobby) -> String:
-	var last_address: Array = lobby._impl.last_address
-	for i in range(last_address.size() - 1, -1, -1):
-		last_address[i] += 1
-		if last_address[i] < 256:
-			break
-		last_address[i] = 0
-	
-	var address: String = str(last_address[0])
-	for i in range(1, last_address.size()):
-		address += "." + str(last_address[i])
-	
-	return address
-
 # Common initialization.
 static func _add_lobby(lobby):
 	var g = _get_gotm()
@@ -225,16 +429,18 @@ static func _add_lobby(lobby):
 	lobby.id = _generate_id()
 	lobby.invite_link = "https://gotm.io/my-studio/my-game/"
 	lobby.invite_link += "?connectToken=" + _generate_id()
-	
 	lobby._impl = {
 		# Not exposed to user, so doesn't have to be a real timestamp.
-		"created": g._impl.last_lobby_created,
+		"created": OS.get_system_time_msecs(),
 		"props": {},
 		"sortable_props": [],
 		"filterable_props": [],
-		"last_address": [192, 168, 0, 0]
+		"heartbeats": {},
+		"last_heartbeat": 0,
+		"host_id": "",
+		"address": ""
 	}
-	g._impl.last_lobby_created += 1
+	lobby.me._impl.id = g.user._impl.id
 	
 	g._impl.lobbies.push_back(lobby)
 	return lobby
@@ -245,39 +451,60 @@ static func _host_lobby(lobby):
 	_leave_lobby(g.lobby)
 	
 	lobby = _add_lobby(lobby)
-	lobby.host = _generate_address(lobby)
-	lobby.my_address = lobby.host
+	lobby._impl.address = "127.0.0.1"
+	lobby.host.address = "127.0.0.1"
+	lobby._impl.host_id = g.user._impl.id
+	lobby.host._impl.id = g.user._impl.id
+	lobby.me.address = "127.0.0.1"
 	g.lobby = lobby
 	g.emit_signal("lobby_changed")
+	
+	_init_socket()
+		
 	return lobby
 
 
 static func _join_lobby(lobby) -> bool:
 	var g = _get_gotm()
 	_leave_lobby(g.lobby)
-	yield(_get_tree().create_timer(0.25), "timeout") # fake delay
 	
-	if not g._impl.lobbies.has(lobby) or lobby.locked:
-		return false
+	if not g._impl.lobbies.has(lobby):
+		lobby = yield(_request_join(lobby.id), "completed")
+	else:
+		yield(g.get_tree().create_timer(0.25), "timeout")
 	
-	lobby.my_address = _generate_address(lobby)
+	if not lobby or lobby.locked:
+		return false	
+	
+	lobby.host.address = lobby._impl.address
+	lobby.host._impl.id = lobby._impl.host_id
+	lobby.me.address = "127.0.0.1"
 	g.lobby = lobby
 	g.emit_signal("lobby_changed")
 	return true
 
 
-static func _kick_lobby_peer(lobby, peer: String) -> bool:
+static func _is_lobby_host(lobby) -> bool:
+	var g = _get_gotm()
+	return lobby.host._impl.id == g.user._impl.id
+
+
+static func _kick_lobby_peer(lobby, peer) -> bool:
 	var g = _get_gotm()
 	
-	if lobby.host != lobby.my_address:
+	if not lobby.is_host():
 		return false
 	
-	if lobby.my_address == peer:
+	if g.user._impl.id == peer._impl.id:
 		_leave_lobby(lobby)
 	else:
-		lobby.peers.erase(peer)
-		if lobby == g.lobby:
-			lobby.emit_signal("peer_left", peer)
+		for p in lobby.peers.duplicate():
+			if p._impl.id != peer._impl.id:
+				continue
+			lobby.peers.erase(p)
+			if lobby == g.lobby:
+				lobby.emit_signal("peer_left", p)
+			break
 	
 	return true
 
@@ -288,9 +515,17 @@ static func _leave_lobby(lobby) -> void:
 	
 	var g = _get_gotm()
 	if g.lobby == lobby:
-		if lobby.host == lobby.my_address:
+		if lobby.host.address == lobby.me.address:
 			g._impl.lobbies.erase(lobby)
-		lobby.my_address = ""
+		lobby.me.address = ""
+		lobby.host.address = ""
+		_put_sockets({
+			"op": "leave_lobby", 
+			"data": {
+				"lobby_id": lobby.id,
+				"id": g.user._impl.id
+			}
+		})
 		g.lobby = null
 		g.emit_signal("lobby_changed")
 
