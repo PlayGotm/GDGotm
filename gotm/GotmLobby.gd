@@ -1,3 +1,25 @@
+# MIT License
+#
+# Copyright (c) 2020-2020 Macaroni Studios AB
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+
 class_name GotmLobby
 #warnings-disable
 
@@ -10,13 +32,15 @@ class_name GotmLobby
 ##############################################################
 # SIGNALS
 ##############################################################
-# Player joined the lobby.
+# Peer joined the lobby.
+# 'peer_user' is a 'GotmUser' instance.
 # This is only emitted if you are in this lobby.
-signal peer_joined(address)
+signal peer_joined(peer_user)
 
-# Player left the lobby.
+# Peer left the lobby.
+# 'peer_user' is a 'GotmUser' instance.
 # This is only emitted if you are in this lobby.
-signal peer_left(address)
+signal peer_left(peer_user)
 
 
 
@@ -26,16 +50,17 @@ signal peer_left(address)
 # Globally unique identifier.
 var id: String
 
-# Addresses of other players in the lobby.
+# Other peers in the lobby with addresses.
+# Is an array of 'GotmUser'.
 var peers: Array = []
 
-# Your address.
-var my_address: String
+# You with address.
+var me: GotmUser = GotmUser.new()
 
-# Address of the host.
-var host: String
+# Host user with address.
+var host: GotmUser = GotmUser.new()
 
-# Players can join the lobby directly through this link.
+# Peers can join the lobby directly through this link.
 var invite_link: String
 
 
@@ -50,10 +75,10 @@ var invite_link: String
 var name: String = ""
 
 # Prevent the lobby from showing up in fetches?
-# Players may still join directly through 'invite_link'
+# Peers may still join directly through 'invite_link'
 var hidden: bool = true
 
-# Prevent new players from joining?
+# Prevent new peers from joining?
 # Also prevents the lobby from showing up in fetches.
 var locked: bool = false
 
@@ -81,7 +106,7 @@ func leave() -> void:
 
 # Am I the host of this lobby?
 func is_host() -> bool:
-	return my_address == host
+	return _GotmImpl._is_lobby_host(self)
 
 
 # Get a custom property.
@@ -93,14 +118,14 @@ func get_property(name: String):
 ################################
 # Host-only methods
 ################################
-# Kick player from this lobby.
+# Kick peer from this lobby.
 # Returns true if successful, else false.
-func kick(peer: String) -> bool:
+func kick(peer: GotmUser) -> bool:
 	return _GotmImpl._kick_lobby_peer(self, peer)
 
 
 # Store up to 10 of your own custom properties in the lobby.
-# These are visible to other players when fetching lobbies.
+# These are visible to other peers when fetching lobbies.
 # Only properties of types String, int, float or bool are allowed.
 # Integers are converted to floats.
 # Strings longer than 64 characters are truncated.
