@@ -155,7 +155,6 @@ static func _process() -> void:
 	for socket in g._impl.sockets:
 		while socket.get_available_packet_count() > 0:
 			var v = socket.get_var()
-			print(v)
 			if v.op == "get_lobbies":
 				var data = null
 				if g.lobby and g.lobby.is_host():
