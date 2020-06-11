@@ -30,9 +30,10 @@ class_name GotmUser
 ##############################################################
 # PROPERTIES
 ##############################################################
-# The address of the user in a lobby context.
-# Is only populated in a lobby context, for example
-# 'GotmLobby.peers', 'GotmLobby.host' and 'GotmLobby.me'.
+# These are all read-only.
+
+# The IP address of the user.
+# Is empty if you are not in the same lobby.
 var address: String = ""
 
 
