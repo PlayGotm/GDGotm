@@ -23,11 +23,12 @@
 class_name _GotmImpl
 #warnings-disable
 
+
 # Utility sorter for 'sort_custom'.
 class LobbySorter:
 	var fetch
 	var g
-	
+
 	func sort(lhs, rhs) -> bool:
 		var a
 		var b
@@ -38,20 +39,10 @@ class LobbySorter:
 			a = lhs._impl.props[fetch.sort_property]
 			b = rhs._impl.props[fetch.sort_property]
 		
-		
-		if typeof(a) == typeof(b):
-			return a < b if fetch.sort_ascending else a > b
-		
-		# GDScript doesn't handle comparison of different types very well.
-		# Abuse Array's min and max functions instead.
-		var m = [a, b].min() if fetch.sort_ascending else [a, b].max()
-		if m != null or a == null or b == null:
-			return m == a
-			
-		# Array method failed. Go with strings instead.
-		a = String(a)
-		b = String(b)
-		return a < b if fetch.sort_ascending else a > b
+		if fetch.sort_ascending:
+			return _GotmImplUtility.is_less(a, b)
+		else:
+			return _GotmImplUtility.is_greater(a, b)
 
 
 # Generate 20 characters long random string.
@@ -134,8 +125,8 @@ static func _initialize(GotmLobbyT, GotmUserT) -> void:
 		"is_listening": false
 	}
 	g._impl.rng.randomize()
-  g.user._impl.id = _generate_id()
-  g.user.address = "localhost"
+	g.user._impl.id = _generate_id()
+	g.user.address = "localhost"
 
 
 static func _process() -> void:
@@ -313,7 +304,11 @@ static func _stringify_fetch_state(fetch) -> String:
 		fetch.filter_properties,
 		fetch.sort_property,
 		fetch.sort_property,
-		fetch.sort_ascending
+    fetch.sort_ascending,
+    fetch.sort_min,
+    fetch.sort_max,
+    fetch.sort_min_exclusive,
+    fetch.sort_max_exclusive
 	]
 	return JSON.print(d)
 	
@@ -324,8 +319,25 @@ static func _sort_lobbies(lobbies: Array, fetch) -> Array:
 	var sorted: Array = []
 	var g = _get_gotm()
 	for lobby in lobbies:
-		if fetch.sort_property.empty() or lobby._impl.props.has(fetch.sort_property):
+		if fetch.sort_property.empty():
 			sorted.push_back(lobby)
+			
+		var v = lobby._impl.props.get(fetch.sort_property)
+		if v == null:
+			continue
+		if fetch.sort_min != null:
+			if _GotmImplUtility.is_less(v, fetch.sort_min):
+				continue
+			if fetch.sort_min_exclusive and not _GotmImplUtility.is_greater(v, fetch.sort_min):
+				continue
+		if fetch.sort_max != null:
+			if _GotmImplUtility.is_greater(v, fetch.sort_max):
+				continue
+			if fetch.sort_max_exclusive and not _GotmImplUtility.is_less(v, fetch.sort_max):
+				continue
+		
+		sorted.push_back(lobby)
+		
 	
 	var sorter: LobbySorter = LobbySorter.new()
 	sorter.fetch = fetch

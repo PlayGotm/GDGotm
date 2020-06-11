@@ -64,6 +64,18 @@ var sort_property: String = ""
 # Sort results in ascending order?
 var sort_ascending: bool = false
 
+# If not null, fetch lobbies whose sort property's value is equal to or greater than 'sort_min'.
+var sort_min = null
+
+# If not null, fetch lobbies whose sort property's value is equal to or lesser than 'sort_max'.
+var sort_max = null
+
+# If true, and 'sort_min' is provided, exclude lobbies whose sort property's value is equal to 'sort_min'.
+var sort_min_exclusive = false
+
+# If true, and 'sort_max' is provided, exclude lobbies whose sort property's value is equal to 'sort_max'.
+var sort_max_exclusive = false
+
 
 
 ##############################################################
