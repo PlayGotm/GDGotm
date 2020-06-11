@@ -70,12 +70,14 @@ func is_live() -> bool:
 
 # Create a new lobby and join it.
 #
+# If 'show_invitation' is true, show an invitation link in a popup.
+#
 # By default, the lobby is hidden and is only accessible directly through 
 # its 'invite_link'.
 # Set 'lobby.hidden' to false to make it fetchable with 'GotmLobbyFetch'.
 #
 # Returns the hosted lobby (also accessible at 'Gotm.lobby').
-static func host_lobby() -> GotmLobby:
+static func host_lobby(show_invitation: bool = true) -> GotmLobby:
 	return _GotmImpl._host_lobby(GotmLobby.new())
 
 
