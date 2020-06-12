@@ -406,7 +406,7 @@ static func _fetch_lobbies(fetch, count: int, type: String) -> Array:
 	
 	# Apply sort options
 	lobbies = _sort_lobbies(lobbies, fetch)
-	count = min(20, count)
+	count = min(8, count)
 	var index: int = 0
 	if type == "first":
 		index = 0
