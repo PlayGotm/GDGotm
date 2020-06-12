@@ -1,8 +1,6 @@
-![PlayGotM](https://avatars1.githubusercontent.com/u/60827502?s=200&v=4)
-
-Benefit more from Gotm through its GDScript API.
-
-[Learn more](https://gotm.io/about/plugin)
+<p align="center"><a href="https://gotm.io"><img src="https://imgur.com/mc8HAgS.png" alt="gotm.io" ></a></p>
+<p align="center">Access Gotm's API with GDScript</p>
+<p align="center"><a href="https://gotm.io/about/plugin>Learn more</a></p>
 
 # Install
 
