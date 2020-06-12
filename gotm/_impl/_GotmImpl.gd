@@ -422,7 +422,7 @@ static func _fetch_lobbies(fetch, count: int, type: String) -> Array:
 	for i in range(index, min(index + count, lobbies.size())):
 		result.push_back(lobbies[i])
 		
-	# Write down last lobby for subsequent 'fetch_next' calls.
+	# Write down last lobby for subsequent 'next' calls.
 	if not result.empty():
 		var start: int = lobbies.find(result.front()) - 1
 		fetch._impl.start_lobby = max(start, -1)

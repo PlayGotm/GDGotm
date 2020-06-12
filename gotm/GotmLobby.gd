@@ -70,7 +70,7 @@ var invite_link: String
 ##############################################################
 # Note that only the host can write to these properties.
 
-# Name that is searchable in the 'fetch_lobbies' function.
+# Name that is searchable using 'GotmLobbyFetch'
 # Names longer than 64 characters are truncated.
 var name: String = ""
 

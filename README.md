@@ -14,7 +14,7 @@ _Supports versions 3.1.0 and newer._
 
 Download the plugin from the [AssetLib](https://docs.godotengine.org/en/stable/tutorials/assetlib/using_assetlib.html#in-the-editor) in the Godot Editor and follow its instructions.
 
-You can also download it directly [here](https://github.com/PlayGotM/GDGotm/archive/master.zip). Extract the contents into your project's directory.
+You can also download it directly [here](https://github.com/PlayGotm/GDGotm/archive/master.zip). Extract the contents into your project's directory.
 
 ## 2. Setup
 

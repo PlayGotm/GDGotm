@@ -23,7 +23,7 @@
 class_name GotmUser
 #warnings-disable
 
-# Holds information about a GotM user.
+# Holds information about a Gotm user.
 
 
 

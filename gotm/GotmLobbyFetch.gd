@@ -89,7 +89,7 @@ var sort_max_exclusive = false
 # fetch the first lobbies.
 #
 # All calls asynchronously return an array of fetched lobbies.
-# Use 'yield(fetch.fetch_next(), "completed")' to retrieve it.
+# Use 'yield(fetch.next(), "completed")' to retrieve it.
 
 
 # Fetch the next lobbies, starting after the last lobby fetched

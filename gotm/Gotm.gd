@@ -51,6 +51,7 @@ signal files_dropped(files, screen)
 ##############################################################
 # These are all read only.
 
+# Player information.
 var user: GotmUser = GotmUser.new()
 
 # Current lobby you are in. 
