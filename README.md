@@ -20,6 +20,10 @@ You can also download it directly [here](https://github.com/PlayGotm/GDGotm/arch
 
 Add Gotm.gd to your autoloads at "Project Settings -> AutoLoad". Make sure the global autoload is named "Gotm". It must be named "Gotm" for it to work.
 
+# Examples
+
+[Examples](https://github.com/PlayGotM/game-examples)
+
 # Notes
 
 This plugin serves as a polyfill when developing against the API locally.
