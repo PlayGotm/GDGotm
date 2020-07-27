@@ -33,7 +33,7 @@ static func _fuzzy_compare(a, b, compare_less: bool) -> bool:
 		var m = [a, b].min() if compare_less else [a, b].max()
 		if m != null or a == null or b == null:
 			return m == a
-			  
+			
 	# Array method failed. Go with strings instead.
 	a = String(a)
 	b = String(b)
