@@ -150,7 +150,7 @@ static func _process() -> void:
 				var v = socket.get_var()
 				if v.op == "get_lobbies":
 					var data = null
-					if g.lobby and g.lobby.is_host():
+					if g.lobby and g.lobby.is_host() and not g.lobby.hidden and not g.lobby.locked:
 						data = {
 							"id": g.lobby.id,
 							"name": g.lobby.name,
