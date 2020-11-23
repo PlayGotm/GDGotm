@@ -1,5 +1,5 @@
 <p align="center">
-  <a href="https://gotm.io"><img src="https://i.imgur.com/mc8HAgS.png" alt="gotm.io"></a>
+  <a href="https://gotm.io"><img src="https://i.imgur.com/YaV4VlM.png" alt="gotm.io"></a>
   <br/>
   Access Gotm's API with GDScript
   <br />
