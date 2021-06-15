@@ -3,7 +3,7 @@
   <br/>
   Access Gotm's API with GDScript
   <br />
-  <a href="https://gotm.io/about/plugin">Learn more</a>
+  <a href="https://gotm.io/docs">Learn more</a>
 </p>
 
 # Install
