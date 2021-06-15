@@ -33,18 +33,14 @@ class_name GotmUser
 # These are all read-only.
 
 # Globally unique ID.
-# Is empty if user is not logged in.
 var id: String = ""
 
-# Current nickname.
+# Current nickname. Can be changed at https://gotm.io/settings
 var display_name: String = ""
 
 # The IP address of the user.
 # Is empty if you are not in the same lobby.
 var address: String = ""
-
-# Is user logged in? 
-var is_logged_in: bool = false
 
 ##############################################################
 # PRIVATE
