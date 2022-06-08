@@ -20,29 +20,16 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-class_name GotmUser
+class_name _GotmScoreDevelopment
 #warnings-disable
 
-# Holds information about a Gotm user.
 
 
+static func create(api: String, data: Dictionary):
+	pass
 
-##############################################################
-# PROPERTIES
-##############################################################
-# These are all read-only.
+static func update(id: String, data: Dictionary):
+	pass
 
-# Globally unique ID.
-var id: String = ""
-
-# Current nickname. Can be changed at https://gotm.io/settings
-var display_name: String = ""
-
-# The IP address of the user.
-# Is empty if you are not in the same lobby.
-var address: String = ""
-
-##############################################################
-# PRIVATE
-##############################################################
-var _impl: Dictionary = {}
+static func delete(id: String) -> void:
+	pass

@@ -20,29 +20,31 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-class_name GotmUser
+class_name _GotmScore
 #warnings-disable
 
-# Holds information about a Gotm user.
+# There are three implementations, development, http and gotm 
+# We could intercept fetches, and fix backwards incompatibility that way.
+# Probably need a plugin version indicator somewhere.
 
+static func get_implementation():
+	if not Gotm.is_live() and not Gotm.get_config().experimentalForceLiveScoresApi:
+		return _GotmScoreDevelopment
+	return _GotmStore
 
+static func create(score, name: String, value: float, properties: Dictionary = {}):
+	var data = yield(get_implementation().create("scores", {"name": name, "value": value, "properties": properties}), "completed")
+	return _GotmUtility.copy(data, score)
 
-##############################################################
-# PROPERTIES
-##############################################################
-# These are all read-only.
+static func update(score, value = null, properties = null):
+	var new_score = yield(get_implementation().update(score.id, _GotmUtility.delete_null({"value": value, "properties": properties})), "completed")
+	if not new_score:
+		return
+	if value != null:
+		score.value = new_score.value
+	if properties != null:
+		score.properties = new_score.properties
+	return score
 
-# Globally unique ID.
-var id: String = ""
-
-# Current nickname. Can be changed at https://gotm.io/settings
-var display_name: String = ""
-
-# The IP address of the user.
-# Is empty if you are not in the same lobby.
-var address: String = ""
-
-##############################################################
-# PRIVATE
-##############################################################
-var _impl: Dictionary = {}
+static func delete(score) -> void:
+	yield(get_implementation().delete(score.id), "completed")

@@ -1,6 +1,6 @@
 # MIT License
 #
-# Copyright (c) 2020-2021 Macaroni Studios AB
+# Copyright (c) 2020-2022 Macaroni Studios AB
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -19,6 +19,13 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
+
+
+# So, we can skip autoload.
+# We want an interface that can swap implementations, one for local and one that uses HTTP calls.
+# If we keep that interface private we can change it how we want.
+# Do we want to keep it public? Probably not. 
+
 
 extends Node
 #warnings-disable
@@ -63,11 +70,16 @@ var lobby: GotmLobby = null
 # METHODS
 ##############################################################
 
+static func initialize(config = GotmConfig.new()) -> void:
+	_Gotm.initialize(config)
+
 # The API is live when the game runs on gotm.io.
 # Running the game in the web player (gotm.io/web-player) also counts as live.
-func is_live() -> bool:
-	return false
+static func is_live() -> bool:
+	return _Gotm.is_live()
 
+static func get_config() -> GotmConfig:
+	return _Gotm.get_config()
 
 # Create a new lobby and join it.
 #

@@ -20,29 +20,51 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-class_name GotmUser
+class_name GotmScore
 #warnings-disable
 
-# Holds information about a Gotm user.
-
-
+# A score entry used for leaderboards.
+# To fetch ranks and scores, see the GotmLeaderboard class.
 
 ##############################################################
 # PROPERTIES
 ##############################################################
-# These are all read-only.
 
-# Globally unique ID.
-var id: String = ""
+# Id of the score.
+var id: String
 
-# Current nickname. Can be changed at https://gotm.io/settings
-var display_name: String = ""
+# Id of the user who owns the score.
+var user_id: String
 
-# The IP address of the user.
-# Is empty if you are not in the same lobby.
-var address: String = ""
+# For example, "bananas_collected".
+var name: String
+
+# A numeric representation of the score.
+var value: float
+
+# Optional metadata to attach to the score entry, 
+# for example {level: "desert1", difficulty: "hard"}.
+# When fetching ranks and scores with GotmLeaderboard, you can optionally 
+# filter with these properties. 
+var properties: Dictionary
+
+# UNIX epoch time (in seconds). Use OS.get_datetime_from_unix_time to convert to date.
+var created: int
 
 ##############################################################
-# PRIVATE
+# METHODS
 ##############################################################
-var _impl: Dictionary = {}
+
+# Create a score entry for the current user.
+# Scores can be fetched via a GotmLeaderboard instance.
+static func create(name: String, value: float, properties: Dictionary = {}) -> GotmScore:
+	return yield(_GotmScore.create(.new(), name, value, properties), "completed")
+
+# Update this score.
+# Null is ignored.
+func update(value = null, properties = null) -> GotmScore:
+	return yield(_GotmScore.update(self, value, properties), "completed")
+
+# Delete this score.
+func delete() -> void:
+	return yield(_GotmScore.delete(self), "completed")
