@@ -65,7 +65,36 @@ static func list(api: String, query: String, params: Dictionary = {}, authentica
 	yield(_GotmUtility.get_tree(), "idle_frame")
 	if api == "scores" and query == "byScoreSort":
 		return _fetch_by_score_sort(params)
+	if api == "stats" and query == "countByScoreSort":
+		return _fetch_counts(params)
 	return []
+
+static func _fetch_counts(params) -> Array:
+	var scores = _fetch_by_score_sort(params)
+	
+	var stats := []
+	for i in range(0, params.limit):
+		stats.append({"value": 0})
+	
+	if scores.empty():
+		return stats
+	
+	var min_value = params.min
+	var max_value = params.max
+	if not min_value is float:
+		min_value = scores[scores.size() - 1].value
+	if not max_value is float:
+		max_value = scores[0].value
+	var step = (max_value - min_value) / params.limit
+	for i in range(0, params.limit):
+		var is_last = i == params.limit - 1
+		var start = min_value + step * i
+		var end = max_value if is_last else min_value + step * (i + 1)
+		for score in scores:
+			if score.value >= start and (score.value <= end if is_last else score.value < end):
+				stats[0].value += 1
+	
+	return stats
 
 static func _fetch_rank(params) -> int:
 	params = _GotmUtility.copy(params, {})
@@ -148,6 +177,10 @@ static func _get_range_from_period(period: String) -> Array:
 
 static func _match_score(score, params) -> bool:
 	if params.name != score.name or params.author and params.author != score.author:
+		return false
+	if params.min is float and score.value < params.min:
+		return false
+	if params.max is float and score.value > params.max:
 		return false
 	if params.props and not _match_props(params.props, score.properties):
 		return false

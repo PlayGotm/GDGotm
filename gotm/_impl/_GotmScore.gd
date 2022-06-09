@@ -74,6 +74,8 @@ static func get_rank(leaderboard, score_id_or_value) -> int:
 	var project = _get_project()
 	if project is GDScriptFunctionState:
 		project = yield(project, "completed")
+	if not project:
+		return 0
 	var params = _GotmUtility.delete_empty({
 		"name": leaderboard.name,
 		"target": project,
@@ -93,6 +95,41 @@ static func get_rank(leaderboard, score_id_or_value) -> int:
 		return 0
 	return stat.value
 
+static func get_counts(leaderboard, minimum_value, maximum_value, segment_count) -> Array:
+	if segment_count > 20:
+		segment_count = 20
+	if segment_count < 1:
+		segment_count = 1
+	var project = _get_project()
+	if project is GDScriptFunctionState:
+		project = yield(project, "completed")
+	var counts := []
+	for i in range(0, segment_count):
+		counts.append(0)
+	if not project:
+		return counts
+	
+	var params = _GotmUtility.delete_empty({
+		"name": leaderboard.name,
+		"target": project,
+		"props": leaderboard.properties,
+		"period": leaderboard.period.to_string(),
+		"isUnique": leaderboard.is_unique,
+		"author": leaderboard.user_id,
+		"limit": segment_count,
+	})
+	if minimum_value is float:
+		params.min = minimum_value
+	if maximum_value is float:
+		params.max = maximum_value
+	var stats = yield(get_implementation().list("stats", "countByScoreSort", params), "completed")
+	
+	if stats.size() != counts.size():
+		return counts
+	
+	for i in range(stats.size()):
+		counts[i] = stats[i].value
+	return counts
 
 static func _get_project() -> String:
 	var Auth = get_auth_implementation()
