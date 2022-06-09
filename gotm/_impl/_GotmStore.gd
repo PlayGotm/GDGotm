@@ -23,10 +23,6 @@
 class_name _GotmStore
 #warnings-disable
 
-
-
-
-
 static func create(api: String, data: Dictionary) -> Dictionary:
 	var created = yield(_request(api, HTTPClient.METHOD_POST, data, true), "completed")
 	if created:
@@ -43,23 +39,25 @@ static func delete(path: String) -> void:
 	yield(_request(path, HTTPClient.METHOD_DELETE, null, true), "completed")
 	_cache.erase(path)
 	
-static func get_resource(path: String, authenticate: bool = false) -> Dictionary:
-	return yield(_cached_get_request(path, authenticate), "completed")
+static func fetch(path: String, query: String = "", params: Dictionary = {}, authenticate: bool = false) -> Dictionary:
+	return yield(_cached_get_request(create_request_path(path, query, params), authenticate), "completed")
 
 static func list(api: String, query: String, params: Dictionary = {}, authenticate: bool = false) -> Array:
-	var query_object := {}
-	_GotmUtility.copy(params, query_object)
-	query_object.query = query
-	var query_string := _GotmUtility.create_query_string(query_object)
-	var data = yield(_cached_get_request(api + query_string, authenticate), "completed")
+	var data = yield(_cached_get_request(create_request_path(api, query, params), authenticate), "completed")
 	if not data or not data.data:
 		return
 	return data.data
 
-
-
 const _cache = {}
 const _signal_cache = {}
+
+static func create_request_path(path: String, query: String, params: Dictionary) -> String:
+	if query:
+		var query_object := {}
+		_GotmUtility.copy(params, query_object)
+		query_object.query = query
+		path += _GotmUtility.create_query_string(query_object)
+	return path
 
 static func _set_cache(path: String, data):
 	if not data:

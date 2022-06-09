@@ -27,6 +27,10 @@ class_name GotmLeaderboard
 # You do not need to create a leaderboard before creating scores.
 
 
+##############################################################
+# PROPERTIES
+##############################################################
+
 # Required. Filters by score name.
 # For example, a name of "bananas_collected" will only fetch scores with the 
 # same name.
@@ -55,6 +59,10 @@ var period: GotmPeriod = GotmPeriod.all()
 var user_id: String = ""
 
 
+##############################################################
+# METHODS
+##############################################################
+
 # If a score id (string) is provided, get the rank of that score among all
 # scores that match the filters of this leaderboard.
 # If a value (int) is provided, get the rank a score would have if it would
@@ -63,11 +71,22 @@ var user_id: String = ""
 # For example, if Score1 has value 5 and Score2 has value 6, then Score1 
 # would have rank 2 and Score2 would have rank 1.
 func get_rank(score_id_or_value) -> int:
-	return yield(_GotmImpl._get_rank(score_id_or_value, name, properties, is_unique, period), "completed")
+	return yield(_GotmScore.get_rank(self, score_id_or_value), "completed")
 
 # Fetch up to 20 scores that match the filters of this leaderboard sorted
 # by their values in descending order (highest value first).
 # If "after_score_id" is specified, fetch the scores that come after that score.
 # If "ascending" is true, sort in ascending order (lowest value first).
 func get_scores(after_score_id: String = "", ascending: bool = false) -> Array:
-	return yield(_GotmImpl._get_scores(name, properties, is_unique, period, after_score_id, ascending, user_id), "completed")
+	return yield(_GotmScore.list(GotmScore, self, after_score_id, ascending), "completed")
+
+class SurroundingScores:
+	# Scores above "score" in descending order. The last element is the score above "score".
+	var before: Array
+	# The middle score
+	var score: GotmScore
+	# Scores below "score" descending order. The first element is the score below "score".
+	var after: Array
+# Fetch surrounding scores.
+func get_surrounding_scores(score_id: String) -> SurroundingScores:
+	return yield(_GotmLeaderboard.get_surrounding_scores(self, score_id), "completed")

@@ -21,12 +21,6 @@
 # SOFTWARE.
 
 
-# So, we can skip autoload.
-# We want an interface that can swap implementations, one for local and one that uses HTTP calls.
-# If we keep that interface private we can change it how we want.
-# Do we want to keep it public? Probably not. 
-
-
 extends Node
 #warnings-disable
 

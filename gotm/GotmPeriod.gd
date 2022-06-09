@@ -67,13 +67,13 @@ static func offset(granularity: String, offset: int = 0) -> GotmPeriod:
 			
 		TimeGranularity.DAY:
 			var unix_time: int = period.to_unix_time()
-			unix_time -= 1000 * 60 * 60 * 24 * offset
+			unix_time -= 60 * 60 * 24 * offset
 			var date = OS.get_datetime_from_unix_time (unix_time)
 			return at(granularity, date.year, date.month, date.day)
 			
 		TimeGranularity.WEEK:
 			var unix_time: int = period.to_unix_time()
-			unix_time -= 1000 * 60 * 60 * 24 * 7 * offset
+			unix_time -= 60 * 60 * 24 * 7 * offset
 			var date = OS.get_datetime_from_unix_time (unix_time)
 			return at(granularity, date.year, date.month, date.day)
 	
@@ -99,11 +99,13 @@ static func now(granularity: String) -> GotmPeriod:
 	return at(granularity)
 
 func to_unix_time() -> int:
+	if to_string() == granularity:
+		return offset(granularity, -1).to_unix_time()
 	return OS.get_unix_time_from_datetime({
 		"year": year, 
 		"month": month, 
 		"day": day, 
-		"hour": 12, 
+		"hour": 0, 
 		"minute": 0, 
 		"second": 0
 	})
@@ -128,6 +130,6 @@ func to_string() -> String:
 		TimeGranularity.WEEK:
 			if  not year >= 1 or not month >= 1 or not day >= 1:
 				return TimeGranularity.WEEK
-			return "week%d" % [to_unix_time() / (1000 * 60 * 60 * 24 * 7)]
+			return "week%d" % [to_unix_time() / (60 * 60 * 24 * 7)]
 	
 	return ""

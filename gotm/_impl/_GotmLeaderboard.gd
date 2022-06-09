@@ -20,9 +20,15 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-class_name GotmConfig
+class_name _GotmLeaderboard
 #warnings-disable
 
-var projectKey: String = ""
-var forceDevelopmentScoresApi: bool = false
-var experimentalForceLiveScoresApi: bool = false
+static func get_surrounding_scores(leaderboard, score_id: String) -> Dictionary:
+	var beforeSig = _GotmScore.list(GotmScore, leaderboard, score_id, true)
+	var scoreSig = GotmScore.fetch(score_id)
+	var afterSig = _GotmScore.list(GotmScore, leaderboard, score_id, false)
+	var before: Array = yield(beforeSig, "completed")
+	var score: Array = yield(scoreSig, "completed")
+	var after: Array = yield(beforeSig, "completed")
+	before.invert()
+	return {"before": before, "score": score, "after": after}

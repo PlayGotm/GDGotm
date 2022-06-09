@@ -57,6 +57,7 @@ var created: int
 
 # Create a score entry for the current user.
 # Scores can be fetched via a GotmLeaderboard instance.
+# See PROPERTIES above for descriptions of the arguments.
 static func create(name: String, value: float, properties: Dictionary = {}) -> GotmScore:
 	return yield(_GotmScore.create(.new(), name, value, properties), "completed")
 
@@ -68,3 +69,7 @@ func update(value = null, properties = null) -> GotmScore:
 # Delete this score.
 func delete() -> void:
 	return yield(_GotmScore.delete(self), "completed")
+
+# Get an existing score.
+static func fetch(id: String) -> GotmScore:
+	return yield(_GotmScore.fetch(.new(), id), "completed")

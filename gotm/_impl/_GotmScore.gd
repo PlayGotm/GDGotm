@@ -23,28 +23,97 @@
 class_name _GotmScore
 #warnings-disable
 
-# There are three implementations, development, http and gotm 
-# We could intercept fetches, and fix backwards incompatibility that way.
-# Probably need a plugin version indicator somewhere.
-
 static func get_implementation():
 	if not Gotm.is_live() and not Gotm.get_config().experimentalForceLiveScoresApi:
 		return _GotmScoreDevelopment
 	return _GotmStore
 
+static func get_auth_implementation():
+	if get_implementation() == _GotmScoreDevelopment:
+		return _GotmAuthDevelopment
+	return _GotmAuth
+
 static func create(score, name: String, value: float, properties: Dictionary = {}):
 	var data = yield(get_implementation().create("scores", {"name": name, "value": value, "properties": properties}), "completed")
-	return _GotmUtility.copy(data, score)
+	return _format(data, score)
+
 
 static func update(score, value = null, properties = null):
-	var new_score = yield(get_implementation().update(score.id, _GotmUtility.delete_null({"value": value, "properties": properties})), "completed")
-	if not new_score:
-		return
-	if value != null:
-		score.value = new_score.value
-	if properties != null:
-		score.properties = new_score.properties
-	return score
+	var data = yield(get_implementation().update(score.id, _GotmUtility.delete_null({"value": value, "properties": properties})), "completed")
+	return _format(data, score)
 
 static func delete(score) -> void:
 	yield(get_implementation().delete(score.id), "completed")
+
+static func fetch(score, id: String):
+	var data = yield(get_implementation().fetch(id), "completed")
+	return _format(data, score)
+
+static func list(GotmScoreType, leaderboard, after: String, ascending: bool) -> Array:
+	var project = _get_project()
+	if project is GDScriptFunctionState:
+		project = yield(project, "completed")
+	if not project:
+		return []
+	var data_list = yield(get_implementation().list("scores", "byScoreSort", _GotmUtility.delete_empty({
+		"name": leaderboard.name,
+		"target": project,
+		"props": leaderboard.properties,
+		"period": leaderboard.period.to_string(),
+		"isUnique": leaderboard.is_unique,
+		"author": leaderboard.user_id,
+		"after": after,
+		"descending": not ascending,
+	})), "completed")
+	var scores = []
+	for data in data_list:
+		scores.append(_format(data, GotmScoreType.new()))
+	return scores 
+
+static func get_rank(leaderboard, score_id_or_value) -> int:
+	var project = _get_project()
+	if project is GDScriptFunctionState:
+		project = yield(project, "completed")
+	var params = _GotmUtility.delete_empty({
+		"name": leaderboard.name,
+		"target": project,
+		"props": leaderboard.properties,
+		"period": leaderboard.period.to_string(),
+		"isUnique": leaderboard.is_unique,
+		"author": leaderboard.user_id,
+	})
+	if score_id_or_value is int:
+		params.value = score_id_or_value
+	elif score_id_or_value and score_id_or_value is String:
+		params.score = score_id_or_value
+	else:
+		return 0
+	var stat = yield(get_implementation().fetch("stats/rank", "rankByScoreSort", params), "completed")
+	if not stat:
+		return 0
+	return stat.value
+
+
+static func _get_project() -> String:
+	var Auth = get_auth_implementation()
+	var token = Auth.get_token()
+	if not token:
+		token = yield(Auth.get_token_async(), "completed")
+	return Auth.get_project_from_token(token)
+
+static func _format(data, score):
+	if not data or not score:
+		return
+	score.id = data.path
+	score.user_id = data.author
+	score.name = data.name
+	score.value = data.value
+	score.properties = data.properties
+	score.created = _GotmUtility.get_unix_time_from_iso(data.created)
+	return score
+	
+	
+	
+	
+	
+
