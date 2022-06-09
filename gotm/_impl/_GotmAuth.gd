@@ -40,8 +40,18 @@ static func get_token() -> String:
 	return ""
 
 static func get_project_from_token(token: String) -> String:
-	# TODO
-	return ""
+	if not token:
+		return ""
+	var parts = token.split(".")
+	if parts.size() != 3:
+		return ""
+	
+
+	var data = parse_json(Marshalls.base64_to_utf8(parts[1] + "=="))
+	if not data or not data.project:
+		return ""
+		
+	return data.project
 
 static func get_token_async():
 	var token = get_token()
