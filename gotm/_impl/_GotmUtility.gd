@@ -39,7 +39,17 @@ static func delete_empty(dictionary: Dictionary) -> Dictionary:
 static func copy(from, to):
 	if not from or not to:
 		return to
-	for key in from:
+	var keys:= []
+	if from is Array:
+		keys = range(0, from.size())
+	elif from is Dictionary:
+		keys = from.keys()
+	else:
+		var properties = from.get_property_list()
+		for property in properties:
+			if property.usage == PROPERTY_USAGE_SCRIPT_VARIABLE:
+				keys.append(property.name)
+	for key in keys:
 		to[key] = from[key]
 	return to
 
@@ -118,7 +128,7 @@ static func get_unix_time_from_iso(iso: String, as_milliseconds: bool = false) -
 # Converts UNIX epoch time in seconds to a date ISO 8601 string.
 static func get_iso_from_unix_time(unix_time: int = OS.get_unix_time(), milliseconds: int = 0) -> String:
 	var datetime = OS.get_datetime_from_unix_time(unix_time)
-	return "%04d-%02d-%02dT%02d:%02d:02d.%03dZ" % [datetime.year, datetime.month, datetime.day, datetime.hour, datetime.minute, datetime.second, milliseconds % 1000]
+	return "%04d-%02d-%02dT%02d:%02d:%02d.%03dZ" % [datetime.year, datetime.month, datetime.day, datetime.hour, datetime.minute, datetime.second, milliseconds % 1000]
 
 static func join(array: Array, separator: String = ",") -> String:
 	var string = ""

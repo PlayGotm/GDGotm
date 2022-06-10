@@ -73,7 +73,7 @@ static func get_token_async():
 	return get_token()
 
 static func _get_refreshed_auth(auth: _GotmAuthData) -> _GotmAuthData:
-	var projectKey = Gotm.get_config().projectKey
+	var projectKey = _Gotm.get_config().projectKey
 	if auth and auth.refresh_token:
 		var data = yield(_create_authentication({"refreshToken": auth.refresh_token}), "completed")
 		if data:

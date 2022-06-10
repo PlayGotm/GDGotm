@@ -27,16 +27,21 @@ class __GotmGlobalData:
 	var config: GotmConfig
 	var version: String = "0.0.1"
 	var apiOrigin: String = "https://api.gotm.io"
+	var classes: Dictionary = {}
 
 const _version = "0.0.1"
 const _global = {"value": null}
 static func get_global() -> __GotmGlobalData:
 	return _global.value
 
-static func initialize(config: GotmConfig) -> void:
+static func create_instance(name: String):
+	return get_global().classes[name].new()
+
+static func initialize(config: GotmConfig, classes: Dictionary) -> void:
 	_global.value = __GotmGlobalData.new()
 	var global := get_global()
 	global.config = _GotmUtility.copy(config, GotmConfig.new())
+	global.classes = classes
 	var gotm = get_singleton()
 	if gotm:
 		gotm.initialize(global)
@@ -48,4 +53,6 @@ static func get_config() -> GotmConfig:
 	return _GotmUtility.copy(get_global().config, GotmConfig.new())
 	
 static func get_singleton():
+	if not Engine.has_singleton("Gotm"):
+		return
 	return Engine.get_singleton("Gotm")

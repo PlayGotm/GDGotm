@@ -24,7 +24,7 @@ class_name _GotmScore
 #warnings-disable
 
 static func get_implementation():
-	if not Gotm.is_live() and not Gotm.get_config().experimentalForceLiveScoresApi:
+	if _Gotm.get_config().emulateScoresApi or not _Gotm.is_live():
 		return _GotmScoreDevelopment
 	return _GotmStore
 
@@ -33,9 +33,9 @@ static func get_auth_implementation():
 		return _GotmAuthDevelopment
 	return _GotmAuth
 
-static func create(score, name: String, value: float, properties: Dictionary = {}):
+static func create(name: String, value: float, properties: Dictionary = {}):
 	var data = yield(get_implementation().create("scores", {"name": name, "value": value, "properties": properties}), "completed")
-	return _format(data, score)
+	return _format(data, _Gotm.create_instance("GotmScore"))
 
 
 static func update(score, value = null, properties = null):
@@ -49,7 +49,7 @@ static func fetch(score, id: String):
 	var data = yield(get_implementation().fetch(id), "completed")
 	return _format(data, score)
 
-static func list(GotmScoreType, leaderboard, after: String, ascending: bool) -> Array:
+static func list(leaderboard, after: String, ascending: bool) -> Array:
 	var project = _get_project()
 	if project is GDScriptFunctionState:
 		project = yield(project, "completed")
@@ -67,7 +67,7 @@ static func list(GotmScoreType, leaderboard, after: String, ascending: bool) -> 
 	})), "completed")
 	var scores = []
 	for data in data_list:
-		scores.append(_format(data, GotmScoreType.new()))
+		scores.append(_format(data, _Gotm.create_instance("GotmScore")))
 	return scores 
 
 static func get_rank(leaderboard, score_id_or_value) -> int:

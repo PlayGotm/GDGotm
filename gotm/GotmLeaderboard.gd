@@ -23,6 +23,7 @@
 class_name GotmLeaderboard
 #warnings-disable
 
+# BETA FEATURE
 # Used for fetching ranks and scores.
 # You do not need to create a leaderboard before creating scores.
 
@@ -78,7 +79,7 @@ func get_rank(score_id_or_value) -> int:
 # If "after_score_id" is specified, fetch the scores that come after that score.
 # If "ascending" is true, sort in ascending order (lowest value first).
 func get_scores(after_score_id: String = "", ascending: bool = false) -> Array:
-	return yield(_GotmScore.list(GotmScore, self, after_score_id, ascending), "completed")
+	return yield(_GotmScore.list(self, after_score_id, ascending), "completed")
 
 class SurroundingScores:
 	# Scores above "score" in descending order. The last element is the score above "score".

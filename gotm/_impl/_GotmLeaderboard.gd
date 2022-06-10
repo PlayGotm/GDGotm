@@ -24,9 +24,9 @@ class_name _GotmLeaderboard
 #warnings-disable
 
 static func get_surrounding_scores(leaderboard, score_id: String) -> Dictionary:
-	var beforeSig = _GotmScore.list(GotmScore, leaderboard, score_id, true)
+	var beforeSig = _GotmScore.list(leaderboard, score_id, true)
 	var scoreSig = GotmScore.fetch(score_id)
-	var afterSig = _GotmScore.list(GotmScore, leaderboard, score_id, false)
+	var afterSig = _GotmScore.list(leaderboard, score_id, false)
 	var before: Array = yield(beforeSig, "completed")
 	var score: Array = yield(scoreSig, "completed")
 	var after: Array = yield(beforeSig, "completed")

@@ -23,6 +23,7 @@
 class_name GotmScore
 #warnings-disable
 
+# BETA FEATURE
 # A score entry used for leaderboards.
 # To fetch ranks and scores, see the GotmLeaderboard class.
 
@@ -59,7 +60,7 @@ var created: int
 # Scores can be fetched via a GotmLeaderboard instance.
 # See PROPERTIES above for descriptions of the arguments.
 static func create(name: String, value: float, properties: Dictionary = {}) -> GotmScore:
-	return yield(_GotmScore.create(.new(), name, value, properties), "completed")
+	return yield(_GotmScore.create(name, value, properties), "completed")
 
 # Update this score.
 # Null is ignored.
