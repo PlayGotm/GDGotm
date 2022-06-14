@@ -37,7 +37,7 @@ static func delete_empty(dictionary: Dictionary) -> Dictionary:
 	return dictionary
 
 static func copy(from, to):
-	if not from or not to:
+	if not from:
 		return to
 	var keys:= []
 	if from is Array:
@@ -78,12 +78,14 @@ static func fetch_json(url: String, method: int, body = null, headers: PoolStrin
 
 static func create_query_string(dictionary: Dictionary) -> String:
 	var string := ""
-	var keys = dictionary.keys().sort()
+	var keys = dictionary.keys()
+	keys.sort()
 	for i in range(0, keys.size()):
-		var value = dictionary[keys[i]]
+		var key = keys[i]
+		var value = dictionary[key]
 		if value is Object:
 			value = to_stable_json(value)
-		string += encode_url_component(String(value))
+		string += String(key) + "=" + String(value)
 		if i < keys.size() - 1:
 			string += "&"
 	if string:
@@ -197,3 +199,7 @@ class QueueSignal:
 		_queue.append(sig)
 		return sig
 
+static func safe_yield(return_value):
+	if return_value is GDScriptFunctionState:
+		return yield(return_value, "completed")
+	return return_value

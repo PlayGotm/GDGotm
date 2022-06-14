@@ -27,13 +27,12 @@ class_name GotmPeriod
 # A utility class for representing a time period.
 
 
-const TimeGranularity = {
-	YEAR = "year",
-	MONTH = "month",
-	WEEK = "week",
-	DAY = "day",
-	ALL = ""
-}
+class TimeGranularity:
+	const YEAR = "year"
+	const MONTH = "month"
+	const WEEK = "week"
+	const DAY = "day"
+	const ALL = ""
 
 var granularity: String = TimeGranularity.ALL
 var year: int = -1
@@ -41,10 +40,10 @@ var month: int = -1
 var day: int = -1
 
 static func all() -> GotmPeriod:
-	return .new()
+	return _Gotm.create_instance("GotmPeriod")
 
 static func sliding(granularity: String) -> GotmPeriod:
-	var period = .new()
+	var period = _Gotm.create_instance("GotmPeriod")
 	period.granularity = granularity
 	return period
 
@@ -67,13 +66,13 @@ static func offset(granularity: String, offset: int = 0) -> GotmPeriod:
 			
 		TimeGranularity.DAY:
 			var unix_time: int = period.to_unix_time()
-			unix_time -= 60 * 60 * 24 * offset
+			unix_time += 60 * 60 * 24 * offset
 			var date = OS.get_datetime_from_unix_time (unix_time)
 			return at(granularity, date.year, date.month, date.day)
 			
 		TimeGranularity.WEEK:
 			var unix_time: int = period.to_unix_time()
-			unix_time -= 60 * 60 * 24 * 7 * offset
+			unix_time += 60 * 60 * 24 * 7 * offset
 			var date = OS.get_datetime_from_unix_time (unix_time)
 			return at(granularity, date.year, date.month, date.day)
 	
@@ -81,7 +80,7 @@ static func offset(granularity: String, offset: int = 0) -> GotmPeriod:
 
 
 static func at(granularity: String, year: int = -1, month: int = -1, day: int = -1) -> GotmPeriod:
-	var period = .new()
+	var period = _Gotm.create_instance("GotmPeriod")
 	period.granularity = granularity
 	var date = OS.get_date()
 	period.year = year

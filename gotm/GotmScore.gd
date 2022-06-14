@@ -69,8 +69,8 @@ func update(value = null, properties = null) -> GotmScore:
 
 # Delete this score.
 func delete() -> void:
-	return yield(_GotmScore.delete(self), "completed")
+	return yield(_GotmScore.delete(id), "completed")
 
 # Get an existing score.
 static func fetch(id: String) -> GotmScore:
-	return yield(_GotmScore.fetch(.new(), id), "completed")
+	return yield(_GotmScore.fetch(id), "completed")

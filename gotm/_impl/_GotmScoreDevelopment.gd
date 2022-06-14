@@ -33,7 +33,7 @@ static func create(api: String, data: Dictionary):
 		"author": _GotmAuthDevelopment.get_user(),
 		"name": data.name,
 		"value": data.value,
-		"properties": data if data else {},
+		"properties": data.properties if data.get("properteis") else {},
 		"created": _GotmUtility.get_iso_from_unix_time(OS.get_unix_time(), OS.get_ticks_msec() % 1000)
 	}
 	_scores[score.path] = score
@@ -41,9 +41,9 @@ static func create(api: String, data: Dictionary):
 #
 static func update(id: String, data: Dictionary):
 	yield(_GotmUtility.get_tree(), "idle_frame")
-	var score = _scores[id]
-	if not score:
+	if not id in _scores:
 		return
+	var score = _scores[id]
 	for key in data:
 		score[key] = data[key]
 	return score
@@ -55,11 +55,11 @@ static func delete(id: String) -> void:
 static func fetch(path: String, query: String = "", params: Dictionary = {}, authenticate: bool = false) -> Dictionary:
 	yield(_GotmUtility.get_tree(), "idle_frame")
 	var path_parts = path.split("/")
-	var api = path[0]
-	var id = path[1]
+	var api = path_parts[0]
+	var id = path_parts[1]
 	if api == "stats" and id == "rank" and query == "rankByScoreSort":
 		return {"path": _GotmStore.create_request_path(path, query, params), "value": _fetch_rank(params)}
-	return _scores[path]
+	return _scores.get(path)
 
 static func list(api: String, query: String, params: Dictionary = {}, authenticate: bool = false) -> Array:
 	yield(_GotmUtility.get_tree(), "idle_frame")
@@ -70,17 +70,22 @@ static func list(api: String, query: String, params: Dictionary = {}, authentica
 	return []
 
 static func _fetch_counts(params) -> Array:
+	params = _GotmUtility.copy(params, {})
+	params.descending = true
 	var scores = _fetch_by_score_sort(params)
-	
+
+	if params.limit > 1:
+		pass
+
 	var stats := []
 	for i in range(0, params.limit):
 		stats.append({"value": 0})
-	
+
 	if scores.empty():
 		return stats
-	
-	var min_value = params.min
-	var max_value = params.max
+
+	var min_value = params.get("min")
+	var max_value = params.get("max")
 	if not min_value is float:
 		min_value = scores[scores.size() - 1].value
 	if not max_value is float:
@@ -92,8 +97,8 @@ static func _fetch_counts(params) -> Array:
 		var end = max_value if is_last else min_value + step * (i + 1)
 		for score in scores:
 			if score.value >= start and (score.value <= end if is_last else score.value < end):
-				stats[0].value += 1
-	
+				stats[i].value += 1
+
 	return stats
 
 static func _fetch_rank(params) -> int:
@@ -101,15 +106,15 @@ static func _fetch_rank(params) -> int:
 	params.descending = true
 	var scores = _fetch_by_score_sort(params)
 	var match_score
-	if params.score:
+	if params.get("score"):
 		match_score = _scores[params.score]
-	else:
+	elif params.get("value") is float:
 		match_score = {"value": params.value, "created": _GotmUtility.get_iso_from_unix_time(OS.get_unix_time(), OS.get_ticks_msec() % 1000), "path": _GotmUtility.create_resource_path("scores")}
 	if not match_score:
 			return 0
 	var rank = 1
 	for score in scores:
-		if ScoreSearchPredicate.is_greater_than(match_score, score):
+		if match_score.path == score.path or ScoreSearchPredicate.is_greater_than(match_score, score):
 			return rank
 		rank += 1
 	return rank
@@ -120,8 +125,8 @@ static func _match_props(subset, superset) -> bool:
 	if subset is Dictionary:
 		if subset.size() > superset.size():
 			return false
-		for key in subset.keys():
-			if not _match_props(subset[key], superset[key]):
+		for key in subset:
+			if not key in superset or not _match_props(subset[key], superset[key]):
 				return false
 		return true
 	if subset is Array:
@@ -135,13 +140,13 @@ static func _match_props(subset, superset) -> bool:
 
 static func _get_range_from_period(period: String) -> Array:
 	match period:
-		"":
+		GotmPeriod.TimeGranularity.ALL:
 			return [null, null]
-		"year", "month", "week", "day":
+		GotmPeriod.TimeGranularity.YEAR, GotmPeriod.TimeGranularity.MONTH, GotmPeriod.TimeGranularity.WEEK, GotmPeriod.TimeGranularity.DAY:
 			return [_GotmUtility.get_iso_from_unix_time(GotmPeriod.sliding(period).to_unix_time()), null]
-	
-	if period.begins_with("week"):
-		var week_number = int(period.substr("week".length(), period.length() - "week".length()))
+
+	if period.begins_with(GotmPeriod.TimeGranularity.WEEK):
+		var week_number = int(period.substr(GotmPeriod.TimeGranularity.WEEK.length(), period.length() - GotmPeriod.TimeGranularity.WEEK.length()))
 		if week_number > 0:
 			var unix_time = 60 * 60 * 24 * 7 * week_number
 			return [_GotmUtility.get_iso_from_unix_time(unix_time - 60 * 60 * 24 * 3), _GotmUtility.get_iso_from_unix_time(unix_time + 60 * 60 * 24 * 4 - 1)]
@@ -156,7 +161,7 @@ static func _get_range_from_period(period: String) -> Array:
 		year = int(year)
 		month = int(month)
 		day = int(day)
-	elif month: 
+	elif month:
 		granularity = GotmPeriod.TimeGranularity.MONTH
 		year = int(year)
 		month = int(month)
@@ -178,13 +183,13 @@ static func _get_range_from_period(period: String) -> Array:
 static func _match_score(score, params) -> bool:
 	if params.name != score.name or params.author and params.author != score.author:
 		return false
-	if params.min is float and score.value < params.min:
+	if params.get("min") is float and score.value < params.get("min"):
 		return false
-	if params.max is float and score.value > params.max:
+	if params.get("max") is float and score.value > params.get("max"):
 		return false
-	if params.props and not _match_props(params.props, score.properties):
+	if params.get("props") and not _match_props(params.props, score.properties):
 		return false
-	if params.period:
+	if params.get("period"):
 		var period_range = _get_range_from_period(params.period)
 		var start = period_range[0]
 		var end = period_range[1]
@@ -202,15 +207,21 @@ class ScoreSearchPredicate:
 static func _fetch_by_score_sort(params) -> Array:
 	var matches := []
 	var scores_per_author := {}
-	for score in _scores:
+	for score_path in _scores:
+		var score = _scores[score_path]
 		if _match_score(score, params):
-			if params.is_unique:
-				var existing_score = scores_per_author[score.author]
+			if params.get("isUnique"):
+				var existing_score = scores_per_author.get(score.author)
 				if not existing_score or score.created > existing_score.created:
 					scores_per_author[score.author] = score
 			else:
 				matches.append(score)
-	if params.is_unique:
+	if params.get("isUnique"):
 		matches = scores_per_author.values()
-	matches.sort_custom(ScoreSearchPredicate, "is_greater_than" if params.descending else "is_less_than")
+	matches.sort_custom(ScoreSearchPredicate, "is_greater_than" if params.get("descending") else "is_less_than")
+	if params.get("after"):
+		while not matches.empty() and matches[0].path != params.after:
+			matches.pop_front()
+		if not matches.empty() and matches[0].path == params.after:
+			matches.pop_front()
 	return matches

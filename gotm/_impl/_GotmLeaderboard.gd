@@ -29,6 +29,6 @@ static func get_surrounding_scores(leaderboard, score_id: String) -> Dictionary:
 	var afterSig = _GotmScore.list(leaderboard, score_id, false)
 	var before: Array = yield(beforeSig, "completed")
 	var score: Array = yield(scoreSig, "completed")
-	var after: Array = yield(beforeSig, "completed")
+	var after: Array = yield(afterSig, "completed")
 	before.invert()
 	return {"before": before, "score": score, "after": after}

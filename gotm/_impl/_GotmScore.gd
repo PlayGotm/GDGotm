@@ -42,17 +42,19 @@ static func update(score, value = null, properties = null):
 	var data = yield(get_implementation().update(score.id, _GotmUtility.delete_null({"value": value, "properties": properties})), "completed")
 	return _format(data, score)
 
-static func delete(score) -> void:
-	yield(get_implementation().delete(score.id), "completed")
+static func delete(id: String) -> void:
+	yield(get_implementation().delete(id), "completed")
 
-static func fetch(score, id: String):
+static func fetch(id: String):
 	var data = yield(get_implementation().fetch(id), "completed")
-	return _format(data, score)
+	return _format(data, _Gotm.create_instance("GotmScore"))
 
 static func list(leaderboard, after: String, ascending: bool) -> Array:
 	var project = _get_project()
 	if project is GDScriptFunctionState:
 		project = yield(project, "completed")
+	elif not project:
+		yield(_GotmUtility.get_tree(), "idle_frame")
 	if not project:
 		return []
 	var data_list = yield(get_implementation().list("scores", "byScoreSort", _GotmUtility.delete_empty({
@@ -72,9 +74,13 @@ static func list(leaderboard, after: String, ascending: bool) -> Array:
 
 static func get_rank(leaderboard, score_id_or_value) -> int:
 	var project = _get_project()
+	var has_yielded := false
 	if project is GDScriptFunctionState:
 		project = yield(project, "completed")
+		has_yielded = true
 	if not project:
+		if not has_yielded:
+			yield(_GotmUtility.get_tree(), "idle_frame")
 		return 0
 	var params = _GotmUtility.delete_empty({
 		"name": leaderboard.name,
@@ -84,11 +90,13 @@ static func get_rank(leaderboard, score_id_or_value) -> int:
 		"isUnique": leaderboard.is_unique,
 		"author": leaderboard.user_id,
 	})
-	if score_id_or_value is int:
-		params.value = score_id_or_value
+	if score_id_or_value is float or score_id_or_value is int:
+		params.value = float(score_id_or_value)
 	elif score_id_or_value and score_id_or_value is String:
 		params.score = score_id_or_value
 	else:
+		if not has_yielded:
+			yield(_GotmUtility.get_tree(), "idle_frame")
 		return 0
 	var stat = yield(get_implementation().fetch("stats/rank", "rankByScoreSort", params), "completed")
 	if not stat:
@@ -118,10 +126,10 @@ static func get_counts(leaderboard, minimum_value, maximum_value, segment_count)
 		"author": leaderboard.user_id,
 		"limit": segment_count,
 	})
-	if minimum_value is float:
-		params.min = minimum_value
-	if maximum_value is float:
-		params.max = maximum_value
+	if minimum_value is float or minimum_value is int:
+		params.min = float(minimum_value)
+	if maximum_value is float or maximum_value is int:
+		params.max = float(maximum_value)
 	var stats = yield(get_implementation().list("stats", "countByScoreSort", params), "completed")
 	
 	if stats.size() != counts.size():
@@ -144,7 +152,7 @@ static func _format(data, score):
 	score.id = data.path
 	score.user_id = data.author
 	score.name = data.name
-	score.value = data.value
+	score.value = float(data.value)
 	score.properties = data.properties
 	score.created = _GotmUtility.get_unix_time_from_iso(data.created)
 	return score
