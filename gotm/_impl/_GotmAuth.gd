@@ -103,7 +103,7 @@ static func _format_auth_data(data) -> _GotmAuthData:
 	return auth
 
 static func _get_user_auth() -> _GotmAuthData:
-	var file_path := "user://gotm/user_auth.json"
+	var file_path := _Gotm.get_path("auth.json")
 	var file = File.new()
 	file.open(file_path, File.READ_WRITE)
 	var content = file.get_as_text()

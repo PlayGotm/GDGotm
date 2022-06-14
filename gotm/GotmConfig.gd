@@ -23,16 +23,20 @@
 class_name GotmConfig
 #warnings-disable
 
-# The project key gives your game access to Gotm's APIs and is bound to your game.
-# You can create one in your game's Gotm dashboard (https://gotm.io/dashboard).
-# If you don't specify a project key, the plugin will emulate Gotm's APIs locally.
+# The project key gives your game access to Gotm's cloud and lets you share data
+# between players, for example scores and leaderboards. You can create a key in 
+# your game's Gotm dashboard (https://gotm.io/dashboard).
+# If you don't specify a project key, the plugin will not use Gotm's cloud and all
+# data is only saved locally on the device your game is running on.
 #
 # For example, if you specify a project key, all scores that you create with
-# GotmScore.create will be saved persistently in the cloud. If you don't specify
-# a project key, the scores will just be stored in your computer's local memory
-# and will be wiped when you close the game.
+# GotmScore.create will be saved in the cloud and will be visible to other players. 
+# If you don't specify a project key, the scores will only be stored in the local
+# storage of the device the game is running on, and will not be visible to other
+# players.
 var projectKey: String = ""
 
-# The Scores API is a beta feature and is always emulated when Gotm.is_live is false.
-# If true, the API is emulated even when a project key is provided Gotm.is_live is true.
-var emulateScoresApi: bool = false
+# Scores and Leaderboards are currently beta features and are always local when 
+# Gotm.is_live is false.
+# If true, the feature is local even if a project key is provided.
+var forceLocalScores: bool = false

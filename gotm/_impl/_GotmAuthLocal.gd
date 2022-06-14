@@ -20,16 +20,30 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-class_name _GotmAuthDevelopment
+class_name _GotmAuthLocal
 #warnings-disable
 
 const _cache := {"token": "", "project": "", "user": ""}
 
 static func _get_cache():
-	if not _cache.token:
+	if _cache.token:
+		return _cache
+	
+	var file_path := _Gotm.get_local_path("auth.json")
+	var file = File.new()
+	file.open(file_path, File.READ_WRITE)
+	var content = file.get_as_text() if file.is_open() else ""
+	file.close()
+	if content:
+		_GotmUtility.copy(parse_json(content), _cache)
+	else:
 		_cache.token = _GotmUtility.create_id()
 		_cache.project = _GotmUtility.create_resource_path("games")
 		_cache.user = _GotmUtility.create_resource_path("users")
+		file = File.new()
+		file.open(file_path, File.WRITE)
+		file.store_string(to_json(_cache))
+		file.close()
 	return _cache
 
 static func get_user() -> String:

@@ -42,12 +42,23 @@ static func initialize(config: GotmConfig, classes: Dictionary) -> void:
 	var global := get_global()
 	global.config = _GotmUtility.copy(config, GotmConfig.new())
 	global.classes = classes
+	var directory = Directory.new()
+	directory.make_dir_recursive(get_local_path(""))
 	var gotm = get_singleton()
 	if gotm:
 		gotm.initialize(global)
 
 static func is_live() -> bool:
 	return get_singleton()
+
+static func supports_beta() -> bool:
+	return is_live() and get_global().config.projectKey
+	
+static func get_local_path(path: String) -> String:
+	return get_path("local/" + path)
+
+static func get_path(path: String) -> String:
+	return "user://gotm/" + path
 
 static func get_config() -> GotmConfig:
 	return _GotmUtility.copy(get_global().config, GotmConfig.new())

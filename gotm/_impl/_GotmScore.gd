@@ -24,13 +24,13 @@ class_name _GotmScore
 #warnings-disable
 
 static func get_implementation():
-	if _Gotm.get_config().emulateScoresApi or not _Gotm.is_live():
-		return _GotmScoreDevelopment
+	if not _Gotm.supports_beta() or _Gotm.get_config().forceLocalScores:
+		return _GotmScoreLocal
 	return _GotmStore
 
 static func get_auth_implementation():
-	if get_implementation() == _GotmScoreDevelopment:
-		return _GotmAuthDevelopment
+	if get_implementation() == _GotmScoreLocal:
+		return _GotmAuthLocal
 	return _GotmAuth
 
 static func create(name: String, value: float, properties: Dictionary = {}):

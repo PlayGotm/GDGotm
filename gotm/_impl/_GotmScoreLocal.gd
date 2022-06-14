@@ -20,37 +20,68 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-class_name _GotmScoreDevelopment
+class_name _GotmScoreLocal
 #warnings-disable
 
-const _scores = {}
+const _global = {"scores": null}
 
+const FILE_NAME := "scores.json"
+
+static func clear():
+	yield(_GotmUtility.get_tree(), "idle_frame")
+	var scores = _get_scores()
+	for key in scores.keys():
+		scores.erase(key)
+	_write_scores()
+
+static func _get_scores() -> Dictionary:
+	if _global.scores != null:
+		return _global.scores
+
+	var file = File.new()
+	file.open(_Gotm.get_local_path(FILE_NAME), File.READ)
+	var content = file.get_as_text() if file.is_open() else ""
+	file.close()
+	if content:
+		_global.scores = parse_json(content)
+	else:
+		_global.scores = {}
+	return _global.scores
+
+static func _write_scores() -> void:
+	var file = File.new()
+	file.open(_Gotm.get_local_path(FILE_NAME), File.WRITE)
+	file.store_string(to_json(_get_scores()))
+	file.close()
 
 static func create(api: String, data: Dictionary):
 	yield(_GotmUtility.get_tree(), "idle_frame")
 	var score = {
 		"path": _GotmUtility.create_resource_path(api),
-		"author": _GotmAuthDevelopment.get_user(),
+		"author": _GotmAuthLocal.get_user(),
 		"name": data.name,
 		"value": data.value,
 		"properties": data.properties if data.get("properteis") else {},
 		"created": _GotmUtility.get_iso_from_unix_time(OS.get_unix_time(), OS.get_ticks_msec() % 1000)
 	}
-	_scores[score.path] = score
+	_get_scores()[score.path] = score
+	_write_scores()
 	return score
 #
 static func update(id: String, data: Dictionary):
 	yield(_GotmUtility.get_tree(), "idle_frame")
-	if not id in _scores:
+	if not id in _get_scores():
 		return
-	var score = _scores[id]
+	var score = _get_scores()[id]
 	for key in data:
 		score[key] = data[key]
+	_write_scores()
 	return score
 
 static func delete(id: String) -> void:
 	yield(_GotmUtility.get_tree(), "idle_frame")
-	_scores.erase(id)
+	_get_scores().erase(id)
+	_write_scores()
 
 static func fetch(path: String, query: String = "", params: Dictionary = {}, authenticate: bool = false) -> Dictionary:
 	yield(_GotmUtility.get_tree(), "idle_frame")
@@ -59,7 +90,7 @@ static func fetch(path: String, query: String = "", params: Dictionary = {}, aut
 	var id = path_parts[1]
 	if api == "stats" and id == "rank" and query == "rankByScoreSort":
 		return {"path": _GotmStore.create_request_path(path, query, params), "value": _fetch_rank(params)}
-	return _scores.get(path)
+	return _get_scores().get(path)
 
 static func list(api: String, query: String, params: Dictionary = {}, authenticate: bool = false) -> Array:
 	yield(_GotmUtility.get_tree(), "idle_frame")
@@ -107,7 +138,7 @@ static func _fetch_rank(params) -> int:
 	var scores = _fetch_by_score_sort(params)
 	var match_score
 	if params.get("score"):
-		match_score = _scores[params.score]
+		match_score = _get_scores()[params.score]
 	elif params.get("value") is float:
 		match_score = {"value": params.value, "created": _GotmUtility.get_iso_from_unix_time(OS.get_unix_time(), OS.get_ticks_msec() % 1000), "path": _GotmUtility.create_resource_path("scores")}
 	if not match_score:
@@ -207,8 +238,8 @@ class ScoreSearchPredicate:
 static func _fetch_by_score_sort(params) -> Array:
 	var matches := []
 	var scores_per_author := {}
-	for score_path in _scores:
-		var score = _scores[score_path]
+	for score_path in _get_scores():
+		var score = _get_scores()[score_path]
 		if _match_score(score, params):
 			if params.get("isUnique"):
 				var existing_score = scores_per_author.get(score.author)

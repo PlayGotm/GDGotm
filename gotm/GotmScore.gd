@@ -74,3 +74,7 @@ func delete() -> void:
 # Get an existing score.
 static func fetch(id: String) -> GotmScore:
 	return yield(_GotmScore.fetch(id), "completed")
+
+# Delete all locally stored scores.
+static func clear_local():
+	yield(_GotmScoreLocal.clear(), "completed")
