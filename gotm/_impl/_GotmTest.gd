@@ -80,6 +80,10 @@ static func resource_to_string(resource) -> String:
 		for res in resource:
 			parts.append(resource_to_string(res))
 		return "[" + _GotmUtility.join(parts, ",") + "]"
-	if resource.get("id"):
-		return resource.id
-	return resource.to_string()
+	if resource is Object:
+		if resource.get("id"):
+			return resource.id
+		return resource.to_string()
+	if resource == null:
+		return "null"
+	return String(resource)

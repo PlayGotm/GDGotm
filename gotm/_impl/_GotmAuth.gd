@@ -106,7 +106,7 @@ static func _get_user_auth() -> _GotmAuthData:
 	var file_path := _Gotm.get_path("auth.json")
 	var file = File.new()
 	file.open(file_path, File.READ_WRITE)
-	var content = file.get_as_text()
+	var content = file.get_as_text() if file.is_open() else ""
 	file.close()
 	if content:
 		yield(_GotmUtility.get_tree(), "idle_frame")
@@ -125,4 +125,5 @@ static func _get_user_auth() -> _GotmAuthData:
 
 
 static func _create_authentication(body: Dictionary = {}, headers: PoolStringArray = []) -> Dictionary:
-	return yield(_GotmUtility.fetch_json(_Gotm.get_global().apiOrigin + "/authentications", HTTPClient.METHOD_POST, body, headers), "completed")
+	var result = yield(_GotmUtility.fetch_json(_Gotm.get_global().apiOrigin + "/authentications", HTTPClient.METHOD_POST, body, headers), "completed")
+	return result.data

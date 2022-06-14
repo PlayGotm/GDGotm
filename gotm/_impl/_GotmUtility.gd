@@ -55,7 +55,7 @@ static func copy(from, to):
 
 
 class FetchJsonResult:
-	var code: String
+	var code: int
 	var data: Dictionary
 	var headers: PoolStringArray
 	var ok: bool
@@ -69,12 +69,12 @@ static func fetch_json(url: String, method: int, body = null, headers: PoolStrin
 	var code = signal_results[1] as int
 	var response_headers = signal_results[2] as PoolStringArray
 	var data = signal_results[3] as PoolByteArray
-	return .copy({
+	return copy(delete_null({
 		"code": code, 
 		"data": parse_json(data.get_string_from_utf8()), 
 		"headers": response_headers,
 		"ok": code >= 200 && code <= 299
-	}, FetchJsonResult.new())
+	}), FetchJsonResult.new())
 
 static func create_query_string(dictionary: Dictionary) -> String:
 	var string := ""
