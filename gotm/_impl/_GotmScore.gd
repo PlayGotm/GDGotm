@@ -35,28 +35,42 @@ static func get_auth_implementation():
 
 static func create(name: String, value: float, properties: Dictionary = {}):
 	var data = yield(get_implementation().create("scores", {"name": name, "value": value, "properties": properties}), "completed")
+	if data:
+		_clear_cache()
 	return _format(data, _Gotm.create_instance("GotmScore"))
 
 
 static func update(score, value = null, properties = null):
 	var data = yield(get_implementation().update(score.id, _GotmUtility.delete_null({"value": value, "properties": properties})), "completed")
+	if data:
+		_clear_cache()
 	return _format(data, score)
 
 static func delete(id: String) -> void:
 	yield(get_implementation().delete(id), "completed")
+	_clear_cache()
 
 static func fetch(id: String):
 	var data = yield(get_implementation().fetch(id), "completed")
 	return _format(data, _Gotm.create_instance("GotmScore"))
 
-static func list(leaderboard, after: String, ascending: bool) -> Array:
-	var project = _get_project()
-	if project is GDScriptFunctionState:
-		project = yield(project, "completed")
-	elif not project:
-		yield(_GotmUtility.get_tree(), "idle_frame")
+static func encode_cursor(score_id_or_value) -> String:
+	if score_id_or_value is String:
+		var score = yield(fetch(score_id_or_value), "completed")
+		if not score:
+			return ""
+		return _GotmUtility.encode_cursor([score.value, score.id + "~"])
+	elif score_id_or_value is float or score_id_or_value is int:
+		return _GotmUtility.encode_cursor([float(score_id_or_value), "~"])
+	
+	return ""
+	
+static func list(leaderboard, after, ascending: bool) -> Array:
+	var project = yield(_GotmUtility.get_yieldable(_get_project()), "completed")
 	if not project:
 		return []
+	if after:
+		after = yield(encode_cursor(after), "completed")
 	var data_list = yield(get_implementation().list("scores", "byScoreSort", _GotmUtility.delete_empty({
 		"name": leaderboard.name,
 		"target": project,
@@ -67,6 +81,9 @@ static func list(leaderboard, after: String, ascending: bool) -> Array:
 		"after": after,
 		"descending": not ascending,
 	})), "completed")
+	if not data_list:
+		return []
+		
 	var scores = []
 	for data in data_list:
 		scores.append(_format(data, _Gotm.create_instance("GotmScore")))
@@ -139,6 +156,10 @@ static func get_counts(leaderboard, minimum_value, maximum_value, segment_count)
 		counts[i] = stats[i].value
 	return counts
 
+static func _clear_cache():
+	get_implementation().clear_cache("scores")
+	get_implementation().clear_cache("stats")
+
 static func _get_project() -> String:
 	var Auth = get_auth_implementation()
 	var token = Auth.get_token()
@@ -153,7 +174,7 @@ static func _format(data, score):
 	score.user_id = data.author
 	score.name = data.name
 	score.value = float(data.value)
-	score.properties = data.properties
+	score.properties = data.props if data.props else {}
 	score.created = _GotmUtility.get_unix_time_from_iso(data.created)
 	return score
 	

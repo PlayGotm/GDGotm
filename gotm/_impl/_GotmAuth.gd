@@ -35,7 +35,7 @@ class _GotmAuthData:
 
 static func get_token() -> String:
 	var auth = _cache.auth
-	if auth and auth.token and auth.expired < OS.get_unix_time() - 60:
+	if auth and auth.token and auth.expired > OS.get_unix_time() + 60:
 		return auth.token
 	return ""
 
@@ -65,8 +65,7 @@ static func get_token_async():
 	
 	var queue := _GotmUtility.QueueSignal.new()
 	_cache.queue = queue
-	var sig = _get_refreshed_auth(_cache.auth)
-	var auth = yield(sig, "completed")
+	var auth = yield(_get_refreshed_auth(_cache.auth), "completed")
 	_cache.auth = auth
 	_cache.queue = null
 	queue.trigger()
@@ -98,12 +97,16 @@ static func _get_refreshed_auth(auth: _GotmAuthData) -> _GotmAuthData:
 static func _format_auth_data(data) -> _GotmAuthData:
 	if not data:
 		return null
-	var auth: _GotmAuthData = _GotmUtility.copy(data, _GotmAuthData.new())
+	var auth := _GotmAuthData.new()
+	auth.token = data.token
+	auth.refresh_token = data.refreshToken
 	auth.expired = _GotmUtility.get_unix_time_from_iso(data.expired)
 	return auth
 
+const FILE_NAME := "auth.json"
+
 static func _get_user_auth() -> _GotmAuthData:
-	var file_path := _Gotm.get_path("auth.json")
+	var file_path := _Gotm.get_path(FILE_NAME)
 	var file = File.new()
 	file.open(file_path, File.READ_WRITE)
 	var content = file.get_as_text() if file.is_open() else ""
@@ -126,4 +129,6 @@ static func _get_user_auth() -> _GotmAuthData:
 
 static func _create_authentication(body: Dictionary = {}, headers: PoolStringArray = []) -> Dictionary:
 	var result = yield(_GotmUtility.fetch_json(_Gotm.get_global().apiOrigin + "/authentications", HTTPClient.METHOD_POST, body, headers), "completed")
+	if not result.ok:
+		return
 	return result.data

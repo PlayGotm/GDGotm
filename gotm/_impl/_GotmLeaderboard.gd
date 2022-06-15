@@ -23,12 +23,26 @@
 class_name _GotmLeaderboard
 #warnings-disable
 
-static func get_surrounding_scores(leaderboard, score_id: String) -> Dictionary:
-	var beforeSig = _GotmScore.list(leaderboard, score_id, true)
-	var scoreSig = GotmScore.fetch(score_id)
-	var afterSig = _GotmScore.list(leaderboard, score_id, false)
-	var before: Array = yield(beforeSig, "completed")
-	var score: Array = yield(scoreSig, "completed")
-	var after: Array = yield(afterSig, "completed")
-	before.invert()
-	return {"before": before, "score": score, "after": after}
+static func get_surrounding_scores(leaderboard, score_id_or_value) -> Dictionary:
+	if score_id_or_value is String:
+		var score_id = score_id_or_value
+		var beforeSig := _GotmUtility.defer_signal(_GotmScore.list(leaderboard, score_id, true))
+		var scoreSig = GotmScore.fetch(score_id)
+		var afterSig := _GotmUtility.defer_signal(_GotmScore.list(leaderboard, score_id, false))
+		var score = yield(scoreSig, "completed")
+		if not score:
+			return {"before": [], "score": null, "after": []}
+		var before: Array = yield(beforeSig.get_yieldable(), "completed")
+		var after: Array = yield(afterSig.get_yieldable(), "completed")
+		before.invert()
+		return {"before": before, "score": score, "after": after}
+	elif score_id_or_value is float or score_id_or_value is int:
+		var value = score_id_or_value
+		var beforeSig = _GotmUtility.defer_signal(_GotmScore.list(leaderboard, value, true))
+		var scores = yield(_GotmScore.list(leaderboard, value, false), "completed")
+		var score = scores[0] if scores else null
+		var after: Array = yield(_GotmScore.list(leaderboard, score.id, false), "completed") if score else []
+		var before: Array = yield(beforeSig.get_yieldable(), "completed")
+		before.invert()
+		return {"before": before, "score": score, "after": after}
+	return {"before": [], "score": null, "after": []}

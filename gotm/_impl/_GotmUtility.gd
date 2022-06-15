@@ -25,13 +25,13 @@ class_name _GotmUtility
 
 
 static func delete_null(dictionary: Dictionary) -> Dictionary:
-	for key in dictionary:
+	for key in dictionary.keys():
 		if dictionary[key] == null:
 			dictionary.erase(key)
 	return dictionary
 
 static func delete_empty(dictionary: Dictionary) -> Dictionary:
-	for key in dictionary:
+	for key in dictionary.keys():
 		if not dictionary[key]:
 			dictionary.erase(key)
 	return dictionary
@@ -60,10 +60,16 @@ class FetchJsonResult:
 	var headers: PoolStringArray
 	var ok: bool
 
+static func encode_cursor(data: Array) -> String:
+	# TODO: Implement
+	return ""
+
 static func fetch_json(url: String, method: int, body = null, headers: PoolStringArray = []) -> FetchJsonResult:
 	var request := HTTPRequest.new()
+	if get_tree().get_frame() <= 0:
+		yield(get_tree(), "idle_frame")
 	get_tree().root.add_child(request)
-	request.request(url, PoolStringArray(), true, method, "" if not body is Dictionary else to_json(body))
+	var error = request.request(url, headers, true, method, "" if not body is Dictionary else to_json(body))
 	var signal_results = yield(request, "request_completed")
 	var result = signal_results[0] as int
 	var code = signal_results[1] as int
@@ -76,6 +82,41 @@ static func fetch_json(url: String, method: int, body = null, headers: PoolStrin
 		"ok": code >= 200 && code <= 299
 	}), FetchJsonResult.new())
 
+
+class DeferredSignal:
+	var is_completed := false
+	var value
+	var _signal
+	var tree: SceneTree
+	class Yieldable:
+		signal completed()
+	func get_yieldable() -> Yieldable:
+		if is_completed:
+			yield(tree, "idle_frame")
+			return value
+		else:
+			return _signal
+		
+	func _on_completed(v):
+		value = v
+		is_completed = true
+		
+
+static func get_yieldable(sig):
+	return yield(defer_signal(sig).get_yieldable(), "completed")
+
+static func defer_signal(sig) -> DeferredSignal:
+	var deferred := DeferredSignal.new()
+	deferred.tree = get_tree()
+	if not sig is GDScriptFunctionState:
+		deferred.is_completed = true
+		deferred.value = sig
+		return deferred
+	deferred._signal = sig
+	sig.connect("completed", deferred, "_on_completed")
+	return deferred
+
+
 static func create_query_string(dictionary: Dictionary) -> String:
 	var string := ""
 	var keys = dictionary.keys()
@@ -85,6 +126,8 @@ static func create_query_string(dictionary: Dictionary) -> String:
 		var value = dictionary[key]
 		if value is Object:
 			value = to_stable_json(value)
+		elif value is bool:
+			value = String(value).to_lower()
 		string += String(key) + "=" + String(value)
 		if i < keys.size() - 1:
 			string += "&"
@@ -188,8 +231,3 @@ class QueueSignal:
 		var sig = FakeSignal.new()
 		_queue.append(sig)
 		return sig
-
-static func safe_yield(return_value):
-	if return_value is GDScriptFunctionState:
-		return yield(return_value, "completed")
-	return return_value

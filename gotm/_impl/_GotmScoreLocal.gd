@@ -100,6 +100,9 @@ static func list(api: String, query: String, params: Dictionary = {}, authentica
 		return _fetch_counts(params)
 	return []
 
+static func clear_cache(path: String) -> void:
+	pass
+
 static func _fetch_counts(params) -> Array:
 	params = _GotmUtility.copy(params, {})
 	params.descending = true

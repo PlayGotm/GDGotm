@@ -46,10 +46,28 @@ static func list(api: String, query: String, params: Dictionary = {}, authentica
 	var data = yield(_cached_get_request(create_request_path(api, query, params), authenticate), "completed")
 	if not data or not data.data:
 		return
+	for resource in data.data:
+		_cache[resource.path] = resource
 	return data.data
 
 const _cache = {}
 const _signal_cache = {}
+
+static func clear_cache(path: String) -> void:
+	var prefixes = []
+	if path.find("?") >= 0:
+		prefixes.append(path)
+	elif path.find("/") >= 0:
+		prefixes.append(path)
+		prefixes.append(path + "?")
+	else:
+		prefixes.append(path)
+		prefixes.append(path + "?")
+		prefixes.append(path + "/")
+	for key in _cache.keys():
+		for prefix in prefixes:
+			if key == prefix or key.begins_with(prefix):
+				_cache.erase(key)
 
 static func create_request_path(path: String, query: String, params: Dictionary) -> String:
 	if query:
@@ -90,6 +108,9 @@ static func _cached_get_request(path: String, authenticate: bool = false) -> Dic
 	return value
 
 static func _request(path: String, method: int, body = null, authenticate: bool = false) -> Dictionary:
+	if not path:
+		yield(_GotmUtility.get_tree(), "idle_frame")
+		return
 	var headers = PoolStringArray()
 	if authenticate:
 		var token = _GotmAuth.get_token()
@@ -99,7 +120,7 @@ static func _request(path: String, method: int, body = null, authenticate: bool 
 			return
 		headers.push_back("authorization: Bearer " + token)
 		
-	var result = yield(_GotmUtility.fetch_json(_Gotm.get_global().apiOrigin + "/" + path, method, body), "completed")
+	var result = yield(_GotmUtility.fetch_json(_Gotm.get_global().apiOrigin + "/" + path, method, body, headers), "completed")
 	if not result.ok:
 		return
 	return result.data

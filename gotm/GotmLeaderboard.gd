@@ -76,10 +76,12 @@ func get_rank(score_id_or_value) -> int:
 
 # Fetch up to 20 scores that match the filters of this leaderboard sorted
 # by their values in descending order (highest value first).
-# If "after_score_id" is specified, fetch the scores that come after that score.
+# If "after_score_id_or_value" is specified and is a string, fetch the scores 
+# that come after that score by id, if it's a number, fetch the scores after that
+# value.
 # If "ascending" is true, sort in ascending order (lowest value first).
-func get_scores(after_score_id: String = "", ascending: bool = false) -> Array:
-	return yield(_GotmScore.list(self, after_score_id, ascending), "completed")
+func get_scores(after_score_id_or_value = null, ascending: bool = false) -> Array:
+	return yield(_GotmScore.list(self, after_score_id_or_value, ascending), "completed")
 
 class SurroundingScores:
 	# Scores above "score" in descending order. The last element is the score above "score".
@@ -88,9 +90,11 @@ class SurroundingScores:
 	var score: GotmScore
 	# Scores below "score" descending order. The first element is the score below "score".
 	var after: Array
-# Fetch scores surrounding the one with id "score_id".
-func get_surrounding_scores(score_id: String) -> SurroundingScores:
-	return yield(_GotmLeaderboard.get_surrounding_scores(self, score_id), "completed")
+# If "score_id_or_value" is a string, fetch scores surrounding the one with that id.
+# If "score_id_or_value" is a number, fetch scores surrounding the score with that value or the closest score
+# with lower value.
+func get_surrounding_scores(score_id_or_value) -> SurroundingScores:
+	return yield(_GotmLeaderboard.get_surrounding_scores(self, score_id_or_value), "completed")
 
 # Get the number of scores that match this leaderboard.
 func get_count() -> int:
