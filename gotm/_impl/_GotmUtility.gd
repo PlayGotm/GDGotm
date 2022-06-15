@@ -92,16 +92,6 @@ static func create_query_string(dictionary: Dictionary) -> String:
 		string = "?" + string
 	return string
 
-static func encode_url_component(string: String) -> String:
-	var bytes: PoolByteArray = string.to_utf8()
-	var encoded: String = ""
-	for c in bytes:
-		if c == 46 or c == 45 or c == 95 or c == 126 or (c >= 97 && c <= 122) or (c >= 65 && c <= 90) or (c >= 48 && c <= 57):
-			encoded += char(c)
-		else:
-			encoded += "%%%02X" % [c]
-	return encoded
-
 static func get_tree() -> SceneTree:
 	return Engine.get_main_loop() as SceneTree
 
