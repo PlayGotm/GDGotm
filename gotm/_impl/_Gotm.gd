@@ -52,12 +52,15 @@ static func is_live() -> bool:
 	return get_singleton()
 
 static func supports_beta() -> bool:
-	return is_live() and get_global().config.projectKey
-	
-static func get_local_path(path: String) -> String:
+	return is_live() and get_global().config.project_key
+
+static func get_project_key() -> String:
+	return get_global().config.project_key
+
+static func get_local_path(path: String = "") -> String:
 	return get_path("local/" + path)
 
-static func get_path(path: String) -> String:
+static func get_path(path: String = "") -> String:
 	return "user://gotm/" + path
 
 static func get_config() -> GotmConfig:
