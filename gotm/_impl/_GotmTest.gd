@@ -40,6 +40,8 @@ static func are_resources_equal(lhs, rhs) -> bool:
 
 static func are_equal(lhs, rhs) -> bool:
 	if typeof(lhs) != typeof(rhs):
+		if lhs is int and rhs is float or lhs is float and rhs is int:
+			return float(lhs) == float(rhs)
 		return false
 	if lhs is Array:
 		if lhs.size() != rhs.size():

@@ -107,7 +107,6 @@ static func _fetch_counts(params) -> Array:
 	params = _GotmUtility.copy(params, {})
 	params.descending = true
 	var scores = _fetch_by_score_sort(params)
-
 	if params.limit > 1:
 		pass
 
@@ -215,7 +214,7 @@ static func _get_range_from_period(period: String) -> Array:
 	return [null, null]
 
 static func _match_score(score, params) -> bool:
-	if params.name != score.name or params.author and params.author != score.author:
+	if params.name != score.name && params.get("author") and params.author != score.author:
 		return false
 	if params.get("min") is float and score.value < params.get("min"):
 		return false

@@ -61,8 +61,7 @@ class FetchJsonResult:
 	var ok: bool
 
 static func encode_cursor(data: Array) -> String:
-	# TODO: Implement
-	return ""
+	return Marshalls.utf8_to_base64(to_json(data)).replace("=", "").replace("+", "-").replace("/", "_")
 
 static func fetch_json(url: String, method: int, body = null, headers: PoolStringArray = []) -> FetchJsonResult:
 	var request := HTTPRequest.new()
@@ -124,7 +123,7 @@ static func create_query_string(dictionary: Dictionary) -> String:
 	for i in range(0, keys.size()):
 		var key = keys[i]
 		var value = dictionary[key]
-		if value is Object:
+		if value is Object or value is Dictionary or value is Array:
 			value = to_stable_json(value)
 		elif value is bool:
 			value = String(value).to_lower()

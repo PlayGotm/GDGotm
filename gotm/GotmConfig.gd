@@ -34,7 +34,7 @@ class_name GotmConfig
 # If you don't specify a project key, the scores will only be stored in the local
 # storage of the device the game is running on, and will not be visible to other
 # players.
-var projectKey: String = ""
+var project_key: String = ""
 
 # Scores and Leaderboards are currently beta features and are always local when 
 # Gotm.is_live is false.

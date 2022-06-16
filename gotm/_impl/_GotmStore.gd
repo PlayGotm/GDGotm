@@ -81,7 +81,7 @@ static func _set_cache(path: String, data):
 	if not data:
 		_cache.erase(path)
 		return
-	for key in ["created", "updated"]:
+	for key in ["created", "updated", "expired"]:
 		if key in data:
 			data[key] = _GotmUtility.get_unix_time_from_iso(data[key])
 	_cache[path] = data
@@ -113,12 +113,12 @@ static func _request(path: String, method: int, body = null, authenticate: bool 
 		return
 	var headers = PoolStringArray()
 	if authenticate:
-		var token = _GotmAuth.get_token()
-		if not token:
-			token = yield(_GotmAuth.get_token_async(), "completed")
-		if not token:
+		var auth = _GotmAuth.get_auth()
+		if not auth:
+			auth = yield(_GotmAuth.get_auth_async(), "completed")
+		if not auth:
 			return
-		headers.push_back("authorization: Bearer " + token)
+		headers.push_back("authorization: Bearer " + auth.token)
 		
 	var result = yield(_GotmUtility.fetch_json(_Gotm.get_global().apiOrigin + "/" + path, method, body, headers), "completed")
 	if not result.ok:

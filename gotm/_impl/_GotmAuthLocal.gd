@@ -50,12 +50,9 @@ static func get_user() -> String:
 	return _get_cache().user
 
 
-static func get_token() -> String:
-	return _get_cache().token
+static func get_auth():
+	return _get_cache()
 
-static func get_project_from_token(token: String) -> String:
-	return _get_cache().project
-
-static func get_token_async():
+static func get_auth_async():
 	yield(_GotmUtility.get_tree(), "idle_frame")
-	return get_token()
+	return get_auth()

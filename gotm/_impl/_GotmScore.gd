@@ -41,7 +41,7 @@ static func create(name: String, value: float, properties: Dictionary = {}):
 
 
 static func update(score, value = null, properties = null):
-	var data = yield(get_implementation().update(score.id, _GotmUtility.delete_null({"value": value, "properties": properties})), "completed")
+	var data = yield(get_implementation().update(score.id, _GotmUtility.delete_null({"value": value, "props": properties})), "completed")
 	if data:
 		_clear_cache()
 	return _format(data, score)
@@ -59,7 +59,7 @@ static func encode_cursor(score_id_or_value) -> String:
 		var score = yield(fetch(score_id_or_value), "completed")
 		if not score:
 			return ""
-		return _GotmUtility.encode_cursor([score.value, score.id + "~"])
+		return _GotmUtility.encode_cursor([score.value, score.id.replace("/", "-") + "~"])
 	elif score_id_or_value is float or score_id_or_value is int:
 		return _GotmUtility.encode_cursor([float(score_id_or_value), "~"])
 	
@@ -162,10 +162,10 @@ static func _clear_cache():
 
 static func _get_project() -> String:
 	var Auth = get_auth_implementation()
-	var token = Auth.get_token()
-	if not token:
-		token = yield(Auth.get_token_async(), "completed")
-	return Auth.get_project_from_token(token)
+	var auth = Auth.get_auth()
+	if not auth:
+		auth = yield(Auth.get_auth_async(), "completed")
+	return auth.project
 
 static func _format(data, score):
 	if not data or not score:
@@ -174,8 +174,7 @@ static func _format(data, score):
 	score.user_id = data.author
 	score.name = data.name
 	score.value = float(data.value)
-	score.properties = data.props if data.props else {}
-	score.created = _GotmUtility.get_unix_time_from_iso(data.created)
+	score.properties = data.props if data.get("props") else {}
 	return score
 	
 	
