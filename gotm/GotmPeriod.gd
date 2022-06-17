@@ -39,6 +39,8 @@ var year: int = -1
 var month: int = -1
 var day: int = -1
 
+const MS_PER_DAY := 1000 * 60 * 60 * 24
+
 static func all() -> GotmPeriod:
 	return _Gotm.create_instance("GotmPeriod")
 
@@ -66,14 +68,14 @@ static func offset(granularity: String, offset: int = 0) -> GotmPeriod:
 			
 		TimeGranularity.DAY:
 			var unix_time: int = period.to_unix_time()
-			unix_time += 60 * 60 * 24 * offset
-			var date = OS.get_datetime_from_unix_time (unix_time)
+			unix_time += MS_PER_DAY * offset
+			var date = OS.get_datetime_from_unix_time(unix_time / 1000)
 			return at(granularity, date.year, date.month, date.day)
 			
 		TimeGranularity.WEEK:
 			var unix_time: int = period.to_unix_time()
-			unix_time += 60 * 60 * 24 * 7 * offset
-			var date = OS.get_datetime_from_unix_time (unix_time)
+			unix_time += MS_PER_DAY * 7 * offset
+			var date = OS.get_datetime_from_unix_time(unix_time / 1000)
 			return at(granularity, date.year, date.month, date.day)
 	
 	return period
@@ -107,7 +109,7 @@ func to_unix_time() -> int:
 		"hour": 0, 
 		"minute": 0, 
 		"second": 0
-	})
+	}) * 1000
 
 func to_string() -> String:
 	match self.granularity:
@@ -129,6 +131,6 @@ func to_string() -> String:
 		TimeGranularity.WEEK:
 			if  not year >= 1 or not month >= 1 or not day >= 1:
 				return TimeGranularity.WEEK
-			return "week%d" % [to_unix_time() / (60 * 60 * 24 * 7)]
+			return "week%d" % [to_unix_time() / (MS_PER_DAY * 7)]
 	
 	return ""

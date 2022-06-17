@@ -29,7 +29,7 @@ class _GotmAuthData:
 	var data: Dictionary
 	var refresh_token: String
 	var token: String
-	# Expiration date in UNIX epoch time seconds
+	# Expiration date in UNIX epoch time milliseconds
 	var expired: int
 	var is_guest: bool
 	var owner: String
@@ -115,7 +115,7 @@ static func _get_refreshed_project_auth(auth: _GotmAuthData):
 	return yield(_create_authentication({"project": project_key}, ["authorization: Bearer " + user_auth.token]), "completed")
 
 static func _is_auth_valid(auth: _GotmAuthData) -> bool:
-	if not auth or not auth.token or not auth.expired > OS.get_unix_time() + 60:
+	if not auth or not auth.token or not auth.expired / 1000 > OS.get_unix_time() + 60:
 		return false
 	if auth.project_key and auth.project_key != _Gotm.get_project_key():
 		return false

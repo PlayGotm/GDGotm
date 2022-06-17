@@ -26,13 +26,13 @@ class_name _GotmStore
 static func create(api: String, data: Dictionary) -> Dictionary:
 	var created = yield(_request(api, HTTPClient.METHOD_POST, data, true), "completed")
 	if created:
-		_cache[created.path] = created
+		_set_cache(created.path, created)
 	return created
 
 static func update(path: String, data: Dictionary) -> Dictionary:
 	var updated = yield(_request(path, HTTPClient.METHOD_PATCH, data, true), "completed")
 	if updated:
-		_cache[path] = updated
+		_set_cache(path, updated)
 	return updated
 
 static func delete(path: String) -> void:
@@ -46,8 +46,6 @@ static func list(api: String, query: String, params: Dictionary = {}, authentica
 	var data = yield(_cached_get_request(create_request_path(api, query, params), authenticate), "completed")
 	if not data or not data.data:
 		return
-	for resource in data.data:
-		_cache[resource.path] = resource
 	return data.data
 
 const _cache = {}
@@ -102,6 +100,9 @@ static func _cached_get_request(path: String, authenticate: bool = false) -> Dic
 	var value = yield(_request(path, HTTPClient.METHOD_GET, null, authenticate), "completed")
 	if value:
 		value = _set_cache(path, value)
+		if value.get("data") is Array and value.get("next") is String:
+			for resource in value.data:
+				_set_cache(resource.path, resource)
 		
 	_signal_cache.erase(path)
 	queue_signal.trigger()

@@ -59,12 +59,13 @@ static func encode_cursor(score_id_or_value) -> String:
 		var score = yield(fetch(score_id_or_value), "completed")
 		if not score:
 			return ""
-		return _GotmUtility.encode_cursor([score.value, score.id.replace("/", "-") + "~"])
+		return _GotmUtility.encode_cursor([_GotmScoreUtility.encode_cursor_value(score.value, score.created), score.id.replace("/", "-") + "~"])
 	elif score_id_or_value is float or score_id_or_value is int:
-		return _GotmUtility.encode_cursor([float(score_id_or_value), "~"])
+		yield(_GotmUtility.get_tree(), "idle_frame")
+		return _GotmUtility.encode_cursor([_GotmScoreUtility.encode_cursor_value(float(score_id_or_value)), "~"])
 	
 	return ""
-	
+
 static func list(leaderboard, after, ascending: bool) -> Array:
 	var project = yield(_GotmUtility.get_yieldable(_get_project()), "completed")
 	if not project:
@@ -175,6 +176,7 @@ static func _format(data, score):
 	score.name = data.name
 	score.value = float(data.value)
 	score.properties = data.props if data.get("props") else {}
+	score.created = data.created
 	return score
 	
 	

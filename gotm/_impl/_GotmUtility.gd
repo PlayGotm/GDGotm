@@ -141,9 +141,8 @@ static func get_tree() -> SceneTree:
 	return Engine.get_main_loop() as SceneTree
 
 
-# Converts a date ISO 8601 string to UNIX epoch time in seconds.
-# If "as_milliseconds" is true, return as milliseconds.
-static func get_unix_time_from_iso(iso: String, as_milliseconds: bool = false) -> int:
+# Converts a date ISO 8601 string to UNIX epoch time in milliseconds.
+static func get_unix_time_from_iso(iso: String) -> int:
 	if not iso:
 		return 0
 	var date := iso.split("T")[0].split("-")
@@ -156,16 +155,13 @@ static func get_unix_time_from_iso(iso: String, as_milliseconds: bool = false) -
 		minute = time[1],
 		second = time[2],
 	}
-	
-	if as_milliseconds:
-		var milliseconds = int(time[3].trim_prefix("."))
-		return OS.get_unix_time_from_datetime(datetime) * 1000 + milliseconds
-	return OS.get_unix_time_from_datetime(datetime)
+	var milliseconds = int(time[2].split(".")[1])
+	return OS.get_unix_time_from_datetime(datetime) * 1000 + milliseconds
 
-# Converts UNIX epoch time in seconds to a date ISO 8601 string.
-static func get_iso_from_unix_time(unix_time: int = OS.get_unix_time(), milliseconds: int = 0) -> String:
-	var datetime = OS.get_datetime_from_unix_time(unix_time)
-	return "%04d-%02d-%02dT%02d:%02d:%02d.%03dZ" % [datetime.year, datetime.month, datetime.day, datetime.hour, datetime.minute, datetime.second, milliseconds % 1000]
+# Converts UNIX epoch time in milliseconds to a date ISO 8601 string.
+static func get_iso_from_unix_time(unix_time_ms: int = OS.get_unix_time() + OS.get_ticks_msec() % 1000) -> String:
+	var datetime = OS.get_datetime_from_unix_time(unix_time_ms / 1000)
+	return "%04d-%02d-%02dT%02d:%02d:%02d.%03dZ" % [datetime.year, datetime.month, datetime.day, datetime.hour, datetime.minute, datetime.second, unix_time_ms % 1000]
 
 static func join(array: Array, separator: String = ",") -> String:
 	var string = ""

@@ -49,7 +49,7 @@ var value: float
 # filter with these properties. 
 var properties: Dictionary
 
-# UNIX epoch time (in seconds). Use OS.get_datetime_from_unix_time to convert to date.
+# UNIX epoch time (in milliseconds). Use OS.get_datetime_from_unix_time(score.created / 1000) to convert to date.
 var created: int
 
 ##############################################################

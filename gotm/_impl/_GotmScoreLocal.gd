@@ -27,13 +27,6 @@ const _global = {"scores": null}
 
 const FILE_NAME := "scores.json"
 
-static func clear():
-	yield(_GotmUtility.get_tree(), "idle_frame")
-	var scores = _get_scores()
-	for key in scores.keys():
-		scores.erase(key)
-	_write_scores()
-
 static func _get_scores() -> Dictionary:
 	if _global.scores != null:
 		return _global.scores
@@ -62,11 +55,11 @@ static func create(api: String, data: Dictionary):
 		"name": data.name,
 		"value": data.value,
 		"props": data.props if data.get("props") else {},
-		"created": _GotmUtility.get_iso_from_unix_time(OS.get_unix_time(), OS.get_ticks_msec() % 1000)
+		"created": _GotmUtility.get_iso_from_unix_time()
 	}
 	_get_scores()[score.path] = score
 	_write_scores()
-	return score
+	return _format(score)
 #
 static func update(id: String, data: Dictionary):
 	yield(_GotmUtility.get_tree(), "idle_frame")
@@ -76,7 +69,7 @@ static func update(id: String, data: Dictionary):
 	for key in data:
 		score[key] = data[key]
 	_write_scores()
-	return score
+	return _format(score)
 
 static func delete(id: String) -> void:
 	yield(_GotmUtility.get_tree(), "idle_frame")
@@ -90,7 +83,7 @@ static func fetch(path: String, query: String = "", params: Dictionary = {}, aut
 	var id = path_parts[1]
 	if api == "stats" and id == "rank" and query == "rankByScoreSort":
 		return {"path": _GotmStore.create_request_path(path, query, params), "value": _fetch_rank(params)}
-	return _get_scores().get(path)
+	return _format(_get_scores().get(path))
 
 static func list(api: String, query: String, params: Dictionary = {}, authenticate: bool = false) -> Array:
 	yield(_GotmUtility.get_tree(), "idle_frame")
@@ -142,7 +135,7 @@ static func _fetch_rank(params) -> int:
 	if params.get("score"):
 		match_score = _get_scores()[params.score]
 	elif params.get("value") is float:
-		match_score = {"value": params.value, "created": _GotmUtility.get_iso_from_unix_time(OS.get_unix_time(), OS.get_ticks_msec() % 1000), "path": _GotmUtility.create_resource_path("scores")}
+		match_score = {"value": params.value, "created": _GotmUtility.get_iso_from_unix_time(), "path": _GotmUtility.create_resource_path("scores")}
 	if not match_score:
 			return 0
 	var rank = 1
@@ -181,8 +174,9 @@ static func _get_range_from_period(period: String) -> Array:
 	if period.begins_with(GotmPeriod.TimeGranularity.WEEK):
 		var week_number = int(period.substr(GotmPeriod.TimeGranularity.WEEK.length(), period.length() - GotmPeriod.TimeGranularity.WEEK.length()))
 		if week_number > 0:
-			var unix_time = 60 * 60 * 24 * 7 * week_number
-			return [_GotmUtility.get_iso_from_unix_time(unix_time - 60 * 60 * 24 * 3), _GotmUtility.get_iso_from_unix_time(unix_time + 60 * 60 * 24 * 4 - 1)]
+			var ms_per_day = 1000 * 60 * 60 * 24
+			var unix_time =  ms_per_day * 7 * week_number
+			return [_GotmUtility.get_iso_from_unix_time(unix_time - ms_per_day * 3), _GotmUtility.get_iso_from_unix_time(unix_time + ms_per_day * 4 - 1)]
 
 	var parts = period.split("-")
 	var year = parts[0] if parts.size() >= 1 else ""
@@ -205,10 +199,10 @@ static func _get_range_from_period(period: String) -> Array:
 		month = 1
 		day = 1
 	if granularity:
-		var start = OS.get_unix_time_from_datetime({"year": year, "month": month, "day": day, "hour": 0, "minute": 0, "second": 0})
+		var start = 1000 * OS.get_unix_time_from_datetime({"year": year, "month": month, "day": day, "hour": 0, "minute": 0, "second": 0})
 		var end_datetime = {"year": year, "month": month, "day": day, "hour": 0, "minute": 0, "second": 0}
 		end_datetime[granularity] += 1
-		var end = OS.get_unix_time_from_datetime(end_datetime) - 1
+		var end = 1000 * OS.get_unix_time_from_datetime(end_datetime) - 1
 		return [_GotmUtility.get_iso_from_unix_time(start), _GotmUtility.get_iso_from_unix_time(end)]
 
 	return [null, null]
@@ -253,10 +247,16 @@ static func _fetch_by_score_sort(params) -> Array:
 	if params.get("isUnique"):
 		matches = scores_per_author.values()
 	matches.sort_custom(ScoreSearchPredicate, "is_greater_than" if descending else "is_less_than")
+	for i in range(0, matches.size()):
+		matches[i] = _format(matches[i])
 	if params.get("after"):
 		var cursor = _decode_cursor(params.after)
-		var cursor_score = {"value": cursor[0], "path": cursor[1], "created": ""}
-		while not matches.empty() and (ScoreSearchPredicate.is_less_than(cursor_score, matches[0]) if descending else ScoreSearchPredicate.is_greater_than(cursor_score, matches[0])):
+		var cursor_score = {"value": cursor[0], "path": cursor[1], "created": 0}
+		while not matches.empty():
+			var m = matches[0]
+			m = {"value": _GotmScoreUtility.encode_cursor_value(m.value, m.created)._bigint, "path": m.path, "created": m.created}
+			if not (ScoreSearchPredicate.is_less_than(cursor_score, m) if descending else ScoreSearchPredicate.is_greater_than(cursor_score, m)):
+				break
 			matches.pop_front()
 		if not matches.empty() and matches[0].path == cursor_score.path:
 			matches.pop_front()
@@ -265,8 +265,15 @@ static func _fetch_by_score_sort(params) -> Array:
 
 static func _decode_cursor(cursor: String) -> Array:
 	var decoded := _GotmUtility.decode_cursor(cursor)
-	decoded[0] = float(decoded[0])
+	decoded[0] = decoded[0]._bigint
 	var target: String = decoded[1]
 	if target:
 		decoded[1] = target.substr(0, target.length() - 1).replace("-", "/")
 	return decoded
+
+static func _format(data: Dictionary):
+	if not data:
+		return
+	data = _GotmUtility.copy(data, {})
+	data.created = _GotmUtility.get_unix_time_from_iso(data.created)
+	return data
