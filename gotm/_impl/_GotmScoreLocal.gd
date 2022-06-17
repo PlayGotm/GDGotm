@@ -61,7 +61,7 @@ static func create(api: String, data: Dictionary):
 		"author": _GotmAuthLocal.get_user(),
 		"name": data.name,
 		"value": data.value,
-		"properties": data.properties if data.get("properteis") else {},
+		"props": data.props if data.get("props") else {},
 		"created": _GotmUtility.get_iso_from_unix_time(OS.get_unix_time(), OS.get_ticks_msec() % 1000)
 	}
 	_get_scores()[score.path] = score
@@ -220,7 +220,7 @@ static func _match_score(score, params) -> bool:
 		return false
 	if params.get("max") is float and score.value > params.get("max"):
 		return false
-	if params.get("props") and not _match_props(params.props, score.properties):
+	if params.get("props") and not _match_props(params.props, score.props):
 		return false
 	if params.get("period"):
 		var period_range = _get_range_from_period(params.period)
@@ -240,6 +240,7 @@ class ScoreSearchPredicate:
 static func _fetch_by_score_sort(params) -> Array:
 	var matches := []
 	var scores_per_author := {}
+	var descending = params.get("descending")
 	for score_path in _get_scores():
 		var score = _get_scores()[score_path]
 		if _match_score(score, params):
@@ -251,10 +252,21 @@ static func _fetch_by_score_sort(params) -> Array:
 				matches.append(score)
 	if params.get("isUnique"):
 		matches = scores_per_author.values()
-	matches.sort_custom(ScoreSearchPredicate, "is_greater_than" if params.get("descending") else "is_less_than")
+	matches.sort_custom(ScoreSearchPredicate, "is_greater_than" if descending else "is_less_than")
 	if params.get("after"):
-		while not matches.empty() and matches[0].path != params.after:
+		var cursor = _decode_cursor(params.after)
+		var cursor_score = {"value": cursor[0], "path": cursor[1], "created": ""}
+		while not matches.empty() and (ScoreSearchPredicate.is_less_than(cursor_score, matches[0]) if descending else ScoreSearchPredicate.is_greater_than(cursor_score, matches[0])):
 			matches.pop_front()
-		if not matches.empty() and matches[0].path == params.after:
+		if not matches.empty() and matches[0].path == cursor_score.path:
 			matches.pop_front()
 	return matches
+
+
+static func _decode_cursor(cursor: String) -> Array:
+	var decoded := _GotmUtility.decode_cursor(cursor)
+	decoded[0] = float(decoded[0])
+	var target: String = decoded[1]
+	if target:
+		decoded[1] = target.substr(0, target.length() - 1).replace("-", "/")
+	return decoded

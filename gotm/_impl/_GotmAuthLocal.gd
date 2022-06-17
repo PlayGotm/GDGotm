@@ -49,7 +49,6 @@ static func _get_cache():
 static func get_user() -> String:
 	return _get_cache().user
 
-
 static func get_auth():
 	return _get_cache()
 

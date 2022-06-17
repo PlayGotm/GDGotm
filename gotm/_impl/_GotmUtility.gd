@@ -63,6 +63,9 @@ class FetchJsonResult:
 static func encode_cursor(data: Array) -> String:
 	return Marshalls.utf8_to_base64(to_json(data)).replace("=", "").replace("+", "-").replace("/", "_")
 
+static func decode_cursor(cursor: String) -> Array:
+	return parse_json(Marshalls.base64_to_utf8(cursor.replace("-", "+").replace("_", "/") + "=="))
+
 static func fetch_json(url: String, method: int, body = null, headers: PoolStringArray = []) -> FetchJsonResult:
 	var request := HTTPRequest.new()
 	if get_tree().get_frame() <= 0:
