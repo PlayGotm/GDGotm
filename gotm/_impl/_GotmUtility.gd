@@ -32,12 +32,12 @@ static func delete_null(dictionary: Dictionary) -> Dictionary:
 
 static func delete_empty(dictionary: Dictionary) -> Dictionary:
 	for key in dictionary.keys():
-		if not dictionary[key]:
+		if !dictionary[key]:
 			dictionary.erase(key)
 	return dictionary
 
 static func copy(from, to):
-	if not from:
+	if !from:
 		return to
 	var keys:= []
 	if from is Array:
@@ -71,7 +71,7 @@ static func fetch_json(url: String, method: int, body = null, headers: PoolStrin
 	if get_tree().get_frame() <= 0:
 		yield(get_tree(), "idle_frame")
 	get_tree().root.add_child(request)
-	var error = request.request(url, headers, true, method, "" if not body is Dictionary else to_json(body))
+	var error = request.request(url, headers, true, method, "" if !(body is Dictionary) else to_json(body))
 	var signal_results = yield(request, "request_completed")
 	var result = signal_results[0] as int
 	var code = signal_results[1] as int
@@ -110,7 +110,7 @@ static func get_yieldable(sig):
 static func defer_signal(sig) -> DeferredSignal:
 	var deferred := DeferredSignal.new()
 	deferred.tree = get_tree()
-	if not sig is GDScriptFunctionState:
+	if !(sig is GDScriptFunctionState):
 		deferred.is_completed = true
 		deferred.value = sig
 		return deferred
@@ -126,7 +126,7 @@ static func create_query_string(dictionary: Dictionary) -> String:
 	for i in range(0, keys.size()):
 		var key = keys[i]
 		var value = dictionary[key]
-		if value is Object or value is Dictionary or value is Array:
+		if value is Object || value is Dictionary || value is Array:
 			value = to_stable_json(value)
 		elif value is bool:
 			value = String(value).to_lower()
@@ -143,7 +143,7 @@ static func get_tree() -> SceneTree:
 
 # Converts a date ISO 8601 string to UNIX epoch time in milliseconds.
 static func get_unix_time_from_iso(iso: String) -> int:
-	if not iso:
+	if !iso:
 		return 0
 	var date := iso.split("T")[0].split("-")
 	var time := iso.split("T")[1].trim_suffix("Z").split(":")
@@ -197,7 +197,7 @@ class GlobalData:
 
 static func _get_global() -> GlobalData:
 	var value = _global.value
-	if not value:
+	if !value:
 		value = GlobalData.new()
 		_global.value = value
 	return value

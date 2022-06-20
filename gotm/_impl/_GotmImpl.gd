@@ -93,19 +93,19 @@ static func _init_search_string_encoders() -> Array:
 # Initialize socket for fetching lobbies on local network.
 static func _init_socket() -> void:
 	var g = _get_gotm()
-	if not g._impl.sockets:
+	if !g._impl.sockets:
 		g._impl.sockets = []
 		var is_listening = false
 		for i in range(5):
 			var socket = PacketPeerUDP.new()
 			if socket.has_method("set_broadcast_enabled"):
 				socket.set_broadcast_enabled(true)
-			if not is_listening:
+			if !is_listening:
 				is_listening = socket.listen(8075 + i) == OK
 			socket.set_dest_address("255.255.255.255", 8075 + i)
 			g._impl.sockets.push_back(socket)
 		
-		if not is_listening:
+		if !is_listening:
 			push_error("Failed to listen for lobbies. All ports 8075-8079 are busy.")
 
 
@@ -150,7 +150,7 @@ static func _process() -> void:
 				var v = socket.get_var()
 				if v.op == "get_lobbies":
 					var data = null
-					if g.lobby and g.lobby.is_host() and not g.lobby.hidden and not g.lobby.locked:
+					if g.lobby && g.lobby.is_host() && !g.lobby.hidden && !g.lobby.locked:
 						data = {
 							"id": g.lobby.id,
 							"name": g.lobby.name,
@@ -161,7 +161,7 @@ static func _process() -> void:
 					
 					_put_sockets({"op": "lobby", "data": data, "id": v.id})
 				elif v.op == "leave_lobby":
-					if g.lobby and v.data.lobby_id == g.lobby.id:
+					if g.lobby && v.data.lobby_id == g.lobby.id:
 						if g.lobby.is_host():
 							_put_sockets({
 								"op": "peer_left", 
@@ -174,7 +174,7 @@ static func _process() -> void:
 							_leave_lobby(g.lobby)
 				elif v.op == "join_lobby":
 					var data = null
-					if g.lobby and g.lobby.is_host() and v.data.lobby_id == g.lobby.id and not g.lobby.locked:
+					if g.lobby && g.lobby.is_host() && v.data.lobby_id == g.lobby.id &&  !g.lobby.locked:
 						_put_sockets({
 							"op": "peer_joined", 
 							"data": {
@@ -197,13 +197,13 @@ static func _process() -> void:
 						}
 					_put_sockets({"op": "lobby", "data": data, "id": v.id})
 				elif v.op == "peer_left":
-					if g.lobby and v.data.lobby_id == g.lobby.id:
+					if g.lobby && v.data.lobby_id == g.lobby.id:
 						for peer in g.lobby.peers.duplicate():
 							if peer._impl.id == v.data.id:
 								g.lobby.peers.erase(peer)
 								g.lobby.emit_signal("peer_left", peer)
 				elif v.op == "peer_joined":
-					if g.lobby and v.data.lobby_id == g.lobby.id and not g._impl.lobby_requests.has(v.id):
+					if g.lobby && v.data.lobby_id == g.lobby.id && !g._impl.lobby_requests.has(v.id):
 						var peer = g._impl.GotmUserT.new()
 						peer.address = v.data.address
 						peer._impl.id = v.data.id
@@ -212,13 +212,13 @@ static func _process() -> void:
 						if g.lobby.is_host():
 							g.lobby._impl.heartbeats[v.data.id] = OS.get_system_time_msecs()
 				elif v.op == "peer_heartbeat":
-					if g.lobby and v.data.lobby_id == g.lobby.id:
+					if g.lobby && v.data.lobby_id == g.lobby.id:
 						g.lobby._impl.heartbeats[v.data.id] = OS.get_system_time_msecs()
 				elif v.op == "lobby":
-					if v.data and g._impl.lobby_requests.has(v.id):
+					if v.data && g._impl.lobby_requests.has(v.id):
 						var lobby = g._impl.GotmLobbyT.new()
 						var peers = []
-						if not v.data._impl.host_id.empty():
+						if !v.data._impl.host_id.empty():
 							v.data.peers.push_back({
 								"address": socket.get_packet_ip(), 
 								"_impl": {
@@ -274,25 +274,25 @@ static func _encode_search_string(s: String) -> String:
 
 # Return true if 'lobby' matches filter options in 'fetch'.
 static func _match_lobby(lobby, fetch) -> bool:
-	if lobby.locked or lobby.hidden:
+	if lobby.locked || lobby.hidden:
 		return false
 	
-	if not fetch.filter_name.empty():
+	if !fetch.filter_name.empty():
 		var name: String = _encode_search_string(lobby.name)
 		var query: String = _encode_search_string(fetch.filter_name)
-		if not query.empty() and name.find(query) < 0:
+		if !query.empty() && name.find(query) < 0:
 			return false
 	
 	var lobby_props: Dictionary = {}
 	for key in lobby._impl.filterable_props:
-		if not lobby._impl.props.has(key):
+		if !lobby._impl.props.has(key):
 			return false
-		if not fetch.filter_properties.has(key):
+		if !fetch.filter_properties.has(key):
 			return false
 		
 		var lhs = fetch.filter_properties[key]
 		var rhs = lobby._impl.props[key]
-		if lhs != null and lhs != rhs:
+		if lhs != null && lhs != rhs:
 			return false
 		
 	return true
@@ -329,12 +329,12 @@ static func _sort_lobbies(lobbies: Array, fetch) -> Array:
 		if fetch.sort_min != null:
 			if _GotmImplUtility.is_less(v, fetch.sort_min):
 				continue
-			if fetch.sort_min_exclusive and not _GotmImplUtility.is_greater(v, fetch.sort_min):
+			if fetch.sort_min_exclusive && !_GotmImplUtility.is_greater(v, fetch.sort_min):
 				continue
 		if fetch.sort_max != null:
 			if _GotmImplUtility.is_greater(v, fetch.sort_max):
 				continue
-			if fetch.sort_max_exclusive and not _GotmImplUtility.is_less(v, fetch.sort_max):
+			if fetch.sort_max_exclusive && !_GotmImplUtility.is_less(v, fetch.sort_max):
 				continue
 		
 		sorted.push_back(lobby)
@@ -393,7 +393,7 @@ static func _fetch_lobbies(fetch, count: int, type: String) -> Array:
 	
 	# Reset fetch state if user has modified any options.
 	var stringified_state: String = _stringify_fetch_state(fetch)
-	if not fetch._impl.has("last_state") or stringified_state != fetch._impl.last_state:
+	if !fetch._impl.has("last_state") || stringified_state != fetch._impl.last_state:
 		fetch._impl.last_state = stringified_state
 		fetch._impl.last_lobby = -1
 		fetch._impl.start_lobby = -1
@@ -424,7 +424,7 @@ static func _fetch_lobbies(fetch, count: int, type: String) -> Array:
 		result.push_back(lobbies[i])
 		
 	# Write down last lobby for subsequent 'next' calls.
-	if not result.empty():
+	if !result.empty():
 		var start: int = lobbies.find(result.front()) - 1
 		fetch._impl.start_lobby = max(start, -1)
 		fetch._impl.last_lobby = lobbies.find(result.back())
@@ -481,12 +481,12 @@ static func _join_lobby(lobby) -> bool:
 	var g = _get_gotm()
 	_leave_lobby(g.lobby)
 	
-	if not g._impl.lobbies.has(lobby):
+	if !g._impl.lobbies.has(lobby):
 		lobby = yield(_request_join(lobby.id), "completed")
 	else:
 		yield(g.get_tree().create_timer(0.25), "timeout")
 	
-	if not lobby or lobby.locked:
+	if !lobby || lobby.locked:
 		return false	
 	
 	lobby.host.address = lobby._impl.address
@@ -505,7 +505,7 @@ static func _is_lobby_host(lobby) -> bool:
 static func _kick_lobby_peer(lobby, peer) -> bool:
 	var g = _get_gotm()
 	
-	if not lobby.is_host():
+	if !lobby.is_host():
 		return false
 	
 	if g.user._impl.id == peer._impl.id:
@@ -523,7 +523,7 @@ static func _kick_lobby_peer(lobby, peer) -> bool:
 
 
 static func _leave_lobby(lobby) -> void:
-	if not lobby:
+	if !lobby:
 		return
 	
 	var g = _get_gotm()
@@ -572,15 +572,15 @@ static func _get_lobby_property(lobby, name: String):
 
 static func _set_lobby_filterable(lobby, property_name: String, filterable: bool) -> void:
 	property_name = _truncate_string(property_name)
-	if not filterable:
+	if !filterable:
 		lobby._impl.filterable_props.erase(property_name)
-	elif not lobby._impl.filterable_props.has(property_name):
+	elif !lobby._impl.filterable_props.has(property_name):
 		lobby._impl.filterable_props.push_back(property_name)
 
 
 static func _set_lobby_sortable(lobby, property_name: String, sortable: bool) -> void:
 	property_name = _truncate_string(property_name)
-	if not sortable:
+	if !sortable:
 		lobby._impl.sortable_props.erase(property_name)
-	elif not lobby._impl.sortable_props.has(property_name):
+	elif !lobby._impl.sortable_props.has(property_name):
 		lobby._impl.sortable_props.push_back(property_name)

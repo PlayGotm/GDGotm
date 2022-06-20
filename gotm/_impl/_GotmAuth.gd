@@ -38,13 +38,13 @@ class _GotmAuthData:
 
 static func get_auth():
 	var auth = _global.auth
-	if not auth and not _global.has_read_from_file:
+	if !auth && ! _global.has_read_from_file:
 		_global.has_read_from_file = true
 		auth = _read_auth(PROJECT_AUTH_NAME)
 		if auth:
 			_global.auth = auth
 	# Only return valid project auths
-	if not _is_auth_valid(auth) or not auth.project_key:
+	if !_is_auth_valid(auth) || !auth.project_key:
 		return
 	return auth
 
@@ -69,14 +69,14 @@ static func get_auth_async():
 
 
 static func _get_project_from_token(token: String) -> String:
-	if not token:
+	if !token:
 		return ""
 	var parts = token.split(".")
 	if parts.size() != 3:
 		return ""
 	
 	var data = parse_json(Marshalls.base64_to_utf8(parts[1] + "=="))
-	if not data or not data.get("project"):
+	if !data || !data.get("project"):
 		return ""
 		
 	return data.project
@@ -86,10 +86,10 @@ static func _refresh_auth(auth: _GotmAuthData) -> _GotmAuthData:
 
 static func _get_refreshed_project_auth(auth: _GotmAuthData):
 	var project_key = _Gotm.get_project_key()
-	if not project_key:
+	if !project_key:
 		yield(_GotmUtility.get_tree(), "idle_frame")
 		return
-	if auth and auth.refresh_token:
+	if auth && auth.refresh_token:
 		var data = yield(_refresh_auth(auth), "completed")
 		if data:
 			return data
@@ -102,28 +102,28 @@ static func _get_refreshed_project_auth(auth: _GotmAuthData):
 
 	# We manage user auths ourselves.
 	var user_auth = _read_auth(USER_AUTH_NAME)
-	if not user_auth:
+	if !user_auth:
 		user_auth = _read_auth(GUEST_AUTH_NAME)
-		if not user_auth:
+		if !user_auth:
 			user_auth = yield(_create_authentication(), "completed")
-	if user_auth and user_auth.project != project_key:
+	if user_auth && user_auth.project != project_key:
 		user_auth = yield(_create_authentication(), "completed")
-	if not _is_auth_valid(user_auth) and user_auth and user_auth.refresh_token:
+	if !_is_auth_valid(user_auth) && user_auth && user_auth.refresh_token:
 		user_auth = yield(_refresh_auth(user_auth), "completed")
 	_write_auth(user_auth)
 
-	if not user_auth:
+	if !user_auth:
 		return
 	return yield(_create_authentication({"project": project_key}, ["authorization: Bearer " + user_auth.token]), "completed")
 
 static func _is_auth_valid(auth: _GotmAuthData) -> bool:
-	if not auth or not auth.token or not auth.expired / 1000 > OS.get_unix_time() + 60:
+	if !auth || !auth.token || !(auth.expired / 1000 > OS.get_unix_time() + 60):
 		return false
-	if auth.project_key and auth.project_key != _Gotm.get_project_key():
+	if auth.project_key && auth.project_key != _Gotm.get_project_key():
 		return false
 	var gotm = _Gotm.get_singleton()
 	if gotm:
-		if not auth.owner or auth.owner != gotm.get_user().path:
+		if !auth.owner || auth.owner != gotm.get_user().path:
 			return false
 	return true
 
@@ -131,7 +131,7 @@ static func _is_auth_valid(auth: _GotmAuthData) -> bool:
 
 
 static func _format_auth_data(data) -> _GotmAuthData:
-	if not data:
+	if !data:
 		return null
 	var auth := _GotmAuthData.new()
 	auth.data = data
@@ -154,7 +154,7 @@ static func _read_auth(name: String):
 	file.open(_Gotm.get_path(name), File.READ_WRITE)
 	var content = file.get_as_text() if file.is_open() else ""
 	file.close()
-	if not content:
+	if !content:
 		return
 	var parsed = parse_json(content)
 	var auth = _format_auth_data(parsed.data)
@@ -162,7 +162,7 @@ static func _read_auth(name: String):
 	return auth
 
 static func _write_auth(auth: _GotmAuthData):
-	if not auth:
+	if !auth:
 		return
 	var name := ""
 	if auth.project:
@@ -179,6 +179,6 @@ static func _write_auth(auth: _GotmAuthData):
 
 static func _create_authentication(body: Dictionary = {}, headers: PoolStringArray = []) -> Dictionary:
 	var result = yield(_GotmUtility.fetch_json(_Gotm.get_global().apiOrigin + "/authentications", HTTPClient.METHOD_POST, body, headers), "completed")
-	if not result.ok:
+	if !result.ok:
 		return
 	return _format_auth_data(result.data)

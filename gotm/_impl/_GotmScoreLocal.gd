@@ -63,7 +63,7 @@ static func create(api: String, data: Dictionary):
 #
 static func update(id: String, data: Dictionary):
 	yield(_GotmUtility.get_tree(), "idle_frame")
-	if not id in _get_scores():
+	if !(id in _get_scores()):
 		return
 	var score = _get_scores()[id]
 	for key in data:
@@ -81,15 +81,15 @@ static func fetch(path: String, query: String = "", params: Dictionary = {}, aut
 	var path_parts = path.split("/")
 	var api = path_parts[0]
 	var id = path_parts[1]
-	if api == "stats" and id == "rank" and query == "rankByScoreSort":
+	if api == "stats" && id == "rank" && query == "rankByScoreSort":
 		return {"path": _GotmStore.create_request_path(path, query, params), "value": _fetch_rank(params)}
 	return _format(_get_scores().get(path))
 
 static func list(api: String, query: String, params: Dictionary = {}, authenticate: bool = false) -> Array:
 	yield(_GotmUtility.get_tree(), "idle_frame")
-	if api == "scores" and query == "byScoreSort":
+	if api == "scores" && query == "byScoreSort":
 		return _fetch_by_score_sort(params)
-	if api == "stats" and query == "countByScoreSort":
+	if api == "stats" && query == "countByScoreSort":
 		return _fetch_counts(params)
 	return []
 
@@ -112,9 +112,9 @@ static func _fetch_counts(params) -> Array:
 
 	var min_value = params.get("min")
 	var max_value = params.get("max")
-	if not min_value is float:
+	if !(min_value is float):
 		min_value = scores[scores.size() - 1].value
-	if not max_value is float:
+	if !(max_value is float):
 		max_value = scores[0].value
 	var step = (max_value - min_value) / params.limit
 	for i in range(0, params.limit):
@@ -122,7 +122,7 @@ static func _fetch_counts(params) -> Array:
 		var start = min_value + step * i
 		var end = max_value if is_last else min_value + step * (i + 1)
 		for score in scores:
-			if score.value >= start and (score.value <= end if is_last else score.value < end):
+			if score.value >= start && (score.value <= end if is_last else score.value < end):
 				stats[i].value += 1
 
 	return stats
@@ -136,11 +136,11 @@ static func _fetch_rank(params) -> int:
 		match_score = _get_scores()[params.score]
 	elif params.get("value") is float:
 		match_score = {"value": params.value, "created": _GotmUtility.get_iso_from_unix_time(), "path": _GotmUtility.create_resource_path("scores")}
-	if not match_score:
+	if !match_score:
 			return 0
 	var rank = 1
 	for score in scores:
-		if match_score.path == score.path or ScoreSearchPredicate.is_greater_than(match_score, score):
+		if match_score.path == score.path || ScoreSearchPredicate.is_greater_than(match_score, score):
 			return rank
 		rank += 1
 	return rank
@@ -152,14 +152,14 @@ static func _match_props(subset, superset) -> bool:
 		if subset.size() > superset.size():
 			return false
 		for key in subset:
-			if not key in superset or not _match_props(subset[key], superset[key]):
+			if !(key in superset) || !_match_props(subset[key], superset[key]):
 				return false
 		return true
 	if subset is Array:
 		if subset.size() > superset.size():
 			return false
 		for i in range(0, subset.size()):
-			if not _match_props(subset[i], superset[i]):
+			if !_match_props(subset[i], superset[i]):
 				return false
 		return true
 	return subset == superset
@@ -208,40 +208,40 @@ static func _get_range_from_period(period: String) -> Array:
 	return [null, null]
 
 static func _match_score(score, params) -> bool:
-	if params.name != score.name && params.get("author") and params.author != score.author:
+	if params.name != score.name && params.get("author") && params.author != score.author:
 		return false
-	if params.get("min") is float and score.value < params.get("min"):
+	if params.get("min") is float && score.value < params.get("min"):
 		return false
-	if params.get("max") is float and score.value > params.get("max"):
+	if params.get("max") is float && score.value > params.get("max"):
 		return false
-	if params.get("props") and not _match_props(params.props, score.props):
+	if params.get("props") && !_match_props(params.props, score.props):
 		return false
 	if params.get("period"):
 		var period_range = _get_range_from_period(params.period)
 		var start = period_range[0]
 		var end = period_range[1]
-		if start and score.created < start or end and score.created > end:
+		if start && score.created < start || end && score.created > end:
 			return false
 	return true
 
 class ScoreSearchPredicate:
 	static func is_less_than(a, b) -> bool:
-		if a.value is String and b.value is String:
-			if a.value.length() < b.value.length() or a.value.length() == b.value.length() and a.value.casecmp_to(b.value) < 0:
+		if a.value is String && b.value is String:
+			if a.value.length() < b.value.length() || a.value.length() == b.value.length() && a.value.casecmp_to(b.value) < 0:
 				return true
 		else:
 			if a.value < b.value:
 				return true
-		return a.value == b.value and (a.created < b.created or a.created == b.created and a.path < b.path)
+		return a.value == b.value && (a.created < b.created || a.created == b.created && a.path < b.path)
 
 	static func is_greater_than(a, b) -> bool:
-		if a.value is String and b.value is String:
-			if a.value.length() > b.value.length() or a.value.length() == b.value.length() and a.value.casecmp_to(b.value) > 0:
+		if a.value is String && b.value is String:
+			if a.value.length() > b.value.length() || a.value.length() == b.value.length() && a.value.casecmp_to(b.value) > 0:
 				return true
 		else:
 			if a.value > b.value:
 				return true
-		return a.value == b.value and (a.created > b.created or a.created == b.created and a.path > b.path)
+		return a.value == b.value && (a.created > b.created || a.created == b.created && a.path > b.path)
 
 static func _fetch_by_score_sort(params) -> Array:
 	var matches := []
@@ -252,7 +252,7 @@ static func _fetch_by_score_sort(params) -> Array:
 		if _match_score(score, params):
 			if params.get("isUnique"):
 				var existing_score = scores_per_author.get(score.author)
-				if not existing_score or score.created > existing_score.created:
+				if !existing_score || score.created > existing_score.created:
 					scores_per_author[score.author] = score
 			else:
 				matches.append(score)
@@ -268,10 +268,10 @@ static func _fetch_by_score_sort(params) -> Array:
 		for i in range(0, matches.size()):
 			var m = matches[i]
 			m = {"value": _GotmScoreUtility.encode_cursor_value(m.value, m.created)._bigint, "path": m.path, "created": m.created}
-			if cursor_score.path == m.path and cursor_score.value == m.value:
+			if cursor_score.path == m.path && cursor_score.value == m.value:
 				continue
 			var a = cursor_score.value < m.value
-			if descending and ScoreSearchPredicate.is_greater_than(cursor_score, m) or not descending and ScoreSearchPredicate.is_less_than(cursor_score, m):
+			if descending && ScoreSearchPredicate.is_greater_than(cursor_score, m) || !descending && ScoreSearchPredicate.is_less_than(cursor_score, m):
 				after_matches.append(matches[i])
 		matches = after_matches
 	return matches
@@ -286,7 +286,7 @@ static func _decode_cursor(cursor: String) -> Array:
 	return decoded
 
 static func _format(data: Dictionary):
-	if not data:
+	if !data:
 		return
 	data = _GotmUtility.copy(data, {})
 	data.created = _GotmUtility.get_unix_time_from_iso(data.created)

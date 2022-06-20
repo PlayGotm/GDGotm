@@ -30,24 +30,24 @@ static func are_resources_equal(lhs, rhs) -> bool:
 		if lhs.size() != rhs.size():
 			return false
 		for i in range(0, lhs.size()):
-			if not are_resources_equal(lhs[i], rhs[i]):
+			if !are_resources_equal(lhs[i], rhs[i]):
 				return false
 		return true
-	if lhs.get("id") and rhs.get("id"):
+	if lhs.get("id") && rhs.get("id"):
 		return lhs.id == rhs.id
 	return false
 
 
 static func are_equal(lhs, rhs) -> bool:
 	if typeof(lhs) != typeof(rhs):
-		if lhs is int and rhs is float or lhs is float and rhs is int:
+		if lhs is int && rhs is float || lhs is float && rhs is int:
 			return float(lhs) == float(rhs)
 		return false
 	if lhs is Array:
 		if lhs.size() != rhs.size():
 			return false
 		for i in range(0, lhs.size()):
-			if not are_equal(lhs[i], rhs[i]):
+			if !are_equal(lhs[i], rhs[i]):
 				return false
 		return true
 	return lhs == rhs
@@ -59,7 +59,7 @@ static func print_assertion(message: String, tag: String):
 		tag = "[" + tag + "] "
 	var stack = get_stack()
 	printerr("ASSERTION FAILED: " + tag + message)
-	while stack.size() > 1 and stack[0].source.ends_with("_GotmTest.gd"):
+	while stack.size() > 1 && stack[0].source.ends_with("_GotmTest.gd"):
 		stack.pop_front()
 	print("\tat")
 	for frame in stack:

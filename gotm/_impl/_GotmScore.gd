@@ -25,7 +25,7 @@ class_name _GotmScore
 
 static func get_implementation():
 	var config := _Gotm.get_config()
-	if not _Gotm.is_global_feature(config.forceLocalScores, config.betaUnsafeForceGlobalScores):
+	if !_Gotm.is_global_feature(config.forceLocalScores, config.betaUnsafeForceGlobalScores):
 		return _GotmScoreLocal
 	return _GotmStore
 
@@ -58,10 +58,10 @@ static func fetch(id: String):
 static func encode_cursor(score_id_or_value) -> String:
 	if score_id_or_value is String:
 		var score = yield(fetch(score_id_or_value), "completed")
-		if not score:
+		if !score:
 			return ""
 		return _GotmUtility.encode_cursor([_GotmScoreUtility.encode_cursor_value(score.value, score.created), score.id.replace("/", "-") + "~"])
-	elif score_id_or_value is float or score_id_or_value is int:
+	elif score_id_or_value is float || score_id_or_value is int:
 		yield(_GotmUtility.get_tree(), "idle_frame")
 		return _GotmUtility.encode_cursor([_GotmScoreUtility.encode_cursor_value(float(score_id_or_value)), "~"])
 	
@@ -69,7 +69,7 @@ static func encode_cursor(score_id_or_value) -> String:
 
 static func list(leaderboard, after, ascending: bool) -> Array:
 	var project = yield(_GotmUtility.get_yieldable(_get_project()), "completed")
-	if not project:
+	if !project:
 		return []
 	if after:
 		after = yield(encode_cursor(after), "completed")
@@ -81,9 +81,9 @@ static func list(leaderboard, after, ascending: bool) -> Array:
 		"isUnique": leaderboard.is_unique,
 		"author": leaderboard.user_id,
 		"after": after,
-		"descending": not ascending,
+		"descending": !ascending,
 	})), "completed")
-	if not data_list:
+	if !data_list:
 		return []
 		
 	var scores = []
@@ -97,8 +97,8 @@ static func get_rank(leaderboard, score_id_or_value) -> int:
 	if project is GDScriptFunctionState:
 		project = yield(project, "completed")
 		has_yielded = true
-	if not project:
-		if not has_yielded:
+	if !project:
+		if !has_yielded:
 			yield(_GotmUtility.get_tree(), "idle_frame")
 		return 0
 	var params = _GotmUtility.delete_empty({
@@ -109,16 +109,16 @@ static func get_rank(leaderboard, score_id_or_value) -> int:
 		"isUnique": leaderboard.is_unique,
 		"author": leaderboard.user_id,
 	})
-	if score_id_or_value is float or score_id_or_value is int:
+	if score_id_or_value is float || score_id_or_value is int:
 		params.value = float(score_id_or_value)
-	elif score_id_or_value and score_id_or_value is String:
+	elif score_id_or_value && score_id_or_value is String:
 		params.score = score_id_or_value
 	else:
-		if not has_yielded:
+		if !has_yielded:
 			yield(_GotmUtility.get_tree(), "idle_frame")
 		return 0
 	var stat = yield(get_implementation().fetch("stats/rank", "rankByScoreSort", params), "completed")
-	if not stat:
+	if !stat:
 		return 0
 	return stat.value
 
@@ -133,7 +133,7 @@ static func get_counts(leaderboard, minimum_value, maximum_value, segment_count)
 	var counts := []
 	for i in range(0, segment_count):
 		counts.append(0)
-	if not project:
+	if !project:
 		return counts
 	
 	var params = _GotmUtility.delete_empty({
@@ -145,9 +145,9 @@ static func get_counts(leaderboard, minimum_value, maximum_value, segment_count)
 		"author": leaderboard.user_id,
 		"limit": segment_count,
 	})
-	if minimum_value is float or minimum_value is int:
+	if minimum_value is float || minimum_value is int:
 		params.min = float(minimum_value)
-	if maximum_value is float or maximum_value is int:
+	if maximum_value is float || maximum_value is int:
 		params.max = float(maximum_value)
 	var stats = yield(get_implementation().list("stats", "countByScoreSort", params), "completed")
 	
@@ -165,14 +165,14 @@ static func _clear_cache():
 static func _get_project() -> String:
 	var Auth = get_auth_implementation()
 	var auth = Auth.get_auth()
-	if not auth:
+	if !auth:
 		auth = yield(Auth.get_auth_async(), "completed")
-	if not auth:
+	if !auth:
 		return
 	return auth.project
 
 static func _format(data, score):
-	if not data or not score:
+	if !data || !score:
 		return
 	score.id = data.path
 	score.user_id = data.author

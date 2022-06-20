@@ -38,7 +38,7 @@ class BigInt:
 	func multiply(n: int) -> BigInt:
 		var i := 0
 		var carry := 0
-		while i < parts.size() or carry > 0:
+		while i < parts.size() || carry > 0:
 			if i >= parts.size():
 				parts.append(0)
 			var tmp = 2 * parts[i] + carry
@@ -55,7 +55,7 @@ class BigInt:
 	func add(big: BigInt) -> BigInt:
 		var i := 0
 		var carry := 0
-		while i < parts.size() and i < big.parts.size() or carry > 0:
+		while i < parts.size() && i < big.parts.size() || carry > 0:
 			var value := 0
 			if i >= parts.size():
 				parts.append(0)

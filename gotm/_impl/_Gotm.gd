@@ -52,7 +52,7 @@ static func is_live() -> bool:
 	return get_singleton()
 
 static func is_global_feature(forceLocal: bool = false, forceGlobal: bool = false) -> bool:
-	return not forceLocal and (is_live() or forceGlobal) and get_project_key()
+	return !forceLocal && (is_live() || forceGlobal) && get_project_key()
 
 static func get_project_key() -> String:
 	return get_global().config.project_key
@@ -67,6 +67,6 @@ static func get_config() -> GotmConfig:
 	return get_global().config
 	
 static func get_singleton():
-	if not Engine.has_singleton("Gotm"):
+	if !Engine.has_singleton("Gotm"):
 		return
 	return Engine.get_singleton("Gotm")

@@ -114,22 +114,22 @@ func to_unix_time() -> int:
 func to_string() -> String:
 	match self.granularity:
 		TimeGranularity.YEAR:
-			if not year >= 1:
+			if !(year >= 1):
 				return TimeGranularity.YEAR
 			return "%04d" % [year]
 	
 		TimeGranularity.MONTH:
-			if not year >= 1 or not month >= 1:
+			if !(year >= 1) || !(month >= 1):
 				return TimeGranularity.MONTH
 			return "%04d-%02d" % [year, month]
 	
 		TimeGranularity.DAY:
-			if  not year >= 1 or not month >= 1 or not day >= 1:
+			if  !(year >= 1) || !(month >= 1) || !(day >= 1):
 				return TimeGranularity.DAY
 			return "%04d-%02d-%02d" % [year, month, day]
 	
 		TimeGranularity.WEEK:
-			if  not year >= 1 or not month >= 1 or not day >= 1:
+			if  !(year >= 1) || !(month >= 1) || !(day >= 1):
 				return TimeGranularity.WEEK
 			return "week%d" % [to_unix_time() / (MS_PER_DAY * 7)]
 	
