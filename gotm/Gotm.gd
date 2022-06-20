@@ -75,7 +75,7 @@ static func is_live() -> bool:
 	return _Gotm.is_live()
 
 static func get_config() -> GotmConfig:
-	return _Gotm.get_config()
+	return _GotmUtility.copy(_Gotm.get_config(), GotmConfig.new())
 
 # Create a new lobby and join it.
 #

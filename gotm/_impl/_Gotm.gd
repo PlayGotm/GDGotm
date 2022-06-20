@@ -51,8 +51,8 @@ static func initialize(config: GotmConfig, classes: Dictionary) -> void:
 static func is_live() -> bool:
 	return get_singleton()
 
-static func supports_beta() -> bool:
-	return is_live() and get_global().config.project_key
+static func is_global_feature(forceLocal: bool = false, forceGlobal: bool = false) -> bool:
+	return not forceLocal and (is_live() or forceGlobal) and get_project_key()
 
 static func get_project_key() -> String:
 	return get_global().config.project_key
@@ -64,7 +64,7 @@ static func get_path(path: String = "") -> String:
 	return "user://gotm/" + path
 
 static func get_config() -> GotmConfig:
-	return _GotmUtility.copy(get_global().config, GotmConfig.new())
+	return get_global().config
 	
 static func get_singleton():
 	if not Engine.has_singleton("Gotm"):

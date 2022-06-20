@@ -24,7 +24,8 @@ class_name _GotmScore
 #warnings-disable
 
 static func get_implementation():
-	if not _Gotm.supports_beta() or _Gotm.get_config().forceLocalScores:
+	var config := _Gotm.get_config()
+	if not _Gotm.is_global_feature(config.forceLocalScores, config.betaUnsafeForceGlobalScores):
 		return _GotmScoreLocal
 	return _GotmStore
 
