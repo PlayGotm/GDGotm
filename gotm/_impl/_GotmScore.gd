@@ -166,6 +166,8 @@ static func _get_project() -> String:
 	var auth = Auth.get_auth()
 	if not auth:
 		auth = yield(Auth.get_auth_async(), "completed")
+	if not auth:
+		return
 	return auth.project
 
 static func _format(data, score):
