@@ -50,6 +50,8 @@ static func list(api: String, query: String, params: Dictionary = {}, authentica
 
 const _cache = {}
 const _signal_cache = {}
+const _eviction_timers = {}
+const _eviction_timeout_seconds = 5
 
 static func clear_cache(path: String) -> void:
 	var prefixes = []
@@ -67,6 +69,10 @@ static func clear_cache(path: String) -> void:
 			if key == prefix or key.begins_with(prefix):
 				_cache.erase(key)
 
+class EvictionTimerHandler:
+	static func on_timeout(path: String):
+		_cache.erase(path)
+
 static func create_request_path(path: String, query: String, params: Dictionary) -> String:
 	if query:
 		var query_object := {}
@@ -76,6 +82,11 @@ static func create_request_path(path: String, query: String, params: Dictionary)
 	return path
 
 static func _set_cache(path: String, data):
+	var existing_timer = _eviction_timers.get(path)
+	_eviction_timers.erase(path)
+	if existing_timer is SceneTreeTimer:
+		existing_timer.disconnect("timeout", EvictionTimerHandler, "on_timeout")
+	
 	if not data:
 		_cache.erase(path)
 		return
@@ -83,6 +94,9 @@ static func _set_cache(path: String, data):
 		if key in data:
 			data[key] = _GotmUtility.get_unix_time_from_iso(data[key])
 	_cache[path] = data
+	var timer := _GotmUtility.get_tree().create_timer(_eviction_timeout_seconds)
+	timer.connect("timeout", EvictionTimerHandler, "on_timeout", [path])
+	_eviction_timers[path] = timer
 	return data
 
 static func _cached_get_request(path: String, authenticate: bool = false) -> Dictionary:
