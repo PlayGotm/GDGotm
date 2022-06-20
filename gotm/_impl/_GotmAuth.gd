@@ -106,6 +106,8 @@ static func _get_refreshed_project_auth(auth: _GotmAuthData):
 		user_auth = _read_auth(GUEST_AUTH_NAME)
 		if not user_auth:
 			user_auth = yield(_create_authentication(), "completed")
+	if user_auth and user_auth.project != project_key:
+		user_auth = yield(_create_authentication(), "completed")
 	if not _is_auth_valid(user_auth) and user_auth and user_auth.refresh_token:
 		user_auth = yield(_refresh_auth(user_auth), "completed")
 	_write_auth(user_auth)
