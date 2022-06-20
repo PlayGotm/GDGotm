@@ -226,10 +226,22 @@ static func _match_score(score, params) -> bool:
 
 class ScoreSearchPredicate:
 	static func is_less_than(a, b) -> bool:
-		return a.value < b.value or (a.value == b.value and (a.created < b.created or a.created == b.created and a.path < b.path))
+		if a.value is String and b.value is String:
+			if a.value.length() < b.value.length() or a.value.length() == b.value.length() and a.value.casecmp_to(b.value) < 0:
+				return true
+		else:
+			if a.value < b.value:
+				return true
+		return a.value == b.value and (a.created < b.created or a.created == b.created and a.path < b.path)
 
 	static func is_greater_than(a, b) -> bool:
-		return a.value > b.value or (a.value == b.value and (a.created > b.created or a.created == b.created and a.path > b.path))
+		if a.value is String and b.value is String:
+			if a.value.length() > b.value.length() or a.value.length() == b.value.length() and a.value.casecmp_to(b.value) > 0:
+				return true
+		else:
+			if a.value > b.value:
+				return true
+		return a.value == b.value and (a.created > b.created or a.created == b.created and a.path > b.path)
 
 static func _fetch_by_score_sort(params) -> Array:
 	var matches := []
@@ -252,14 +264,16 @@ static func _fetch_by_score_sort(params) -> Array:
 	if params.get("after"):
 		var cursor = _decode_cursor(params.after)
 		var cursor_score = {"value": cursor[0], "path": cursor[1], "created": 0}
-		while not matches.empty():
-			var m = matches[0]
+		var after_matches := []
+		for i in range(0, matches.size()):
+			var m = matches[i]
 			m = {"value": _GotmScoreUtility.encode_cursor_value(m.value, m.created)._bigint, "path": m.path, "created": m.created}
-			if not (ScoreSearchPredicate.is_less_than(cursor_score, m) if descending else ScoreSearchPredicate.is_greater_than(cursor_score, m)):
-				break
-			matches.pop_front()
-		if not matches.empty() and matches[0].path == cursor_score.path:
-			matches.pop_front()
+			if cursor_score.path == m.path and cursor_score.value == m.value:
+				continue
+			var a = cursor_score.value < m.value
+			if descending and ScoreSearchPredicate.is_greater_than(cursor_score, m) or not descending and ScoreSearchPredicate.is_less_than(cursor_score, m):
+				after_matches.append(matches[i])
+		matches = after_matches
 	return matches
 
 

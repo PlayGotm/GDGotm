@@ -159,7 +159,7 @@ static func get_unix_time_from_iso(iso: String) -> int:
 	return OS.get_unix_time_from_datetime(datetime) * 1000 + milliseconds
 
 # Converts UNIX epoch time in milliseconds to a date ISO 8601 string.
-static func get_iso_from_unix_time(unix_time_ms: int = OS.get_unix_time() + OS.get_ticks_msec() % 1000) -> String:
+static func get_iso_from_unix_time(unix_time_ms: int = OS.get_unix_time() * 1000 + OS.get_ticks_msec() % 1000) -> String:
 	var datetime = OS.get_datetime_from_unix_time(unix_time_ms / 1000)
 	return "%04d-%02d-%02dT%02d:%02d:%02d.%03dZ" % [datetime.year, datetime.month, datetime.day, datetime.hour, datetime.minute, datetime.second, unix_time_ms % 1000]
 
