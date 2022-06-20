@@ -49,7 +49,7 @@ static func initialize(config: GotmConfig, classes: Dictionary) -> void:
 		gotm.initialize(global)
 
 static func is_live() -> bool:
-	return get_singleton()
+	return !!get_singleton()
 
 static func is_global_feature(forceLocal: bool = false, forceGlobal: bool = false) -> bool:
 	return !forceLocal && (is_live() || forceGlobal) && get_project_key()
