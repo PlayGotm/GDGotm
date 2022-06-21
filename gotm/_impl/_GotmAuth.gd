@@ -23,7 +23,7 @@
 class_name _GotmAuth
 #warnings-disable
 
-const _global := {"auth": null, "queue": null, "has_read_from_file": false}
+const _global := {"auth": null, "queue": null, "has_read_from_file": false, "user_id": null}
 
 class _GotmAuthData:
 	var data: Dictionary
@@ -60,8 +60,14 @@ static func get_auth_async():
 	
 	var queue := _GotmUtility.QueueSignal.new()
 	_global.queue = queue
-	auth = yield(_get_refreshed_project_auth(_global.auth), "completed")
-	_write_auth(auth)
+	
+	var gotm = _Gotm.get_singleton()
+	if gotm && !_global.user_id:
+		_global.user_id = yield(gotm.get_user_id(), "completed")
+		auth = get_auth()
+	if !auth:
+		auth = yield(_get_refreshed_project_auth(_global.auth), "completed")
+		_write_auth(auth)
 	_global.auth = auth
 	_global.queue = null
 	queue.trigger()
@@ -101,11 +107,9 @@ static func _get_refreshed_project_auth(auth: _GotmAuthData):
 		return _format_auth_data(data)
 
 	# We manage user auths ourselves.
-	var user_auth = _read_auth(USER_AUTH_NAME)
+	var user_auth = _read_auth(GUEST_AUTH_NAME)
 	if !user_auth:
-		user_auth = _read_auth(GUEST_AUTH_NAME)
-		if !user_auth:
-			user_auth = yield(_create_authentication(), "completed")
+		user_auth = yield(_create_authentication(), "completed")
 	if user_auth && user_auth.project != project_key:
 		user_auth = yield(_create_authentication(), "completed")
 	if !_is_auth_valid(user_auth) && user_auth && user_auth.refresh_token:
@@ -123,10 +127,9 @@ static func _is_auth_valid(auth: _GotmAuthData) -> bool:
 		return false
 	var gotm = _Gotm.get_singleton()
 	if gotm:
-		if !auth.owner || auth.owner != gotm.get_user().path:
+		if !auth.owner || auth.owner != _global.user_id:
 			return false
 	return true
-
 
 
 
@@ -145,7 +148,6 @@ static func _format_auth_data(data) -> _GotmAuthData:
 	return auth
 
 const PROJECT_AUTH_NAME := "project_auth.json"
-const USER_AUTH_NAME := "user_auth.json"
 const GUEST_AUTH_NAME := "guest_auth.json"
 
 
@@ -167,10 +169,8 @@ static func _write_auth(auth: _GotmAuthData):
 	var name := ""
 	if auth.project:
 		name = PROJECT_AUTH_NAME
-	elif auth.is_guest:
-		name = GUEST_AUTH_NAME
 	else:
-		name = USER_AUTH_NAME
+		name = GUEST_AUTH_NAME
 	var file := File.new()
 	file.open(_Gotm.get_path(name), File.WRITE)
 	if file.is_open():

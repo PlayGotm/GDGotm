@@ -44,9 +44,6 @@ static func initialize(config: GotmConfig, classes: Dictionary) -> void:
 	global.classes = classes
 	var directory = Directory.new()
 	directory.make_dir_recursive(get_local_path(""))
-	var gotm = get_singleton()
-	if gotm:
-		gotm.initialize(global)
 
 static func is_live() -> bool:
 	return !!get_singleton()
@@ -70,3 +67,5 @@ static func get_singleton():
 	if !Engine.has_singleton("Gotm"):
 		return
 	return Engine.get_singleton("Gotm")
+
+
