@@ -126,16 +126,38 @@ static func _request(path: String, method: int, body = null, authenticate: bool 
 	if !path:
 		yield(_GotmUtility.get_tree(), "idle_frame")
 		return
-	var headers = PoolStringArray()
+	var headers := {}
 	if authenticate:
 		var auth = _GotmAuth.get_auth()
 		if !auth:
 			auth = yield(_GotmAuth.get_auth_async(), "completed")
 		if !auth:
 			return
-		headers.push_back("authorization: Bearer " + auth.token)
+		headers.authorization = "Bearer " + auth.token
 		
-	var result = yield(_GotmUtility.fetch_json(_Gotm.get_global().apiOrigin + "/" + path, method, body, headers), "completed")
+	if method != HTTPClient.METHOD_GET && method != HTTPClient.METHOD_HEAD && method != HTTPClient.METHOD_POST:
+		match method:
+			HTTPClient.METHOD_DELETE:
+				headers.method = "DELETE"
+			HTTPClient.METHOD_PATCH:
+				headers.method = "PATCH"
+			HTTPClient.METHOD_PUT:
+				headers.method = "PUT"
+		method = HTTPClient.METHOD_POST
+	if !headers.empty():
+		var header_string := ""
+		for key in headers:
+			header_string += key + ":" + headers[key] + "\n"
+		var path_parts = path.split("?")
+		if path_parts.size() < 2:
+			path += "?"
+		elif path_parts.size() > 2 || path_parts[1].length() > 0:
+			path += "&"
+		path += "$httpHeaders=" + _GotmUtility.encode_url_component(header_string)
+		
+		
+		
+	var result = yield(_GotmUtility.fetch_json(_Gotm.get_global().apiOrigin + "/" + path, method, body), "completed")
 	if !result.ok:
 		return
 	return result.data

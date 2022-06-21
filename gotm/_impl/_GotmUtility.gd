@@ -158,6 +158,16 @@ static func get_unix_time_from_iso(iso: String) -> int:
 	var milliseconds = int(time[2].split(".")[1])
 	return OS.get_unix_time_from_datetime(datetime) * 1000 + milliseconds
 
+static func encode_url_component(string: String) -> String:
+	var bytes: PoolByteArray = string.to_utf8()
+	var encoded: String = ""
+	for c in bytes:
+		if c == 46 or c == 45 or c == 95 or c == 126 or (c >= 97 && c <= 122) or (c >= 65 && c <= 90) or (c >= 48 && c <= 57):
+			encoded += char(c)
+		else:
+			encoded += "%%%02X" % [c]
+	return encoded
+
 # Converts UNIX epoch time in milliseconds to a date ISO 8601 string.
 static func get_iso_from_unix_time(unix_time_ms: int = OS.get_unix_time() * 1000 + OS.get_ticks_msec() % 1000) -> String:
 	var datetime = OS.get_datetime_from_unix_time(unix_time_ms / 1000)
