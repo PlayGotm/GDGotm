@@ -65,6 +65,7 @@ static func get_auth_async():
 	if gotm && !_global.user_id:
 		_global.user_id = yield(gotm.get_user_id(), "completed")
 		auth = get_auth()
+		_global.auth = auth
 	if !auth:
 		auth = yield(_get_refreshed_project_auth(_global.auth), "completed")
 		_write_auth(auth)
