@@ -35,7 +35,7 @@ static func get_auth_implementation():
 	return _GotmAuth
 
 static func create(name: String, value: float, properties: Dictionary = {}):
-	var data = yield(get_implementation().create("scores", {"name": name, "value": value, "properties": properties}), "completed")
+	var data = yield(get_implementation().create("scores", {"name": name, "value": value, "props": properties}), "completed")
 	if data:
 		_clear_cache()
 	return _format(data, _Gotm.create_instance("GotmScore"))
