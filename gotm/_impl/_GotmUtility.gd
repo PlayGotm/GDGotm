@@ -77,9 +77,10 @@ static func fetch_json(url: String, method: int, body = null, headers: PoolStrin
 	var code = signal_results[1] as int
 	var response_headers = signal_results[2] as PoolStringArray
 	var data = signal_results[3] as PoolByteArray
+	var data_string = data.get_string_from_utf8()
 	return copy(delete_null({
 		"code": code, 
-		"data": parse_json(data.get_string_from_utf8()), 
+		"data": parse_json(data_string) if data_string else {}, 
 		"headers": response_headers,
 		"ok": code >= 200 && code <= 299
 	}), FetchJsonResult.new())
