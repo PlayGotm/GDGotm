@@ -37,6 +37,8 @@ static func _get_scores() -> Dictionary:
 	file.close()
 	if content:
 		_global.scores = parse_json(content)
+		if !_global.scores:
+			_global.scores = {}
 	else:
 		_global.scores = {}
 	return _global.scores
