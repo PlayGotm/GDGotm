@@ -50,41 +50,12 @@ static func sliding(granularity: String) -> GotmPeriod:
 	return period
 
 static func offset(granularity: String, offset: int = 0) -> GotmPeriod:
-	var period = now(granularity)
-	match granularity:
-		TimeGranularity.YEAR:
-			period.year += offset
-			return period
-			
-		TimeGranularity.MONTH:
-			period.month += offset
-			while period.months > 12:
-				period.months -= 12
-				period.year += 1
-			while period.months < 1:
-				period.months += 12
-				period.year -= 1
-			return period
-			
-		TimeGranularity.DAY:
-			var unix_time: int = period.to_unix_time()
-			unix_time += MS_PER_DAY * offset
-			var date = OS.get_datetime_from_unix_time(unix_time / 1000)
-			return at(granularity, date.year, date.month, date.day)
-			
-		TimeGranularity.WEEK:
-			var unix_time: int = period.to_unix_time()
-			unix_time += MS_PER_DAY * 7 * offset
-			var date = OS.get_datetime_from_unix_time(unix_time / 1000)
-			return at(granularity, date.year, date.month, date.day)
-	
-	return period
-
+	return now(granularity).move(granularity, offset)
 
 static func at(granularity: String, year: int = -1, month: int = -1, day: int = -1) -> GotmPeriod:
 	var period = _Gotm.create_instance("GotmPeriod")
 	period.granularity = granularity
-	var date = OS.get_date()
+	var date = OS.get_date(true)
 	period.year = year
 	period.month = month
 	period.day = day
@@ -99,6 +70,51 @@ static func at(granularity: String, year: int = -1, month: int = -1, day: int = 
 static func now(granularity: String) -> GotmPeriod:
 	return at(granularity)
 
+
+func duplicate() -> GotmPeriod:
+	var copy = _Gotm.create_instance("GotmPeriod")
+	copy.granularity = granularity
+	copy.year = year
+	copy.month = month
+	copy.day = day
+	return copy
+
+func move(granularity: String, offset: int = 0) -> GotmPeriod:
+	match granularity:
+		TimeGranularity.YEAR:
+			year += offset
+			return self
+			
+		TimeGranularity.MONTH:
+			month += offset
+			while month > 12:
+				month -= 12
+				year += 1
+			while month < 1:
+				month += 12
+				year -= 1
+			return self
+			
+		TimeGranularity.DAY:
+			var unix_time: int = to_unix_time()
+			unix_time += MS_PER_DAY * offset
+			var date = OS.get_datetime_from_unix_time(unix_time / 1000)
+			year = date.year
+			month = date.month
+			day = date.day
+			return self
+			
+		TimeGranularity.WEEK:
+			var unix_time: int = to_unix_time()
+			unix_time += MS_PER_DAY * 7 * offset
+			var date = OS.get_datetime_from_unix_time(unix_time / 1000)
+			year = date.year
+			month = date.month
+			day = date.day
+			return self
+	
+	return self
+
 func to_unix_time() -> int:
 	if to_string() == granularity:
 		return offset(granularity, -1).to_unix_time()
@@ -110,6 +126,18 @@ func to_unix_time() -> int:
 		"minute": 0, 
 		"second": 0
 	}) * 1000
+
+func get_start_datetime(utc: bool = false) -> Dictionary:
+	var unix = to_unix_time()
+	if !utc:
+		unix += _GotmUtility.get_unix_offset()
+	return OS.get_datetime_from_unix_time(unix / 1000)
+
+func get_end_datetime(utc: bool = false) -> Dictionary:
+	var unix = duplicate().move(granularity, 1).to_unix_time()
+	if !utc:
+		unix += _GotmUtility.get_unix_offset()
+	return OS.get_datetime_from_unix_time((unix / 1000) - 1)
 
 func to_string() -> String:
 	match self.granularity:

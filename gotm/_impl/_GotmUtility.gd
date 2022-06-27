@@ -202,6 +202,12 @@ static func join(array: Array, separator: String = ",") -> String:
 			string += separator
 	return string
 
+static func get_unix_offset() -> int:
+	var local_unix = OS.get_unix_time_from_datetime(OS.get_datetime())
+	var unix = OS.get_unix_time() 
+	var offset = local_unix - unix
+	return offset * 1000
+
 static func to_stable_json(value) -> String:
 	if value is Array:
 		var child_strings := []
