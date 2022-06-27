@@ -35,6 +35,7 @@ static func get_auth_implementation():
 	return _GotmAuth
 
 static func create(name: String, value: float, properties: Dictionary = {}):
+	value = _GotmUtility.clean_for_json(value)
 	properties = _GotmUtility.clean_for_json(properties)
 	var data = yield(get_implementation().create("scores", {"name": name, "value": value, "props": properties}), "completed")
 	if data:
@@ -43,6 +44,7 @@ static func create(name: String, value: float, properties: Dictionary = {}):
 
 
 static func update(score, value = null, properties = null):
+	value = _GotmUtility.clean_for_json(value)
 	properties = _GotmUtility.clean_for_json(properties)
 	var data = yield(get_implementation().update(score.id, _GotmUtility.delete_null({"value": value, "props": properties})), "completed")
 	if data:
@@ -58,6 +60,7 @@ static func fetch(id: String):
 	return _format(data, _Gotm.create_instance("GotmScore"))
 
 static func encode_cursor(score_id_or_value) -> String:
+	score_id_or_value = _GotmUtility.clean_for_json(score_id_or_value)
 	if score_id_or_value is String:
 		var score = yield(fetch(score_id_or_value), "completed")
 		if !score:
@@ -94,6 +97,7 @@ static func list(leaderboard, after, ascending: bool) -> Array:
 	return scores 
 
 static func get_rank(leaderboard, score_id_or_value) -> int:
+	score_id_or_value = _GotmUtility.clean_for_json(score_id_or_value)
 	var project = _get_project()
 	var has_yielded := false
 	if project is GDScriptFunctionState:
@@ -125,6 +129,10 @@ static func get_rank(leaderboard, score_id_or_value) -> int:
 	return stat.value
 
 static func get_counts(leaderboard, minimum_value, maximum_value, segment_count) -> Array:
+	minimum_value = _GotmUtility.clean_for_json(minimum_value)
+	maximum_value = _GotmUtility.clean_for_json(maximum_value)
+	segment_count = _GotmUtility.clean_for_json(segment_count)
+	
 	if segment_count > 20:
 		segment_count = 20
 	if segment_count < 1:

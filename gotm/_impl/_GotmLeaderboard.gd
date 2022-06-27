@@ -24,6 +24,7 @@ class_name _GotmLeaderboard
 #warnings-disable
 
 static func get_surrounding_scores(leaderboard, score_id_or_value) -> Dictionary:
+	score_id_or_value = _GotmUtility.clean_for_json(score_id_or_value)
 	if score_id_or_value is String:
 		var score_id = score_id_or_value
 		var beforeSig := _GotmUtility.defer_signal(_GotmScore.list(leaderboard, score_id, true))

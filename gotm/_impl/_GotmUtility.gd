@@ -86,8 +86,12 @@ static func fetch_json(url: String, method: int, body = null, headers: PoolStrin
 	}), FetchJsonResult.new())
 
 static func clean_for_json(value):
-	if value is float && (value == INF || is_nan(value)):
-		return null
+	if value is float:
+		if is_nan(value):
+			return 0.0
+		if is_inf(value):
+			return 9007199254740991.0 if value >= 0 else -9007199254740991.0
+		return value
 		
 	if value is Array:
 		value = value.duplicate()
