@@ -35,6 +35,7 @@ static func get_auth_implementation():
 	return _GotmAuth
 
 static func create(name: String, value: float, properties: Dictionary = {}):
+	properties = _GotmUtility.clean_for_json(properties)
 	var data = yield(get_implementation().create("scores", {"name": name, "value": value, "props": properties}), "completed")
 	if data:
 		_clear_cache()
@@ -42,6 +43,7 @@ static func create(name: String, value: float, properties: Dictionary = {}):
 
 
 static func update(score, value = null, properties = null):
+	properties = _GotmUtility.clean_for_json(properties)
 	var data = yield(get_implementation().update(score.id, _GotmUtility.delete_null({"value": value, "props": properties})), "completed")
 	if data:
 		_clear_cache()

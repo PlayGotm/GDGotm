@@ -85,6 +85,22 @@ static func fetch_json(url: String, method: int, body = null, headers: PoolStrin
 		"ok": code >= 200 && code <= 299
 	}), FetchJsonResult.new())
 
+static func clean_for_json(value):
+	if value is float && (value == INF || is_nan(value)):
+		return null
+		
+	if value is Array:
+		value = value.duplicate()
+		for i in range(0, value.size()):
+			value[i] = clean_for_json(value[i])
+		return value
+	if value is Dictionary:
+		value = value.duplicate()
+		for key in value:
+			value[key] = clean_for_json(value[key])
+		return value
+	return value
+
 
 class DeferredSignal:
 	var is_completed := false
