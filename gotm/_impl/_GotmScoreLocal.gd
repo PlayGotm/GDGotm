@@ -142,7 +142,7 @@ static func _fetch_rank(params) -> int:
 			return 0
 	var rank = 1
 	for score in scores:
-		if match_score.path == score.path || ScoreSearchPredicate.is_greater_than(match_score, score):
+		if match_score.path == score.path || (ScoreSearchPredicate.is_less_than(match_score, score) if params.get("isInverted") else ScoreSearchPredicate.is_greater_than(match_score, score)):
 			return rank
 		rank += 1
 	return rank
@@ -249,6 +249,8 @@ static func _fetch_by_score_sort(params) -> Array:
 	var matches := []
 	var scores_per_author := {}
 	var descending = params.get("descending")
+	if params.get("isInverted"):
+		descending = !descending
 	for score_path in _get_scores():
 		var score = _get_scores()[score_path]
 		if _match_score(score, params):

@@ -50,6 +50,11 @@ var properties: Dictionary = {}
 # scores will only be 2.
 var is_unique: bool = false
 
+# Optionally invert the rank order.
+# If true, a lower score value means a higher rank.
+# If false, a higher score value means a higher rank.
+var is_inverted: bool = false
+
 # Optionally filter by when scores were created.
 # For example, GotmPeriod.sliding(GotmPeriod.TimeGranularity.WEEK) will only
 # fetch scores created the last 7 days.
@@ -101,9 +106,11 @@ func get_count() -> int:
 	return yield(get_counts(null, null, 1), "completed")[0]
 
 # Get the number of scores that match this leaderboard within the provided value range.
+# Useful for distribution graphs.
 # For example, if there are scores with values 1, 2 and 3, then calling
 # GotmLeaderboard.get_score_counts(1, 3, 4) will return 1, 0, 1 and 1. because there is 1
-# score in the range [1, 1.5), 0 in  [1.5, 2), 1 in [2, 2.5) and 1 in [2.5, 3].
+# score in the range [1, 1.5), 0 in  [1.5, 2), 1 in [2, 2.5) and 1 in [2.5, 3], where
+# ")" is exclusive.
 # Calling GotmLeaderboard.get_score_counts(1, 3, 1) would return 3, because there are 3
 # scores in the range [1, 3].
 func get_counts(minimum_value = null, maximum_value = null, segment_count: int = 20) -> Array:
