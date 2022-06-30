@@ -23,6 +23,9 @@
 class_name _GotmScore
 #warnings-disable
 
+
+
+
 static func get_implementation():
 	var config := _Gotm.get_config()
 	if !_Gotm.is_global_feature(config.forceLocalScores, config.betaUnsafeForceGlobalScores):
@@ -59,7 +62,7 @@ static func fetch(id: String):
 	var data = yield(get_implementation().fetch(id), "completed")
 	return _format(data, _Gotm.create_instance("GotmScore"))
 
-static func encode_cursor(score_id_or_value) -> String:
+static func encode_cursor(score_id_or_value, ascending: bool) -> String:
 	score_id_or_value = _GotmUtility.clean_for_json(score_id_or_value)
 	if score_id_or_value is String:
 		var score = yield(fetch(score_id_or_value), "completed")
@@ -68,17 +71,35 @@ static func encode_cursor(score_id_or_value) -> String:
 		return _GotmUtility.encode_cursor([_GotmScoreUtility.encode_cursor_value(score.value, score.created), score.id.replace("/", "-") + "~"])
 	elif score_id_or_value is float || score_id_or_value is int:
 		yield(_GotmUtility.get_tree(), "idle_frame")
-		return _GotmUtility.encode_cursor([_GotmScoreUtility.encode_cursor_value(float(score_id_or_value)), "~"])
+		var created = 253402300799000 if ascending else 0
+		return _GotmUtility.encode_cursor([_GotmScoreUtility.encode_cursor_value(float(score_id_or_value), created), "~"])
 	
 	return ""
 
+static func list_by_rank(leaderboard, after, ascending: bool) -> Array:
+	if after is float:
+		after = int(after)
+	return yield(_list(leaderboard, after, ascending), "completed")
+
 static func list(leaderboard, after, ascending: bool) -> Array:
+	if after is int:
+		after = float(after)
+	return yield(_list(leaderboard, after, ascending), "completed")
+
+static func _list(leaderboard, after, ascending: bool, limit: int = 0) -> Array:
+	after = _coerce_score_id(after)
 	var project = yield(_GotmUtility.get_yieldable(_get_project()), "completed")
 	if !project:
 		return []
-	if after:
-		after = yield(encode_cursor(after), "completed")
-	var data_list = yield(get_implementation().list("scores", "byScoreSort", _GotmUtility.delete_empty({
+	var after_rank = null
+	if after is String || after is float:
+		after = yield(encode_cursor(after, ascending), "completed")
+	elif after is int:
+		after_rank = after
+		after = null
+	else:
+		after = null
+	var params = _GotmUtility.delete_empty({
 		"name": leaderboard.name,
 		"target": project,
 		"props": leaderboard.properties,
@@ -88,7 +109,11 @@ static func list(leaderboard, after, ascending: bool) -> Array:
 		"author": leaderboard.user_id,
 		"after": after,
 		"descending": !ascending,
-	})), "completed")
+		"limit": limit
+	})
+	if after_rank is int:
+		params.afterRank = after_rank
+	var data_list = yield(get_implementation().list("scores", "byScoreSort", params), "completed")
 	if !data_list:
 		return []
 		
@@ -97,7 +122,9 @@ static func list(leaderboard, after, ascending: bool) -> Array:
 		scores.append(_format(data, _Gotm.create_instance("GotmScore")))
 	return scores 
 
+
 static func get_rank(leaderboard, score_id_or_value) -> int:
+	score_id_or_value = _coerce_score_id(score_id_or_value)
 	score_id_or_value = _GotmUtility.clean_for_json(score_id_or_value)
 	var project = _get_project()
 	var has_yielded := false
@@ -195,8 +222,11 @@ static func _format(data, score):
 	score.created = data.created
 	return score
 	
-	
-	
-	
-	
+static func _coerce_score_id(data):
+	if !(data is Object) && !(data is Dictionary):
+		return data
+	var id = data.get("id")
+	if !(id is String):
+		return data
+	return id
 

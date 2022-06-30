@@ -99,19 +99,17 @@ static func clear_cache(path: String) -> void:
 	pass
 
 static func _fetch_counts(params) -> Array:
-	params = _GotmUtility.copy(params, {})
-	params.descending = true
-	var scores = _fetch_by_score_sort(params)
-	if params.limit > 1:
-		pass
-
+	var fetch_params = _GotmUtility.copy(params, {})
+	fetch_params.descending = true
+	fetch_params.erase("limit")
+	var scores = _fetch_by_score_sort(fetch_params)
 	var stats := []
 	for i in range(0, params.limit):
 		stats.append({"value": 0})
-
+	
 	if scores.empty():
 		return stats
-
+	
 	var min_value = params.get("min")
 	var max_value = params.get("max")
 	if !(min_value is float):
@@ -278,6 +276,14 @@ static func _fetch_by_score_sort(params) -> Array:
 			if descending && ScoreSearchPredicate.is_greater_than(cursor_score, m) || !descending && ScoreSearchPredicate.is_less_than(cursor_score, m):
 				after_matches.append(matches[i])
 		matches = after_matches
+	elif params.get("afterRank"):
+		for i in range(0, params.afterRank):
+			if matches.empty():
+				break
+			matches.pop_front()
+	if params.get("limit"):
+		while matches.size() > params.limit:
+			matches.pop_back()
 	return matches
 
 
