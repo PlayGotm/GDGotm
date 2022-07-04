@@ -20,39 +20,9 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-class_name GotmUser
+class_name _GotmUserLocal
 #warnings-disable
 
-# Holds information about a Gotm user.
-
-
-
-##############################################################
-# PROPERTIES
-##############################################################
-# These are all read-only.
-
-# Globally unique ID.
-var id: String = ""
-
-# Current nickname. Can be changed at https://gotm.io/settings
-var display_name: String = ""
-
-# The IP address of the user.
-# Is empty if you are not in the same lobby.
-var address: String = ""
-
-##############################################################
-# METHODS
-##############################################################
-
-# Fetch registered user by id.
-# A registered user is someone who has signed up on Gotm.
-# Returns null if there is no registered user with that id.
-static func fetch(id: String) -> GotmUser:
-	return yield(_GotmUser.fetch(id), "completed")
-
-##############################################################
-# PRIVATE
-##############################################################
-var _impl: Dictionary = {}
+static func fetch(path: String, query: String = "", params: Dictionary = {}, authenticate: bool = false) -> Dictionary:
+	yield(_GotmUtility.get_tree(), "idle_frame")
+	return null

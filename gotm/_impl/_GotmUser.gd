@@ -20,39 +20,21 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-class_name GotmUser
+class_name _GotmUser
 #warnings-disable
 
-# Holds information about a Gotm user.
+static func get_implementation():
+	if !_Gotm.get_project_key():
+		return _GotmUserLocal
+	return _GotmStore
 
+static func fetch(id: String):
+	var data = yield(get_implementation().fetch(id), "completed")
+	return _format(data, _Gotm.create_instance("GotmUser"))
 
-
-##############################################################
-# PROPERTIES
-##############################################################
-# These are all read-only.
-
-# Globally unique ID.
-var id: String = ""
-
-# Current nickname. Can be changed at https://gotm.io/settings
-var display_name: String = ""
-
-# The IP address of the user.
-# Is empty if you are not in the same lobby.
-var address: String = ""
-
-##############################################################
-# METHODS
-##############################################################
-
-# Fetch registered user by id.
-# A registered user is someone who has signed up on Gotm.
-# Returns null if there is no registered user with that id.
-static func fetch(id: String) -> GotmUser:
-	return yield(_GotmUser.fetch(id), "completed")
-
-##############################################################
-# PRIVATE
-##############################################################
-var _impl: Dictionary = {}
+static func _format(data, user):
+	if !data || !user:
+		return
+	user.id = data.path
+	user.display_name = data.name
+	return user
