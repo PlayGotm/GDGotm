@@ -61,10 +61,18 @@ static func at(granularity: String, year: int = -1, month: int = -1, day: int = 
 	period.day = day
 	if year == -1:
 		period.year = date.year
+	
 	if month == -1:
 		period.month = date.month
+	else:
+		period.month = 1
+		period.move(TimeGranularity.MONTH, month - 1)
+	
 	if day == -1:
 		period.day = date.day
+	else:
+		period.day = 1
+		period.move(TimeGranularity.DAY, day - 1)
 	return period
 
 static func now(granularity: String) -> GotmPeriod:
