@@ -31,12 +31,18 @@ class_name GotmScore
 # PROPERTIES
 ##############################################################
 
-# Id of the score.
+# Unique identifier of the score.
 var id: String
 
-# Id of the user who owns the score.
+# Unique identifier of the user who owns the score.
+# Is automatically set to the current user's id when creating the score.
+# If the score is created while the game runs outside gotm.io, this user will 
+# always be an unregistered user with no display name.
+# If the score is created while the game is running on Gotm with a signed in
+# user, you can get their display name via GotmUser.fetch.
 var user_id: String
 
+# A name that describes this score represents and puts it in a category.
 # For example, "bananas_collected".
 var name: String
 
