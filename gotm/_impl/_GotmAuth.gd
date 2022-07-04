@@ -96,7 +96,7 @@ static func _get_refreshed_project_auth(auth: _GotmAuthData):
 	if !project_key:
 		yield(_GotmUtility.get_tree(), "idle_frame")
 		return
-	if auth && auth.refresh_token:
+	if auth && auth.refresh_token && auth.project_key && auth.project_key == project_key:
 		var data = yield(_refresh_auth(auth), "completed")
 		if data:
 			return data
