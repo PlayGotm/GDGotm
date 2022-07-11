@@ -55,6 +55,11 @@ var is_unique: bool = false
 # If false, a higher score value means a higher rank.
 var is_inverted: bool = false
 
+# Optionally rank older scores higher than newer scores with the same value.
+# If true, an older score will have a higher rank than newer scores with the same value.
+# If false, an older score will have a lower rank than newer scores with the same value.
+var is_oldest_first: bool = false
+
 # Optionally filter by when scores were created.
 # For example, GotmPeriod.sliding(GotmPeriod.TimeGranularity.WEEK) will only
 # fetch scores created the last 7 days.

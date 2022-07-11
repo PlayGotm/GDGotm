@@ -136,11 +136,14 @@ static func _fetch_rank(params) -> int:
 		match_score = _get_scores()[params.score]
 	elif params.get("value") is float:
 		match_score = {"value": params.value, "created": _GotmUtility.get_iso_from_unix_time(), "path": _GotmUtility.create_resource_path("scores")}
+	match_score = _format(match_score)
 	if !match_score:
 			return 0
 	var rank = 1
+	var predicate := ScoreSearchPredicate.new()
+	predicate.is_oldest_first = !!params.get("isOldestFirst")
 	for score in scores:
-		if match_score.path == score.path || (ScoreSearchPredicate.is_less_than(match_score, score) if params.get("isInverted") else ScoreSearchPredicate.is_greater_than(match_score, score)):
+		if match_score.path == score.path || (predicate.is_less_than(match_score, score) if params.get("isInverted") else predicate.is_greater_than(match_score, score)):
 			return rank
 		rank += 1
 	return rank
@@ -225,23 +228,41 @@ static func _match_score(score, params) -> bool:
 	return true
 
 class ScoreSearchPredicate:
-	static func is_less_than(a, b) -> bool:
+	var is_oldest_first: bool = false
+	
+	func is_less_than(a, b) -> bool:
 		if a.value is String && b.value is String:
 			if a.value.length() < b.value.length() || a.value.length() == b.value.length() && a.value.casecmp_to(b.value) < 0:
 				return true
 		else:
 			if a.value < b.value:
 				return true
-		return a.value == b.value && (a.created < b.created || a.created == b.created && a.path < b.path)
+		
+		if a.value != b.value:
+			return false
+		if a.created == b.created && a.path < b.path:
+			return true
+			
+		if is_oldest_first:
+			return a.created > b.created
+		return a.created < b.created
 
-	static func is_greater_than(a, b) -> bool:
+	func is_greater_than(a, b) -> bool:
 		if a.value is String && b.value is String:
 			if a.value.length() > b.value.length() || a.value.length() == b.value.length() && a.value.casecmp_to(b.value) > 0:
 				return true
 		else:
 			if a.value > b.value:
 				return true
-		return a.value == b.value && (a.created > b.created || a.created == b.created && a.path > b.path)
+				
+		if a.value != b.value:
+			return false
+		if a.created == b.created && a.path > b.path:
+			return true
+		
+		if is_oldest_first:
+			return a.created < b.created
+		return a.created > b.created
 
 static func _fetch_by_score_sort(params) -> Array:
 	var matches := []
@@ -260,7 +281,10 @@ static func _fetch_by_score_sort(params) -> Array:
 				matches.append(score)
 	if params.get("isUnique"):
 		matches = scores_per_author.values()
-	matches.sort_custom(ScoreSearchPredicate, "is_greater_than" if descending else "is_less_than")
+		
+	var predicate := ScoreSearchPredicate.new()
+	predicate.is_oldest_first = !!params.get("isOldestFirst")
+	matches.sort_custom(predicate, "is_greater_than" if descending else "is_less_than")
 	for i in range(0, matches.size()):
 		matches[i] = _format(matches[i])
 	if params.get("after"):
@@ -273,7 +297,7 @@ static func _fetch_by_score_sort(params) -> Array:
 			if cursor_score.path == m.path && cursor_score.value == m.value:
 				continue
 			var a = cursor_score.value < m.value
-			if descending && ScoreSearchPredicate.is_greater_than(cursor_score, m) || !descending && ScoreSearchPredicate.is_less_than(cursor_score, m):
+			if descending && predicate.is_greater_than(cursor_score, m) || !descending && predicate.is_less_than(cursor_score, m):
 				after_matches.append(matches[i])
 		matches = after_matches
 	elif params.get("afterRank"):

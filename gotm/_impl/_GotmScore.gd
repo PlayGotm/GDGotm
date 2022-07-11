@@ -106,6 +106,7 @@ static func _list(leaderboard, after, ascending: bool, limit: int = 0) -> Array:
 		"period": leaderboard.period.to_string(),
 		"isUnique": leaderboard.is_unique,
 		"isInverted": leaderboard.is_inverted,
+		"isOldestFirst": leaderboard.is_oldest_first,
 		"author": leaderboard.user_id,
 		"after": after,
 		"descending": !ascending,
@@ -142,6 +143,7 @@ static func get_rank(leaderboard, score_id_or_value) -> int:
 		"period": leaderboard.period.to_string(),
 		"isUnique": leaderboard.is_unique,
 		"isInverted": leaderboard.is_inverted,
+		"isOldestFirst": leaderboard.is_oldest_first,
 		"author": leaderboard.user_id,
 	})
 	if score_id_or_value is float || score_id_or_value is int:
@@ -182,6 +184,7 @@ static func get_counts(leaderboard, minimum_value, maximum_value, segment_count)
 		"period": leaderboard.period.to_string(),
 		"isUnique": leaderboard.is_unique,
 		"isInverted": leaderboard.is_inverted,
+		"isOldestFirst": leaderboard.is_oldest_first,
 		"author": leaderboard.user_id,
 		"limit": segment_count,
 	})
