@@ -41,11 +41,7 @@ static func get_auth_implementation():
 	return _GotmAuth
 
 
-const CONTENT_OPTIONS = {
-	"expand": {
-		"data": {}
-	}
-}
+
 
 # Create a score entry for the current user.
 # Scores can be fetched via a GotmLeaderboard instance.
@@ -75,7 +71,7 @@ static func update(content_or_id, data = null, properties = null, key = null, na
 		var blob = yield(get_blob_implementation().create("blobs/upload", {"target": id, "data": data}), "completed")
 		if blob:
 			body.data = blob.path
-	var content = yield(get_implementation().update(id, body, CONTENT_OPTIONS), "completed")
+	var content = yield(get_implementation().update(id, body), "completed")
 	if content:
 		_clear_cache()
 	return _format(content, _Gotm.create_instance("GotmContent"))
@@ -89,14 +85,14 @@ static func delete(content_or_id) -> void:
 # Get an existing score.
 static func fetch(content_or_id):
 	var id = _GotmUtility.coerce_resource_id(content_or_id)
-	var data = yield(get_implementation().fetch(id, CONTENT_OPTIONS), "completed")
+	var data = yield(get_implementation().fetch(id), "completed")
 	return _format(data, _Gotm.create_instance("GotmContent"))
 
 static func get_by_key(key: String):
 	var project = yield(_GotmUtility.get_yieldable(_get_project()), "completed")
 	if !project || !key:
 		return
-	var data_list = yield(get_implementation().list("contents", "byKey", {"target": project, "key": key}, CONTENT_OPTIONS), "completed")
+	var data_list = yield(get_implementation().list("contents", "byKey", {"target": project, "key": key}), "completed")
 	if !data_list:
 		return
 	return _format(data_list[0], _Gotm.create_instance("GotmContent"))
@@ -124,11 +120,10 @@ static func list(query: GotmQuery, after_content_or_id = null) -> Array:
 	params.sort = _GotmUtility.join(query.sorts, ",")
 	if after_id:
 		params.after = after_id
-	var data_list = yield(get_implementation().list("contents", "byContentSort", params, CONTENT_OPTIONS), "completed")
+	var data_list = yield(get_implementation().list("contents", "byContentSort", params), "completed")
 	if !data_list:
 		return
 		
-			
 	var contents = []
 	for data in data_list:
 		contents.append(_format(data, _Gotm.create_instance("GotmContent")))
@@ -161,17 +156,9 @@ static func _format(data, content):
 	content.user_id = data.author
 	content.key = data.key
 	content.name = data.name
-	if content.get("data"):
-		if !(content.data is Dictionary):
-			push_warning("Expected content data to be expanded. " + to_json(get_stack()))
-			content.data_url = ""
-			content.data_type = ""
-			content.data_size = 0
-		else:
-			content.data_url = content.data.downloadUrl
-			content.data_type = content.data.format
-			content.data_size = content.data.size
+	content.blob_id = data.data
 	content.properties = data.props if data.get("props") else {}
+	content.private = data.private
 	content.updated = data.updated
 	content.created = data.created
 	return content
