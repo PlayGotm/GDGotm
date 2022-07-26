@@ -25,24 +25,22 @@ class_name GotmContent
 
 
 # BETA FEATURE
-# A score entry used for leaderboards.
-# To fetch ranks and scores, see the GotmLeaderboard class.
+# A GotmContent is a piece of data that is used to affect your game's
+# content dynamically, such as player-generated content, game saves,
+# downloadable packs/mods or remote configuration.
 
 ##############################################################
 # PROPERTIES
 ##############################################################
 
-
-
-
-# Unique identifier of the score.
+# Unique immutable identifier.
 var id: String
 
-# Unique identifier of the user who owns the score.
-# Is automatically set to the current user's id when creating the score.
-# If the score is created while the game runs outside gotm.io, this user will 
+# Unique identifier of the user who owns the content.
+# Is automatically set to the current user's id when creating the content.
+# If the content is created while the game runs outside gotm.io, this user will 
 # always be an unregistered user with no display name.
-# If the score is created while the game is running on Gotm with a signed in
+# If the content is created while the game is running on Gotm with a signed in
 # user, you can get their display name via GotmUser.fetch.
 var user_id: String
 
@@ -52,7 +50,7 @@ var key: String
 # Optional name searchable with partial search.
 var name: String
 
-# Download
+# Id of this content's data. Use GotmBlob.fetch_data(content.blob_id) to get the data as a PoolByteArray.
 var blob_id: String
 
 # Optional metadata to attach to the score entry, 
@@ -62,6 +60,9 @@ var blob_id: String
 var properties: Dictionary
 
 var private: bool
+
+# Is true if this content was created with GotmContent.create_local and is only stored locally on the user's device.
+var local: bool
 
 # UNIX epoch time (in milliseconds). Use OS.get_datetime_from_unix_time(score.created / 1000) to convert to date.
 var updated: int
@@ -77,12 +78,15 @@ var created: int
 # Create a score entry for the current user.
 # Scores can be fetched via a GotmLeaderboard instance.
 # See PROPERTIES above for descriptions of the arguments.
-static func create(data = null, properties: Dictionary = {}, key: String = "", name: String = "", private: bool = false)  -> GotmContent:
+static func create(data = null, key: String = "", properties: Dictionary = {}, name: String = "", private: bool = false)  -> GotmContent:
 	return yield(_GotmContent.create(data, properties, key, name, private), "completed")
+
+static func create_local(data = null, key: String = "", properties: Dictionary = {}, name: String = "", private: bool = false)  -> GotmContent:
+	return yield(_GotmContent.create(data, properties, key, name, private, true), "completed")
 
 # Update this score.
 # Null is ignored.
-static func update(content_or_id, data = null, properties = null, key = null, name = null, private = null) -> GotmContent:
+static func update(content_or_id, data = null, key = null, properties = null, name = null) -> GotmContent:
 	return yield(_GotmContent.update(content_or_id, data, properties, key, name, private), "completed")
 
 # Delete this score.
@@ -96,10 +100,14 @@ static func fetch(content_or_id) -> GotmContent:
 static func get_by_key(key: String) -> GotmContent:
 	return yield(_GotmContent.get_by_key(key), "completed")
 
-static func get_by_directory(directory: String) -> void:
-	return yield(_GotmContent.get_by_directory(directory), "completed")
+static func get_by_directory(directory: String, after_content_or_id = null) -> Array:
+	return yield(_GotmContent.get_by_directory(directory, false, after_content_or_id), "completed")
 
-static func update_by_key(key: String, data = null, properties = null, key = null, name = null, private = null) -> GotmContent:
+static func get_local_by_directory(directory: String, after_content_or_id = null) -> Array:
+	return yield(_GotmContent.get_by_directory(directory, true, after_content_or_id), "completed")
+	
+
+static func update_by_key(key: String, data = null, key = null, properties = null, name = null) -> GotmContent:
 	return yield(_GotmContent.update_by_key(key, data, properties, key, name, private), "completed")
 	
 static func delete_by_key(key: String) -> void:
@@ -108,26 +116,9 @@ static func delete_by_key(key: String) -> void:
 
 
 
-class QueryProperty:
-	const ID = "id"
-	const USER_ID = "user_id"
-	const KEY = "key"
-	const DIRECTORY = "directory" # Derived from key
-	const EXTENSION = "extension" # Derived from key
-	const NAME = "name"
-	const NAME_SEARCH = "name_search"
-	const PROPERTIES = "properties"
-	const PRIVATE = "private"
-	const UPDATED = "updated"
-	const CREATED = "created"
-	const RATING = "rating"
-	const SIZE = "size"
-	
-	static func get_custom_property(path: String) -> String:
-		return PROPERTIES + path if path.begins_with("/") else PROPERTIES + "/" + path
-
 # directory to list contents directly in that directory. To list contents recursively, use sort query.
-#static func list(after_content_or_id = null, name_search = null, query: GotmQuery = GotmQuery.new()) -> Array:
+# sort by rating, size
+# filter by directory, extension, partial_name
+#static func list(query: GotmQuery = GotmQuery.new(), after_content_or_id = null) -> Array:
 #	return []
-
 
