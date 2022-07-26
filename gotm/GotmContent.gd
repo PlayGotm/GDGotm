@@ -87,7 +87,7 @@ static func create_local(data = null, key: String = "", properties: Dictionary =
 # Update this score.
 # Null is ignored.
 static func update(content_or_id, data = null, key = null, properties = null, name = null) -> GotmContent:
-	return yield(_GotmContent.update(content_or_id, data, properties, key, name, private), "completed")
+	return yield(_GotmContent.update(content_or_id, data, properties, key, name), "completed")
 
 # Delete this score.
 static func delete(content_or_id) -> void:
@@ -105,11 +105,10 @@ static func get_by_directory(directory: String, after_content_or_id = null) -> A
 
 static func get_local_by_directory(directory: String, after_content_or_id = null) -> Array:
 	return yield(_GotmContent.get_by_directory(directory, true, after_content_or_id), "completed")
-	
 
 static func update_by_key(key: String, data = null, key = null, properties = null, name = null) -> GotmContent:
-	return yield(_GotmContent.update_by_key(key, data, properties, key, name, private), "completed")
-	
+	return yield(_GotmContent.update_by_key(key, data, properties, key, name), "completed")
+
 static func delete_by_key(key: String) -> void:
 	return yield(_GotmContent.delete_by_key(key), "completed")
 
