@@ -23,14 +23,14 @@
 class_name _GotmStore
 #warnings-disable
 
-static func create(api: String, data: Dictionary) -> Dictionary:
-	var created = yield(_request(api, HTTPClient.METHOD_POST, data, true), "completed")
+static func create(api: String, data: Dictionary, options: Dictionary = {}) -> Dictionary:
+	var created = yield(_request(create_request_path(api, "", {}, {}), HTTPClient.METHOD_POST, data, true), "completed")
 	if created:
 		_set_cache(created.path, created)
 	return created
 
-static func update(path: String, data: Dictionary) -> Dictionary:
-	var updated = yield(_request(path, HTTPClient.METHOD_PATCH, data, true), "completed")
+static func update(path: String, data: Dictionary, options: Dictionary = {}) -> Dictionary:
+	var updated = yield(_request(create_request_path(path, "", {}, options), HTTPClient.METHOD_PATCH, data, true), "completed")
 	if updated:
 		_set_cache(path, updated)
 	return updated
@@ -39,11 +39,11 @@ static func delete(path: String) -> void:
 	yield(_request(path, HTTPClient.METHOD_DELETE, null, true), "completed")
 	_cache.erase(path)
 	
-static func fetch(path: String, query: String = "", params: Dictionary = {}, authenticate: bool = false) -> Dictionary:
-	return yield(_cached_get_request(create_request_path(path, query, params), authenticate), "completed")
+static func fetch(path: String, query: String = "", params: Dictionary = {}, authenticate: bool = false, options: Dictionary = {}) -> Dictionary:
+	return yield(_cached_get_request(create_request_path(path, query, params, options), authenticate), "completed")
 
-static func list(api: String, query: String, params: Dictionary = {}, authenticate: bool = false) -> Array:
-	var data = yield(_cached_get_request(create_request_path(api, query, params), authenticate), "completed")
+static func list(api: String, query: String, params: Dictionary = {}, authenticate: bool = false, options: Dictionary = {}) -> Array:
+	var data = yield(_cached_get_request(create_request_path(api, query, params, options), authenticate), "completed")
 	if !data || !data.data:
 		return
 	return data.data
@@ -73,13 +73,16 @@ class EvictionTimerHandler:
 	static func on_timeout(path: String):
 		_cache.erase(path)
 
-static func create_request_path(path: String, query: String, params: Dictionary) -> String:
+static func create_request_path(path: String, query: String, params: Dictionary, options: Dictionary) -> String:
+	var query_object := {}
 	if query:
-		var query_object := {}
-		_GotmUtility.copy(params, query_object)
 		query_object.query = query
-		path += _GotmUtility.create_query_string(query_object)
-	return path
+		_GotmUtility.copy(params, query_object)
+	if options.get("expand"):
+		var expands = options.get("expand").keys()
+		expands.sort()
+		query_object.expand = expands.join(",")
+	return path + _GotmUtility.create_query_string(query_object)
 
 static func _set_cache(path: String, data):
 	var existing_timer = _eviction_timers.get(path)

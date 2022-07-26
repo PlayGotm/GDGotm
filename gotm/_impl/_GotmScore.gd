@@ -46,19 +46,22 @@ static func create(name: String, value: float, properties: Dictionary = {}):
 	return _format(data, _Gotm.create_instance("GotmScore"))
 
 
-static func update(score, value = null, properties = null):
+static func update(score_or_id, value = null, properties = null):
+	var id = _GotmUtility.coerce_resource_id(score_or_id)
 	value = _GotmUtility.clean_for_json(value)
 	properties = _GotmUtility.clean_for_json(properties)
-	var data = yield(get_implementation().update(score.id, _GotmUtility.delete_null({"value": value, "props": properties})), "completed")
+	var data = yield(get_implementation().update(id, _GotmUtility.delete_null({"value": value, "props": properties})), "completed")
 	if data:
 		_clear_cache()
-	return _format(data, score)
+	return _format(data, _Gotm.create_instance("GotmScore") if id is String else score_or_id)
 
-static func delete(id: String) -> void:
+static func delete(score_or_id) -> void:
+	var id = _GotmUtility.coerce_resource_id(score_or_id)
 	yield(get_implementation().delete(id), "completed")
 	_clear_cache()
 
-static func fetch(id: String):
+static func fetch(score_or_id):
+	var id = _GotmUtility.coerce_resource_id(score_or_id)
 	var data = yield(get_implementation().fetch(id), "completed")
 	return _format(data, _Gotm.create_instance("GotmScore"))
 
@@ -87,7 +90,7 @@ static func list(leaderboard, after, ascending: bool) -> Array:
 	return yield(_list(leaderboard, after, ascending), "completed")
 
 static func _list(leaderboard, after, ascending: bool, limit: int = 0) -> Array:
-	after = _coerce_score_id(after)
+	after = _GotmUtility.coerce_resource_id(after)
 	var project = yield(_GotmUtility.get_yieldable(_get_project()), "completed")
 	if !project:
 		return []
@@ -125,7 +128,7 @@ static func _list(leaderboard, after, ascending: bool, limit: int = 0) -> Array:
 
 
 static func get_rank(leaderboard, score_id_or_value) -> int:
-	score_id_or_value = _coerce_score_id(score_id_or_value)
+	score_id_or_value = _GotmUtility.coerce_resource_id(score_id_or_value)
 	score_id_or_value = _GotmUtility.clean_for_json(score_id_or_value)
 	var project = _get_project()
 	var has_yielded := false
@@ -224,12 +227,3 @@ static func _format(data, score):
 	score.properties = data.props if data.get("props") else {}
 	score.created = data.created
 	return score
-	
-static func _coerce_score_id(data):
-	if !(data is Object) && !(data is Dictionary):
-		return data
-	var id = data.get("id")
-	if !(id is String):
-		return data
-	return id
-

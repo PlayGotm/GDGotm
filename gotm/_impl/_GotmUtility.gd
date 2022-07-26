@@ -54,9 +54,20 @@ static func copy(from, to):
 	return to
 
 
+
+static func coerce_resource_id(data):
+	if !(data is Object) && !(data is Dictionary):
+		return data
+	var id = data.get("id")
+	if !(id is String):
+		return data
+	return id
+
+
+
 class FetchJsonResult:
 	var code: int
-	var data: Dictionary
+	var data
 	var headers: PoolStringArray
 	var ok: bool
 
@@ -66,7 +77,7 @@ static func encode_cursor(data: Array) -> String:
 static func decode_cursor(cursor: String) -> Array:
 	return parse_json(Marshalls.base64_to_utf8(cursor.replace("-", "+").replace("_", "/") + "=="))
 
-static func fetch_json(url: String, method: int, body = null, headers: PoolStringArray = []) -> FetchJsonResult:
+static func fetch_data(url: String, method: int = HTTPClient.METHOD_GET, body = null, headers: PoolStringArray = []) -> FetchJsonResult:
 	var request := HTTPRequest.new()
 	if get_tree().get_frame() <= 0:
 		yield(get_tree(), "idle_frame")
@@ -77,13 +88,18 @@ static func fetch_json(url: String, method: int, body = null, headers: PoolStrin
 	var code = signal_results[1] as int
 	var response_headers = signal_results[2] as PoolStringArray
 	var data = signal_results[3] as PoolByteArray
-	var data_string = data.get_string_from_utf8()
 	return copy(delete_null({
 		"code": code, 
-		"data": parse_json(data_string) if data_string else {}, 
+		"data": data, 
 		"headers": response_headers,
 		"ok": code >= 200 && code <= 299
 	}), FetchJsonResult.new())
+
+static func fetch_json(url: String, method: int = HTTPClient.METHOD_GET, body = null, headers: PoolStringArray = []) -> FetchJsonResult:
+	var result = yield(fetch_data(url, method, body, headers), "completed")
+	var data_string = result.data.get_string_from_utf8()
+	result.data = parse_json(data_string) if data_string else {}
+	return result
 
 static func clean_for_json(value):
 	if value is float:

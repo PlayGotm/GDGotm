@@ -50,3 +50,18 @@ var forceLocalScores: bool = false
 # outside of https://gotm.io is not safe and is at your own risk. Your game may 
 # break if new backwards-incompatible versions of the beta features are released.
 var betaUnsafeForceGlobalScores: bool = false
+
+# Contents are currently beta features and are always local when 
+# Gotm.is_live is false.
+# If true, the features are local even if a project key is provided.
+var forceLocalContents: bool = false
+
+# Contents are currently beta features and are always local when 
+# Gotm.is_live is false.
+# If true and a project key is provided, the features are made global even if 
+# Gotm.is_live is false.
+#
+# UNSAFE NOTICE: Enabling global mode on beta features when your game is running
+# outside of https://gotm.io is not safe and is at your own risk. Your game may 
+# break if new backwards-incompatible versions of the beta features are released.
+var betaUnsafeForceGlobalContents: bool = false

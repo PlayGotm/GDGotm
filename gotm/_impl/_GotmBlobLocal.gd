@@ -20,22 +20,33 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-class_name _GotmScoreLocal
+class_name _GotmBlobLocal
 #warnings-disable
 
 
-static func create(api: String, data: Dictionary):
+static func create(api: String, body: Dictionary):
 	yield(_GotmUtility.get_tree(), "idle_frame")
+	api = api.split("/")[0]
+	var data = body.data
+	if !(data is PoolByteArray):
+		data = var2bytes(data)
+		
 	var score = {
 		"path": _GotmUtility.create_resource_path(api),
 		"author": _GotmAuthLocal.get_user(),
-		"name": data.name,
-		"value": data.value,
-		"props": data.props if data.get("props") else {},
-		"created": _GotmUtility.get_iso_from_unix_time()
+		"target": body.target,
+		"data": Marshalls.raw_to_base64(data),
+		"size": data.size()
 	}
 	return _format(_LocalStore.create(score))
 #
+
+static func fetch_data_sync(id: String):
+	var score = _LocalStore.fetch(id)
+	if !score:
+		return
+	return Marshalls.base64_to_raw(score.data)
+
 static func update(id: String, data: Dictionary):
 	yield(_GotmUtility.get_tree(), "idle_frame")
 	return _format(_LocalStore.update(id, data))
@@ -288,5 +299,4 @@ static func _format(data: Dictionary):
 	if !data:
 		return
 	data = _GotmUtility.copy(data, {})
-	data.created = _GotmUtility.get_unix_time_from_iso(data.created)
 	return data

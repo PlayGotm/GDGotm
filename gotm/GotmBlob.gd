@@ -20,8 +20,9 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-class_name GotmScore
+class_name GotmBlob
 #warnings-disable
+
 
 # BETA FEATURE
 # A score entry used for leaderboards.
@@ -31,52 +32,19 @@ class_name GotmScore
 # PROPERTIES
 ##############################################################
 
-# Unique identifier of the score.
 var id: String
 
-# Unique identifier of the user who owns the score.
-# Is automatically set to the current user's id when creating the score.
-# If the score is created while the game runs outside gotm.io, this user will 
-# always be an unregistered user with no display name.
-# If the score is created while the game is running on Gotm with a signed in
-# user, you can get their display name via GotmUser.fetch.
-var user_id: String
-
-# A name that describes what this score represents and puts it in a category.
-# For example, "bananas_collected".
-var name: String
-
-# A numeric representation of the score.
-var value: float
-
-# Optional metadata to attach to the score entry, 
-# for example {level: "desert1", difficulty: "hard"}.
-# When fetching ranks and scores with GotmLeaderboard, you can optionally 
-# filter with these properties. 
-var properties: Dictionary
-
-# UNIX epoch time (in milliseconds). Use OS.get_datetime_from_unix_time(score.created / 1000) to convert to date.
-var created: int
+var size: int
 
 ##############################################################
 # METHODS
 ##############################################################
 
+static func fetch(blob_or_id) -> GotmBlob:
+	return yield(_GotmBlob.fetch(blob_or_id), "completed")
+
 # Create a score entry for the current user.
 # Scores can be fetched via a GotmLeaderboard instance.
 # See PROPERTIES above for descriptions of the arguments.
-static func create(name: String, value: float, properties: Dictionary = {}) -> GotmScore:
-	return yield(_GotmScore.create(name, value, properties), "completed")
-
-# Update an existing score.
-# Null is ignored.
-static func update(score_or_id, value = null, properties = null) -> GotmScore:
-	return yield(_GotmScore.update(score_or_id, value, properties), "completed")
-
-# Delete an existing  score.
-static func delete(score_or_id) -> void:
-	return yield(_GotmScore.delete(score_or_id), "completed")
-
-# Get an existing score.
-static func fetch(score_or_id) -> GotmScore:
-	return yield(_GotmScore.fetch(score_or_id), "completed")
+static func fetch_data(blob_or_id) -> PoolByteArray:
+	return yield(_GotmBlob.fetch_data(blob_or_id), "completed")
