@@ -26,11 +26,14 @@ class_name _LocalStore
 
 const _global = {}
 
-
 static func get_all(path_or_api: String) -> Array:
+	if !path_or_api:
+		return []
 	return _get_store(path_or_api).values()
 
-static func fetch(path: String) -> Dictionary:
+static func fetch(path: String):
+	if !path:
+		return
 	return _get_store(path)[path]
 
 static func update(path: String, data: Dictionary) -> Dictionary:
@@ -43,6 +46,8 @@ static func update(path: String, data: Dictionary) -> Dictionary:
 	return value
 
 static func delete(path: String) -> void:
+	if !path:
+		return
 	_get_store(path).erase(path)
 	_write_store(path)
 
@@ -52,7 +57,9 @@ static func create(data: Dictionary) -> Dictionary:
 	return data
 
 
-static func _get_store(path_or_api: String) -> Dictionary:
+static func _get_store(path_or_api: String):
+	if !path_or_api:
+		return
 	var api = path_or_api.split("/")[0]
 	var existing = _global.get(api)
 	if existing is Dictionary:

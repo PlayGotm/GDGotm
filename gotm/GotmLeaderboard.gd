@@ -69,6 +69,11 @@ var period: GotmPeriod = GotmPeriod.all()
 # When set, only the scores that belong to that user will be fetched.
 var user_id: String = ""
 
+# Optionally only fetch local scores.
+# If true, only fetch scores created with GotmScore.create_local and which are
+# only stored locally on the user's device.
+var local: bool = false
+
 
 ##############################################################
 # METHODS

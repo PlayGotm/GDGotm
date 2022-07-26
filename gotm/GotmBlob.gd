@@ -23,28 +23,27 @@
 class_name GotmBlob
 #warnings-disable
 
-
-# BETA FEATURE
-# A score entry used for leaderboards.
-# To fetch ranks and scores, see the GotmLeaderboard class.
+# A GotmBlob is a piece of arbitrary data stored as a PoolByteArray.
+# The data can be anything, such as images, scenes or JSON files.
 
 ##############################################################
 # PROPERTIES
 ##############################################################
 
+# Unique immutable identifier.
 var id: String
 
+# The size of the blob's data in bytes.
 var size: int
 
 ##############################################################
 # METHODS
 ##############################################################
 
+# Get an existing blob.
 static func fetch(blob_or_id) -> GotmBlob:
 	return yield(_GotmBlob.fetch(blob_or_id), "completed")
 
-# Create a score entry for the current user.
-# Scores can be fetched via a GotmLeaderboard instance.
-# See PROPERTIES above for descriptions of the arguments.
+# Get the blob's data as a PoolByteArray.
 static func fetch_data(blob_or_id) -> PoolByteArray:
 	return yield(_GotmBlob.fetch_data(blob_or_id), "completed")

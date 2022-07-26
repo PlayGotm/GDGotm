@@ -31,7 +31,7 @@ class_name GotmScore
 # PROPERTIES
 ##############################################################
 
-# Unique identifier of the score.
+# Unique immutable identifier.
 var id: String
 
 # Unique identifier of the user who owns the score.
@@ -54,6 +54,9 @@ var value: float
 # When fetching ranks and scores with GotmLeaderboard, you can optionally 
 # filter with these properties. 
 var properties: Dictionary
+
+# Is true if this score was created with GotmScore.create_local and is only stored locally on the user's device.
+var local: bool
 
 # UNIX epoch time (in milliseconds). Use OS.get_datetime_from_unix_time(score.created / 1000) to convert to date.
 var created: int

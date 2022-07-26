@@ -59,7 +59,6 @@ var user: GotmUser = GotmUser.new()
 # Is null when not in a lobby.
 var lobby: GotmLobby = null
 
-
 ##############################################################
 # METHODS
 ##############################################################

@@ -39,7 +39,7 @@ var project_key: String = ""
 # Scores and Leaderboards are currently beta features and are always local when 
 # Gotm.is_live is false.
 # If true, the features are local even if a project key is provided.
-var forceLocalScores: bool = false
+var force_local_scores: bool = false
 
 # Scores and Leaderboards are currently beta features and are always local when 
 # Gotm.is_live is false.
@@ -49,12 +49,12 @@ var forceLocalScores: bool = false
 # UNSAFE NOTICE: Enabling global mode on beta features when your game is running
 # outside of https://gotm.io is not safe and is at your own risk. Your game may 
 # break if new backwards-incompatible versions of the beta features are released.
-var betaUnsafeForceGlobalScores: bool = false
+var beta_unsafe_force_global_scores: bool = false
 
 # Contents are currently beta features and are always local when 
 # Gotm.is_live is false.
 # If true, the features are local even if a project key is provided.
-var forceLocalContents: bool = false
+var force_local_contents: bool = false
 
 # Contents are currently beta features and are always local when 
 # Gotm.is_live is false.
@@ -64,4 +64,4 @@ var forceLocalContents: bool = false
 # UNSAFE NOTICE: Enabling global mode on beta features when your game is running
 # outside of https://gotm.io is not safe and is at your own risk. Your game may 
 # break if new backwards-incompatible versions of the beta features are released.
-var betaUnsafeForceGlobalContents: bool = false
+var beta_unsafe_force_global_contents: bool = false

@@ -28,7 +28,7 @@ class_name _GotmScore
 
 static func get_implementation():
 	var config := _Gotm.get_config()
-	if !_Gotm.is_global_feature(config.forceLocalScores, config.betaUnsafeForceGlobalScores):
+	if !_Gotm.is_global_feature(config.force_local_scores, config.beta_unsafe_force_global_scores):
 		return _GotmScoreLocal
 	return _GotmStore
 
@@ -226,4 +226,5 @@ static func _format(data, score):
 	score.value = float(data.value)
 	score.properties = data.props if data.get("props") else {}
 	score.created = data.created
+	score.local = !!_LocalStore.fetch(data.path)
 	return score

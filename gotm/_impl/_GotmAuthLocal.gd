@@ -44,6 +44,7 @@ static func _get_cache():
 		file.open(file_path, File.WRITE)
 		file.store_string(to_json(_cache))
 		file.close()
+	_cache.is_guest = true
 	return _cache
 
 static func get_user() -> String:

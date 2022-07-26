@@ -33,6 +33,7 @@ static func create(api: String, data: Dictionary):
 		"name": data.name,
 		"key": data.key,
 		"private": data.private,
+		"data": "",
 		"props": data.props,
 		"updated": created,
 		"created": created
