@@ -26,7 +26,9 @@ class_name _GotmContentLocal
 
 static func create(api: String, data: Dictionary):
 	yield(_GotmUtility.get_tree(), "idle_frame")
-	var created =  _GotmUtility.get_iso_from_unix_time()
+	if data.key && get_by_key_sync(data.key):
+		return
+	var created = _GotmUtility.get_iso_from_unix_time()
 	var score = {
 		"path": _GotmUtility.create_resource_path(api),
 		"author": _GotmAuthLocal.get_user(),
@@ -55,16 +57,20 @@ static func fetch(path: String, query: String = "", params: Dictionary = {}, aut
 static func list(api: String, query: String, params: Dictionary = {}, authenticate: bool = false) -> Array:
 	yield(_GotmUtility.get_tree(), "idle_frame")
 	if query == "byKey":
-		return _get_by_key(params.project, params.key)
+		return get_by_key_sync(params.key)
+	if query == "byContentSort":
+		return _get_by_content_sort(params)
 	return []
 
 static func clear_cache(path: String) -> void:
 	pass
 
+static func _get_by_content_sort(params: Dictionary) -> Array:
+	return []
 
-static func _get_by_key(project: String, key: String):
+static func get_by_key_sync(key: String):
 	for content in _LocalStore.get_all("contents"):
-		if !content.private && content.project == project && content.key == key:
+		if !content.private && content.key == key:
 			return [_format(content)]
 	return []
 

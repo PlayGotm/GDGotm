@@ -23,33 +23,53 @@
 class_name GotmQuery
 #warnings-disable
 
+# A GotmQuery is used for complex filtering and sorting when fetching 
+# Gotm resources, such as GotmContent.
 
 var filters: Dictionary = {}
 var sorts: Array = []
 
-
+# Fetch only things where the property_path's property equals the specified value.
 func filter(property_path: String, value) -> GotmQuery:
-	return self
+	return _GotmQuery.filter(self, property_path, value)
 	
+# Fetch only things where the property_path's property is greater than or equal to
+# the specified value.
+# If is_exclusive is true, fetch only things where the property_path's property is 
+# greater than the specified value.
 func filter_min(property_path: String, value, is_exclusive: bool = false) -> GotmQuery:
-	return self
+	return _GotmQuery.filter_min(self, property_path, value, is_exclusive)
 
+# Fetch only things where the property_path's property is less than or equal to
+# the specified value.
+# If is_exclusive is true, fetch only things where the property_path's property is 
+# less than the specified value.
 func filter_max(property_path: String, value, is_exclusive: bool = false) -> GotmQuery:
-	return self
+	return _GotmQuery.filter_max(self, property_path, value, is_exclusive)
 
+# Sort results by the value of the property_path's property in descending order (highest value first).
+# If ascending is true, sort in ascending order (lowest value first).
 func sort(property_path: String, ascending: bool = false) -> GotmQuery:
-	return self
-	
+	return _GotmQuery.sort(self, property_path, ascending)
+
+# Make a deep copy of this GotmQuery instance.
 func copy() -> GotmQuery:
-	return self
+	return _GotmQuery.copy(self)
 
+# Create a query directly from filters and sorts.
+# Filters is a dictionary where each key is a property paths its respective
+# value is the value the property path must equal.
+# Sorts is an array of Sort objects.
+#
+# For example, doing GotmQuery.create({"name": "my_name"}, [{"property_path": "created"}])
+# would fetch only things whose name equals "my_name" sorted by creation date in descending order (newest first).
+# It is the same as doing GotmQuery.new().filter("name", "my_name").sort("created").
 static func create(filters: Dictionary = {}, sorts: Array = []) -> GotmQuery:
-	return _Gotm.create_instance("GotmQuery")
-
+	return _GotmQuery.create(filters, sorts)
 
 
 class Sort:
-	var name: String
+	var property_path: String
 	var min_value = null
 	var max_value = null
 	var is_min_exclusive: bool = false

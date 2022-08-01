@@ -55,12 +55,14 @@ static func copy(from, to):
 
 
 
-static func coerce_resource_id(data):
-	if !(data is Object) && !(data is Dictionary):
+static func coerce_resource_id(data) -> String:
+	if data is String:
 		return data
+	if !(data is Object) && !(data is Dictionary):
+		return ""
 	var id = data.get("id")
 	if !(id is String):
-		return data
+		return ""
 	return id
 
 

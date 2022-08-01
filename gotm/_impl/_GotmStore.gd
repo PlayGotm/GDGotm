@@ -73,7 +73,7 @@ class EvictionTimerHandler:
 	static func on_timeout(path: String):
 		_cache.erase(path)
 
-static func create_request_path(path: String, query: String, params: Dictionary, options: Dictionary) -> String:
+static func create_request_path(path: String, query: String = "", params: Dictionary = {}, options: Dictionary = {}) -> String:
 	var query_object := {}
 	if query:
 		query_object.query = query
@@ -103,6 +103,10 @@ static func _set_cache(path: String, data):
 	return data
 
 static func _cached_get_request(path: String, authenticate: bool = false) -> Dictionary:
+	if !path:
+		yield(_GotmUtility.get_tree(), "idle_frame")
+		return
+	
 	if path in _cache:
 		yield(_GotmUtility.get_tree(), "idle_frame")
 		return _cache[path]
@@ -159,8 +163,11 @@ static func _request(path: String, method: int, body = null, authenticate: bool 
 		path += "$httpHeaders=" + _GotmUtility.encode_url_component(header_string)
 		
 		
-		
-	var result = yield(_GotmUtility.fetch_json(_Gotm.get_global().apiOrigin + "/" + path, method, body), "completed")
+	var result
+	if path.begins_with(_Gotm.get_global().storageApiEndpoint):
+		result = yield(_GotmUtility.fetch_data(path, method, body), "completed")
+	else:
+		result = yield(_GotmUtility.fetch_json(_Gotm.get_global().apiOrigin + "/" + path, method, body), "completed")
 	if !result.ok:
 		return
 	return result.data

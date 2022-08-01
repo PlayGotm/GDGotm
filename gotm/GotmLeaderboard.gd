@@ -72,7 +72,7 @@ var user_id: String = ""
 # Optionally only fetch local scores.
 # If true, only fetch scores created with GotmScore.create_local and which are
 # only stored locally on the user's device.
-var local: bool = false
+var is_local: bool = false
 
 
 ##############################################################

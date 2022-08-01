@@ -56,7 +56,7 @@ var value: float
 var properties: Dictionary
 
 # Is true if this score was created with GotmScore.create_local and is only stored locally on the user's device.
-var local: bool
+var is_local: bool
 
 # UNIX epoch time (in milliseconds). Use OS.get_datetime_from_unix_time(score.created / 1000) to convert to date.
 var created: int

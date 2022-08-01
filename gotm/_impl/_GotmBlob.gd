@@ -24,28 +24,17 @@ class_name _GotmBlob
 #warnings-disable
 
 
-static func get_implementation():
+static func get_implementation(id = null):
 	var config := _Gotm.get_config()
-	if !_Gotm.is_global_feature():
+	if !_Gotm.is_global_feature() || _LocalStore.fetch(id):
 		return _GotmBlobLocal
 	return _GotmStore
 
 
-static func fetch_data(content_or_id):
-	var id = _GotmUtility.coerce_resource_id(content_or_id)
-	var local_data = _GotmBlobLocal.fetch_data_sync(id)
-	if local_data:
-		yield(_GotmUtility.get_tree(), "idle_frame")
-		return local_data
-	
-	if !_Gotm.is_global_feature():
-		return 
-	
-	var blob = yield(_GotmStore.fetch(id), "completed")
-	if !blob:
-		return
-	
-	var result = yield(_GotmUtility.fetch_data(blob.downloadUrl), "completed")
-	if !result:
-		return
-	return result.data
+static func fetch(blob_or_id):
+	var id = _GotmUtility.coerce_resource_id(blob_or_id)
+	return yield(get_implementation(id).fetch(id), "completed")
+
+static func fetch_data(blob_or_id):
+	var id = _GotmUtility.coerce_resource_id(blob_or_id)
+	return yield(get_implementation(id).fetch(_Gotm.get_global().storageApiEndpoint + "/" + id), "completed")

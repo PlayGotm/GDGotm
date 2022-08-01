@@ -51,14 +51,17 @@ static func is_guest():
 # Create a score entry for the current user.
 # Scores can be fetched via a GotmLeaderboard instance.
 # See PROPERTIES above for descriptions of the arguments.
-static func create(data = PoolByteArray(), properties: Dictionary = {}, key: String = "", name: String = "", private: bool = false, is_local: bool = false):
+static func create(data = PoolByteArray(), properties: Dictionary = {}, key: String = "", name: String = "", is_private: bool = false, is_local: bool = false):
 	properties = _GotmUtility.clean_for_json(properties)
-	var implementation = _GotmContentLocal if is_local || private && yield(is_guest(), "completed") else get_implementation()
-	var content = yield(implementation.create("contents", {"props": properties, "key": key, "name": name, "private": private}), "completed")
+	var implementation = _GotmContentLocal if is_local || is_private && yield(is_guest(), "completed") else get_implementation()
+	if key && yield(get_by_key(key), "completed"):
+		return
+	var content = yield(implementation.create("contents", {"props": properties, "key": key, "name": name, "private": is_private}), "completed")
+	content = _format(content, _Gotm.create_instance("GotmContent"))
 	if data != null:
 		return yield(update(content, data), "completed")
 	_clear_cache()
-	return _format(content, _Gotm.create_instance("GotmContent"))
+	return content
 
 # Update this score.
 # Null is ignored.
@@ -66,6 +69,10 @@ static func update(content_or_id, data = null, properties = null, key = null, na
 	var id = _GotmUtility.coerce_resource_id(content_or_id)
 	if !id:
 		return
+	if key:
+		var existing = yield(get_by_key(key), "completed")
+		if existing && existing.id != id:
+			return
 	properties = _GotmUtility.clean_for_json(properties)
 	var body = _GotmUtility.delete_null({
 		"props": properties,
@@ -94,57 +101,49 @@ static func fetch(content_or_id):
 	return _format(data, _Gotm.create_instance("GotmContent"))
 
 static func get_by_key(key: String):
-	return 
-#	var project = yield(_GotmUtility.get_yieldable(_get_project()), "completed")
-#	if !project || !key:
-#		return
-#	for content in _LocalStore.get_all("contents"):
-#		if content.key == key:
-#			return _format(content, _Gotm.create_instance("GotmContent"))
-#	var data_list = yield(get_implementation().list("contents", "byKey", {"target": project, "key": key}), "completed")
-#	if !data_list:
-#		return
-#	return _format(data_list[0], _Gotm.create_instance("GotmContent"))
-
-static func get_by_directory(directory: String, local: bool = false, after_content_or_id = null):
-	return 123
-#	var query := GotmQuery.new()
-#	query.filter("directory", directory)
-#	if local:
-#		query.filter("local", true)
-#	return yield(list(query, after_content_or_id), "completed")
+	var project = yield(_GotmUtility.get_yieldable(_get_project()), "completed")
+	if !project || !key:
+		return
+	var local_content = _GotmContentLocal.get_by_key_sync(key)
+	if local_content:
+		return _format(local_content[0], _Gotm.create_instance("GotmContent"))
+	var data_list = yield(get_implementation().list("contents", "byKey", {"target": project, "key": key}), "completed")
+	if !data_list:
+		return
+	return _format(data_list[0], _Gotm.create_instance("GotmContent"))
 
 static func list(query: GotmQuery, after_content_or_id = null) -> Array:
-	return []
-#	var after_id = _GotmUtility.coerce_resource_id(after_content_or_id)
-#	var project = yield(_GotmUtility.get_yieldable(_get_project()), "completed")
-#	if !project:
-#		return
-#	var params := {}
-#	for key in query.filters:
-#		var new_key = key
-#		if key == "user_id":
-#			new_key = "author"
-#		elif key == "partial_name":
-#			new_key = "partialName"
-#		params[new_key] = query.filters[key]
-#	params.target = project
-#	params.sort = _GotmUtility.join(query.sorts, ",")
-#	if after_id:
-#		params.after = after_id
-#	var implementation = _GotmContentLocal if query.filters.local else get_implementation(after_id)
-#	var data_list = yield(implementation.list("contents", "byContentSort", params), "completed")
-#	if !data_list:
-#		return
-#
-#	var contents = []
-#	for data in data_list:
-#		contents.append(_format(data, _Gotm.create_instance("GotmContent")))
-#	return contents
+	var after_id = _GotmUtility.coerce_resource_id(after_content_or_id)
+	var project = yield(_GotmUtility.get_yieldable(_get_project()), "completed")
+	if !project:
+		return
+	var params := {}
+	for key in query.filters:
+		var new_key = key
+		if key == "user_id":
+			new_key = "author"
+		elif key == "name_part":
+			new_key = "namePart"
+		params[new_key] = query.filters[key]
+	params.target = project
+	var sort = _GotmUtility.join(query.sorts, ",")
+	if sort:
+		params.sort = sort
+	if after_id:
+		params.after = after_id
+	var implementation = _GotmContentLocal if query.filters.get("is_local") else get_implementation(after_id)
+	var data_list = yield(implementation.list("contents", "byContentSort", params), "completed")
+	if !data_list:
+		return []
 
-static func update_by_key(key: String, data = null, properties = null, key = null, name = null):
+	var contents = []
+	for data in data_list:
+		contents.append(_format(data, _Gotm.create_instance("GotmContent")))
+	return contents
+
+static func update_by_key(key: String, data = null, properties = null, new_key = null, name = null):
 	var content = yield(get_by_key(key), "completed")
-	return yield(update(content, data, properties, key, name), "completed")
+	return yield(update(content, data, properties, new_key, name), "completed")
 	
 static func delete_by_key(key: String) -> void:
 	var content = yield(get_by_key(key), "completed")
@@ -171,10 +170,10 @@ static func _format(data, content):
 	content.name = data.name
 	content.blob_id = data.data
 	content.properties = data.props if data.get("props") else {}
-	content.private = data.private
+	content.is_private = data.private
 	content.updated = data.updated
 	content.created = data.created
-	content.local = !!_LocalStore.fetch(data.path)
+	content.is_local = !!_LocalStore.fetch(data.path)
 	return content
 	
 	

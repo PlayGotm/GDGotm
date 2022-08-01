@@ -59,10 +59,12 @@ var blob_id: String
 # filter with these properties. 
 var properties: Dictionary
 
-var private: bool
+# Optionally make this content inaccessible to other users. Private content can only be fetched by the user
+# who created it either via GotmContent.get_by_directory
+var is_private: bool
 
 # Is true if this content was created with GotmContent.create_local and is only stored locally on the user's device.
-var local: bool
+var is_local: bool
 
 # UNIX epoch time (in milliseconds). Use OS.get_datetime_from_unix_time(score.created / 1000) to convert to date.
 var updated: int
@@ -78,11 +80,11 @@ var created: int
 # Create a score entry for the current user.
 # Scores can be fetched via a GotmLeaderboard instance.
 # See PROPERTIES above for descriptions of the arguments.
-static func create(data = null, key: String = "", properties: Dictionary = {}, name: String = "", private: bool = false)  -> GotmContent:
-	return yield(_GotmContent.create(data, properties, key, name, private), "completed")
+static func create(data = null, key: String = "", properties: Dictionary = {}, name: String = "", is_private: bool = false)  -> GotmContent:
+	return yield(_GotmContent.create(data, properties, key, name, is_private), "completed")
 
-static func create_local(data = null, key: String = "", properties: Dictionary = {}, name: String = "", private: bool = false)  -> GotmContent:
-	return yield(_GotmContent.create(data, properties, key, name, private, true), "completed")
+static func create_local(data = null, key: String = "", properties: Dictionary = {}, name: String = "", is_private: bool = false)  -> GotmContent:
+	return yield(_GotmContent.create(data, properties, key, name, is_private, true), "completed")
 
 # Update this score.
 # Null is ignored.
@@ -100,14 +102,8 @@ static func fetch(content_or_id) -> GotmContent:
 static func get_by_key(key: String) -> GotmContent:
 	return yield(_GotmContent.get_by_key(key), "completed")
 
-static func get_by_directory(directory: String, after_content_or_id = null) -> Array:
-	return yield(_GotmContent.get_by_directory(directory, false, after_content_or_id), "completed")
-
-static func get_local_by_directory(directory: String, after_content_or_id = null) -> Array:
-	return yield(_GotmContent.get_by_directory(directory, true, after_content_or_id), "completed")
-
-static func update_by_key(key: String, data = null, key = null, properties = null, name = null) -> GotmContent:
-	return yield(_GotmContent.update_by_key(key, data, properties, key, name), "completed")
+static func update_by_key(key: String, data = null, new_key = null, properties = null, name = null) -> GotmContent:
+	return yield(_GotmContent.update_by_key(key, data, properties, new_key, name), "completed")
 
 static func delete_by_key(key: String) -> void:
 	return yield(_GotmContent.delete_by_key(key), "completed")
@@ -117,7 +113,7 @@ static func delete_by_key(key: String) -> void:
 
 # directory to list contents directly in that directory. To list contents recursively, use sort query.
 # sort by rating, size
-# filter by directory, extension, partial_name
-#static func list(query: GotmQuery = GotmQuery.new(), after_content_or_id = null) -> Array:
-#	return []
+# filter by directory, extension, name_part
+static func list(query = GotmQuery.new(), after_content_or_id = null) -> Array:
+	return yield(_GotmContent.list(query, after_content_or_id), "completed")
 

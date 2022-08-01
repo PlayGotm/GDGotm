@@ -95,7 +95,7 @@ static func _list(leaderboard, after, ascending: bool, limit: int = 0) -> Array:
 	if !project:
 		return []
 	var after_rank = null
-	if after is String || after is float:
+	if after && after is String || after is float:
 		after = yield(encode_cursor(after, ascending), "completed")
 	elif after is int:
 		after_rank = after
@@ -226,5 +226,5 @@ static func _format(data, score):
 	score.value = float(data.value)
 	score.properties = data.props if data.get("props") else {}
 	score.created = data.created
-	score.local = !!_LocalStore.fetch(data.path)
+	score.is_local = !!_LocalStore.fetch(data.path)
 	return score
