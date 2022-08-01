@@ -38,13 +38,13 @@ class _GotmAuthData:
 
 static func get_auth():
 	var auth = _global.auth
-	if !auth && ! _global.has_read_from_file:
+	if !auth && !_global.has_read_from_file:
 		_global.has_read_from_file = true
 		auth = _read_auth(PROJECT_AUTH_NAME)
 		if auth:
 			_global.auth = auth
 	# Only return valid project auths
-	if !_is_auth_valid(auth) || !auth.project_key:
+	if !_is_auth_valid(auth) || !auth.project || !auth.project_key:
 		return
 	return auth
 
@@ -89,14 +89,16 @@ static func _get_project_from_token(token: String) -> String:
 	return data.project
 
 static func _refresh_auth(auth: _GotmAuthData) -> _GotmAuthData:
-	return yield(_create_authentication({"refreshToken": auth.refresh_token}), "completed")
+	var refreshed: _GotmAuthData = yield(_create_authentication({"refreshToken": auth.refresh_token}), "completed")
+	refreshed.project_key = auth.project_key
+	return refreshed
 
 static func _get_refreshed_project_auth(auth: _GotmAuthData):
 	var project_key = _Gotm.get_project_key()
 	if !project_key:
 		yield(_GotmUtility.get_tree(), "idle_frame")
 		return
-	if auth && auth.refresh_token && auth.project_key && auth.project_key == project_key:
+	if auth && auth.refresh_token && auth.project && auth.project_key && auth.project_key == project_key:
 		var data = yield(_refresh_auth(auth), "completed")
 		if data:
 			return data
@@ -105,13 +107,13 @@ static func _get_refreshed_project_auth(auth: _GotmAuthData):
 	var gotm = _Gotm.get_singleton()
 	if gotm:
 		var data = yield(gotm.create_project_authentication(project_key), "completed")
-		return _format_auth_data(data)
+		var formatted = _format_auth_data(data)
+		formatted.project_key = project_key
+		return formatted
 
 	# We manage user auths ourselves.
 	var user_auth = _read_auth(GUEST_AUTH_NAME)
 	if !user_auth:
-		user_auth = yield(_create_authentication(), "completed")
-	if user_auth && user_auth.project != project_key:
 		user_auth = yield(_create_authentication(), "completed")
 	if !_is_auth_valid(user_auth) && user_auth && user_auth.refresh_token:
 		user_auth = yield(_refresh_auth(user_auth), "completed")
@@ -119,12 +121,14 @@ static func _get_refreshed_project_auth(auth: _GotmAuthData):
 
 	if !user_auth:
 		return
-	return yield(_create_authentication({"project": project_key}, ["authorization: Bearer " + user_auth.token]), "completed")
+	var project_auth: _GotmAuthData = yield(_create_authentication({"project": project_key}, ["authorization: Bearer " + user_auth.token]), "completed")
+	project_auth.project_key = project_key
+	return project_auth
 
 static func _is_auth_valid(auth: _GotmAuthData) -> bool:
 	if !auth || !auth.token || !(auth.expired / 1000 > OS.get_unix_time() + 60):
 		return false
-	if auth.project_key && auth.project_key != _Gotm.get_project_key():
+	if auth.project && auth.project_key != _Gotm.get_project_key():
 		return false
 	var gotm = _Gotm.get_singleton()
 	if gotm:
@@ -144,7 +148,6 @@ static func _format_auth_data(data) -> _GotmAuthData:
 	auth.owner = data.owner
 	auth.is_guest = data.isAnonymous
 	auth.project = _get_project_from_token(data.token)
-	auth.project_key = _Gotm.get_project_key()
 	auth.expired = _GotmUtility.get_unix_time_from_iso(data.expired)
 	return auth
 
