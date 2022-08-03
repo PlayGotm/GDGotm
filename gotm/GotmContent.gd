@@ -109,11 +109,49 @@ static func delete_by_key(key: String) -> void:
 	return yield(_GotmContent.delete_by_key(key), "completed")
 
 
-
-
-# directory to list contents directly in that directory. To list contents recursively, use sort query.
-# sort by rating, size
-# filter by directory, extension, name_part
+# Use complex filtering with a GotmQuery instance.
+# For example, calling yield(GotmContent.list(GotmQuery.new().filter("properties/difficulty", "hard").sort("created")), "completed")
+# would fetch the latest created contents whose "properties" field contains {"difficulty": "hard"}.
+#
+# @param query
+# List contents according to the filters and sorts of the GotmQuery instance.
+#
+# @param after_content_or_id
+# List contents that come after a previously listed content.
+# 
+# The following keywords can be used to filter or sort contents:
+# * properties/*: Any value within the content's properties field. For example, 
+# if a content's "properties" field equals {"level": {"difficulty": "hard"}},
+# then a keyword of "properties/level/difficulty" refers to the nested "difficulty" field.
+# * key: The content's key field.
+# * name: The content's name field.
+# * user_id: The content's user_id field.
+# * blob_id: The content's blob_id field.
+# * is_private: The content's is_private field. If filtering on a true value, a user_id filter on the current
+# user's id is implicitly added. For example, doing GotmQuery.new().filter("is_private", true) would result
+# in GotmQuery.new().filter("is_private", true).filter("user_id", Gotm.user.id). This is because a user
+# is not permitted to view another user's private contents.
+# * directory: The "directory" of the content's key field. For example,
+# if a content's key is "a/b/c", then its directory is "a/b".
+# * extension: The "extension" of the content's key field. For example,
+# if a content's key is "a/b/c.txt", then its extension is "txt".
+# * namePart: Used for partial name search. For example, doing
+# GotmQuery.new().filter("namePart", "garlic") would match all contents
+# whose names contain "garlic". Does not support GotmQuery.filter_min, GotmQuery.filter_max or GotmQuery.sort.
+# * updated: The content's updated field. Does not support GotmQuery.filter.
+# * created: The content's created field. Does not support GotmQuery.filter.
+# * size: The size of the data stored by the content. Does not support GotmQuery.filter.
+#
+# There is no limit to how many times you use GotmQuery.filter in a single query. However, some limitations apply to GotmQuery.filter_min, 
+# GotmQuery.filter_max and GotmQuery.sort, which you can read about below.
+#
+# Limitations:
+# * The following keywords do not support GotmQuery.filter_min, GotmQuery.filter_max or GotmQuery.sort: namePart
+# * The following keywords do not support GotmQuery.filter: updated, created, size
+# * Contents can only be sorted by one keyword. For example, doing GotmQuery.new().sort("name").sort("key") would
+# sort the contents by key only, because it appeared last.
+# * GotmQuery.filter_min and GotmQuery.filter_max can only be used on the same keyword as GotmQuery.sort. For example,
+# doing GotmQuery.new().filter_min("key", "a").filter_min("created", 0).sort("created") would result in 
+# GotmQuery.new().filter_min("created", 0).sort("created").
 static func list(query = GotmQuery.new(), after_content_or_id = null) -> Array:
 	return yield(_GotmContent.list(query, after_content_or_id), "completed")
-

@@ -112,26 +112,55 @@ static func get_by_key(key: String):
 		return
 	return _format(data_list[0], _Gotm.create_instance("GotmContent"))
 
+static func _format_filter(filter):
+	filter = filter.duplicate(true)
+	if filter.prop == "user_id":
+		filter.prop = "author"
+	elif filter.prop == "name_part":
+		filter.prop = "namePart"
+	elif filter.prop == "blob_id":
+		filter.prop = "data"
+	elif filter.prop == "is_private":
+		filter.prop = "private"
+	elif filter.prop.begins_with("properties"):
+		filter.prop = "props" + filter.prop.substr("properties".length(), filter.prop.length())
+	elif filter.prop == "is_local":
+		return
+	elif filter.prop == "updated" || filter.prop == "created":
+		for key in ["min", "max", "value"]:
+			var value = filter.get("key")
+			if value is int || value is float:
+				filter[key] = _GotmUtility.get_iso_from_unix_time(filter[key])
+	return filter
+
+
 static func list(query: GotmQuery, after_content_or_id = null) -> Array:
+	query = _GotmQuery.get_formatted(query)
 	var after_id = _GotmUtility.coerce_resource_id(after_content_or_id)
 	var project = yield(_GotmUtility.get_yieldable(_get_project()), "completed")
 	if !project:
 		return
-	var params := {}
-	for key in query.filters:
-		var new_key = key
-		if key == "user_id":
-			new_key = "author"
-		elif key == "name_part":
-			new_key = "namePart"
-		params[new_key] = query.filters[key]
-	params.target = project
-	var sort = _GotmUtility.join(query.sorts, ",")
-	if sort:
-		params.sort = sort
-	if after_id:
-		params.after = after_id
-	var implementation = _GotmContentLocal if query.filters.get("is_local") else get_implementation(after_id)
+	var is_local := false
+	var is_private := false
+	var filters := []
+	var sorts := []
+	for filter in query.filters:
+		if filter.prop == "is_local":
+			is_local = !!filter.get("value")
+		elif filter.prop == "is_private":
+			is_private = !!filter.get("value")
+		filter = _format_filter(filter)
+		if filter:
+			filters.append(filter)
+	for sort in query.sorts:
+		sort = _format_filter(sort)
+		if sort:
+			sort.append(sort)
+	if is_private:
+		filters.append({"prop": "author", "value": get_auth_implementation().get_auth().owner})
+	var params := {"filters": filters, "sorts": sorts, "target": project, "after": after_id}
+	_GotmUtility.delete_empty(params)
+	var implementation = _GotmContentLocal if is_local else get_implementation(after_id)
 	var data_list = yield(implementation.list("contents", "byContentSort", params), "completed")
 	if !data_list:
 		return []
@@ -150,7 +179,8 @@ static func delete_by_key(key: String) -> void:
 	yield(delete(content), "completed")
 
 static func _clear_cache():
-	pass # Not needed until we add queries
+	get_implementation().clear_cache("contents")
+	get_implementation().clear_cache("blobs")
 
 static func _get_project() -> String:
 	var Auth = get_auth_implementation()

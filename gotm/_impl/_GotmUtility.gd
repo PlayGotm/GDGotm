@@ -24,6 +24,8 @@ class_name _GotmUtility
 #warnings-disable
 
 
+
+
 static func delete_null(dictionary: Dictionary) -> Dictionary:
 	for key in dictionary.keys():
 		if dictionary[key] == null:
@@ -37,23 +39,25 @@ static func delete_empty(dictionary: Dictionary) -> Dictionary:
 	return dictionary
 
 static func copy(from, to):
-	if !from:
-		return to
-	var keys:= []
-	if from is Array:
-		keys = range(0, from.size())
-	elif from is Dictionary:
-		keys = from.keys()
-	else:
-		var properties = from.get_property_list()
-		for property in properties:
-			if property.usage == PROPERTY_USAGE_SCRIPT_VARIABLE:
-				keys.append(property.name)
-	for key in keys:
+	for key in _get_keys(from):
 		to[key] = from[key]
 	return to
 
-
+static func _get_keys(object) -> Array:
+	if !object || object is float || object is bool || object is int:
+		return []
+	
+	if object is Array:
+		return range(0, object.size())
+	if object is Dictionary:
+		return object.keys()
+	
+	var keys := []
+	var properties = object.get_property_list()
+	for property in properties:
+		if property.usage == PROPERTY_USAGE_SCRIPT_VARIABLE:
+			keys.append(property.name)
+	return keys
 
 static func coerce_resource_id(data) -> String:
 	if data is String:
@@ -246,9 +250,35 @@ const _global = {"value": null}
 class GlobalData:
 	var id_chars := "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
 	var rng := RandomNumberGenerator.new()
+	var search_string_encoders := _create_search_string_encoders()
 	
 	func _init():
 		rng.randomize()
+	
+	# Simplify string somewhat. We want exact matches, but with some reasonable fuzziness.
+	func _create_search_string_encoders() -> Array:
+		var encoders: Array = [
+			["[àáâãäå]", "a"],
+			["[èéêë]", "e"],
+			["[ìíîï]", "i"],
+			["[òóôõöő]", "o"],
+			["[ùúûüű]", "u"],
+			["[ýŷÿ]", "y"],
+			["ñ", "n"],
+			["[çc]", "k"],
+			["ß", "s"],
+			["[-/]", " "],
+			["[^a-z0-9 ]", ""],
+			["\\s+", " "],
+			["^\\s+", ""],
+			["\\s+$", ""]
+		]
+		for encoder in encoders:
+			var regex: RegEx = RegEx.new()
+			regex.compile(encoder[0])
+			encoder[0] = regex
+		
+		return encoders
 
 static func _get_global() -> GlobalData:
 	var value = _global.value
@@ -284,3 +314,74 @@ class QueueSignal:
 		var sig = FakeSignal.new()
 		_queue.append(sig)
 		return sig
+
+
+
+# Improve search experience a little by adding fuzziness.
+static func _encode_search_string(s: String) -> String:
+	if !s:
+		return s
+	s = s.to_lower()
+	var encoders: Array = _get_global().search_string_encoers
+	for encoder in encoders:
+		s = encoder[0].sub(s, encoder[1], true)
+	return s
+
+static func is_partial_search_match(query: String, string: String) -> bool:
+	query = _encode_search_string(query)
+	if !query:
+		return true
+	string = _encode_search_string(query)
+	return string.find(query) >= 0
+
+static func _fuzzy_compare(a, b, compare_less: bool) -> bool:
+	if typeof(a) == typeof(b):
+		return a < b if compare_less else a > b
+		
+	# GDScript doesn't handle comparison of different types very well.
+	# Abuse Array's min and max functions instead.
+	var m = [a, b].min() if compare_less else [a, b].max()
+	if m != null || a == null || b == null:
+		return m == a
+			
+	# Array method failed. Go with strings instead.
+	a = String(a)
+	b = String(b)
+	return a < b if compare_less else a > b
+
+static func is_strictly_equal(a, b) -> bool:
+	return typeof(a) == typeof(b) && a == b
+
+static func is_fuzzy_equal(a, b) -> bool:
+	return !is_less(a, b) && !is_greater(a, b)
+
+static func is_less(a, b) -> bool:
+	return _fuzzy_compare(a, b, true)
+
+
+static func is_greater(a, b) -> bool:
+	return _fuzzy_compare(a, b, false)
+
+static func get_last_element(array):
+	if !array || !(array is Array):
+		return
+	return array[array.size() - 1]
+
+
+static func get_nested_value(path_or_parts, object, undefined_value = null, path_index: int = 0):
+	var parts: Array = path_or_parts if path_or_parts is Array else path_or_parts.split("/")
+	if path_index >= parts.size():
+		return undefined_value
+	var part = parts[path_index]
+	if object is Array:
+		if String(int(part)) != part:
+			return undefined_value
+		part = int(part)
+	
+	for key in _get_keys(object):
+		if key != part:
+			continue
+		if path_index + 1 >= parts.size():
+			return object[key]
+		return get_nested_value(parts, object[key], undefined_value, path_index + 1)
+	return undefined_value

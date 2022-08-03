@@ -34,7 +34,7 @@ static func get_all(path_or_api: String) -> Array:
 static func fetch(path: String):
 	if !path:
 		return
-	return _get_store(path)[path]
+	return _get_store(path).get(path)
 
 static func update(path: String, data: Dictionary) -> Dictionary:
 	var value = fetch(path)

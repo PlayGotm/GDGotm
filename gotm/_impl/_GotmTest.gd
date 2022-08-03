@@ -74,7 +74,7 @@ static func assert_resource_equality(resources, expected_resources, message: Str
 static func assert_equality(lhs, rhs, message: String = ""):
 	if are_equal(lhs, rhs):
 		return
-	print_assertion("Got " + String(lhs) + " but expected " + String(rhs), message)
+	print_assertion("Got " + _GotmUtility.to_stable_json(lhs) + " but expected " + _GotmUtility.to_stable_json(rhs), message)
 
 static func resource_to_string(resource) -> String:
 	if resource is Array:

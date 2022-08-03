@@ -28,11 +28,11 @@ static func _fuzzy_compare(a, b, compare_less: bool) -> bool:
 	if typeof(a) == typeof(b):
 		return a < b if compare_less else a > b
 		
-		# GDScript doesn't handle comparison of different types very well.
-		# Abuse Array's min and max functions instead.
-		var m = [a, b].min() if compare_less else [a, b].max()
-		if m != null || a == null || b == null:
-			return m == a
+	# GDScript doesn't handle comparison of different types very well.
+	# Abuse Array's min and max functions instead.
+	var m = [a, b].min() if compare_less else [a, b].max()
+	if m != null || a == null || b == null:
+		return m == a
 			
 	# Array method failed. Go with strings instead.
 	a = String(a)

@@ -48,6 +48,9 @@ static func update(id: String, data: Dictionary):
 
 static func delete(id: String) -> void:
 	yield(_GotmUtility.get_tree(), "idle_frame")
+	var content = _LocalStore.fetch(id)
+	if content && content.data:
+		_LocalStore.delete(content.data)
 	_LocalStore.delete(id)
 
 static func fetch(path: String, query: String = "", params: Dictionary = {}, authenticate: bool = false) -> Dictionary:
@@ -65,8 +68,140 @@ static func list(api: String, query: String, params: Dictionary = {}, authentica
 static func clear_cache(path: String) -> void:
 	pass
 
+
+const UNDEFINED = {}
+
+class ContentSearchPredicate:
+	var prop: String
+	func is_less_than(a, b) -> bool:
+		var a_value = a.value if a.has("value") else _GotmUtility.get_nested_value(prop, a, UNDEFINED)
+		var b_value = b.value if b.has("value") else _GotmUtility.get_nested_value(prop, b, UNDEFINED)
+		if _GotmUtility.is_strictly_equal(a_value, UNDEFINED) || _GotmUtility.is_strictly_equal(b_value, UNDEFINED):
+			return false
+		return _GotmUtility.is_less(a_value, b_value) || _GotmUtility.is_fuzzy_equal(a_value, b_value) && a.path < b.path
+
+	func is_greater_than(a, b) -> bool:
+		var a_value = a.value if a.has("value") else _GotmUtility.get_nested_value(prop, a, UNDEFINED)
+		var b_value = b.value if b.has("value") else _GotmUtility.get_nested_value(prop, b, UNDEFINED)
+		if _GotmUtility.is_strictly_equal(a_value, UNDEFINED) || _GotmUtility.is_strictly_equal(b_value, UNDEFINED):
+			return false
+		return _GotmUtility.is_greater(a_value, b_value) || _GotmUtility.is_fuzzy_equal(a_value, b_value) && a.path > b.path
+
+
+static func _get_content_value(prop: String, content, undefined_value = null):
+	match prop:
+		"key", "name", "author", "data", "private", "updated", "created":
+			return content[prop]
+		"directory":
+			var key: String = content.key
+			var parts = key.split("/", false)
+			if !parts:
+				return ""
+			parts.resize(parts.size() - 1)
+			return _GotmUtility.join(parts, "/")
+		"extension":
+			var key: String = content.key
+			var parts = key.split("/", false)
+			if !parts:
+				return ""
+			var dot_split: Array = parts[parts.size() - 1].split(".", false)
+			if dot_split.size() <= 1:
+				return ""
+			dot_split.remove(0)
+			return _GotmUtility.join(dot_split, ".")
+			
+			
+		"size":
+			var blob = _LocalStore.fetch(content.data)
+			return blob.size if blob else 0
+		"score":
+			var score: int = 0
+			for mark in _LocalStore.get_all("marks"):
+				if mark.target == content.path:
+					if mark.name == "upvote":
+						score += 1
+					elif mark.name == "downvote":
+						score -= 1
+			return score
+	
+	if prop.begins_with("props"):
+		return _GotmUtility.get_nested_value(prop, content, undefined_value)
+	return undefined_value
+
+static func _match_content(content, params) -> bool:
+	var filters = params.get("filters")
+	if !filters:
+		return true
+	for filter in filters:
+		if filter.prop == "namePart":
+			if !filter.has("value") || !_GotmUtility.is_partial_search_match(filter.value, content.name):
+				return false
+			continue
+		
+		var value = _get_content_value(filter.prop, content, UNDEFINED)
+		if _GotmUtility.is_strictly_equal(value, UNDEFINED):
+			return false
+		if filter.has("value"):
+			if !_GotmUtility.is_fuzzy_equal(filter.value, value):
+				return false
+			continue
+		
+		if filter.has("min"):
+			if filter.get("minExclusive"):
+				if !_GotmUtility.is_greater(value, filter.get("min")):
+					return false
+			else:
+				if _GotmUtility.is_less(value, filter.get("min")):
+					return false
+			
+			
+		if filter.has("max"):
+			if filter.get("maxExclusive"):
+				if !_GotmUtility.is_less(value, filter.get("max")):
+					return false
+			else:
+				if _GotmUtility.is_greater(value, filter.get("max")):
+					return false
+	return true
+
 static func _get_by_content_sort(params: Dictionary) -> Array:
-	return []
+	var matches := []
+	for content in _LocalStore.get_all("contents"):
+		if _match_content(content, params):
+			matches.append(content)
+
+	var sort = _GotmUtility.get_last_element(params.sorts) if params.get("sorts") else {"prop": "created", "descending": true}
+	var descending = !!sort.get("descending")
+	var predicate := ContentSearchPredicate.new()
+	predicate.prop = sort.prop
+	matches.sort_custom(predicate, "is_greater_than" if descending else "is_less_than")
+	if params.get("after"):
+		var cursor = _decode_cursor(params.after)
+		var cursor_content = {"value": cursor[0], "path": cursor[1]}
+		var after_matches := []
+		for i in range(0, matches.size()):
+			var m = matches[i]
+			m = {"value": _GotmUtility.get_nested_value(sort.prop, m), "path": m.path}
+			if cursor_content.path == m.path && cursor_content.value == m.value:
+				continue
+			if descending && predicate.is_greater_than(cursor_content, m) || !descending && predicate.is_less_than(cursor_content, m):
+				after_matches.append(matches[i])
+		matches = after_matches
+	if params.get("limit"):
+		while matches.size() > params.limit:
+			matches.pop_back()
+
+	for i in range(0, matches.size()):
+		matches[i] = _format(matches[i])
+	return matches
+
+
+static func _decode_cursor(cursor: String) -> Array:
+	var decoded := _GotmUtility.decode_cursor(cursor)
+	var target: String = decoded[1]
+	if target:
+		decoded[1] = target.substr(0, target.length() - 1).replace("-", "/")
+	return decoded
 
 static func get_by_key_sync(key: String):
 	for content in _LocalStore.get_all("contents"):

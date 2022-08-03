@@ -26,7 +26,7 @@ class_name GotmQuery
 # A GotmQuery is used for complex filtering and sorting when fetching 
 # Gotm resources, such as GotmContent.
 
-var filters: Dictionary = {}
+var filters: Array = []
 var sorts: Array = []
 
 # Fetch only things where the property_path's property equals the specified value.
@@ -57,21 +57,24 @@ func copy() -> GotmQuery:
 	return _GotmQuery.copy(self)
 
 # Create a query directly from filters and sorts.
-# Filters is a dictionary where each key is a property paths its respective
-# value is the value the property path must equal.
+# Filters is an array of Filter objects.
 # Sorts is an array of Sort objects.
 #
-# For example, doing GotmQuery.create({"name": "my_name"}, [{"property_path": "created"}])
+# For example, doing GotmQuery.create([{"property_path": "name", value: "my_name"}, [{"property_path": "created"}])
 # would fetch only things whose name equals "my_name" sorted by creation date in descending order (newest first).
 # It is the same as doing GotmQuery.new().filter("name", "my_name").sort("created").
-static func create(filters: Dictionary = {}, sorts: Array = []) -> GotmQuery:
+static func create(filters: Array = [], sorts: Array = []) -> GotmQuery:
 	return _GotmQuery.create(filters, sorts)
 
 
-class Sort:
+class Filter:
 	var property_path: String
+	var value = null
 	var min_value = null
 	var max_value = null
 	var is_min_exclusive: bool = false
 	var is_max_exclusive: bool = false
+
+class Sort:
+	var property_path: String
 	var ascending: bool = false
