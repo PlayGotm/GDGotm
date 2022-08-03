@@ -56,6 +56,7 @@ var value: float
 var properties: Dictionary
 
 # Is true if this score was created with GotmScore.create_local and is only stored locally on the user's device.
+# Is useful for scores that do not need to be accessible to other devices, such as scores in an offline game.
 var is_local: bool
 
 # UNIX epoch time (in milliseconds). Use OS.get_datetime_from_unix_time(score.created / 1000) to convert to date.
@@ -69,7 +70,10 @@ var created: int
 # Scores can be fetched via a GotmLeaderboard instance.
 # See PROPERTIES above for descriptions of the arguments.
 static func create(name: String, value: float, properties: Dictionary = {}) -> GotmScore:
-	return yield(_GotmScore.create(name, value, properties), "completed")
+	return yield(_GotmScore.create(name, value, properties, false), "completed")
+
+static func create_local(name: String, value: float, properties: Dictionary = {}) -> GotmScore:
+	return yield(_GotmScore.create(name, value, properties, true), "completed")
 
 # Update an existing score.
 # Null is ignored.

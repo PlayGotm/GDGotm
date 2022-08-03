@@ -26,9 +26,9 @@ class_name _GotmScore
 
 
 
-static func get_implementation():
+static func get_implementation(id = null):
 	var config := _Gotm.get_config()
-	if !_Gotm.is_global_feature(config.force_local_scores, config.beta_unsafe_force_global_scores):
+	if !_Gotm.is_global_feature(config.force_local_scores, config.beta_unsafe_force_global_scores) || _LocalStore.fetch(id):
 		return _GotmScoreLocal
 	return _GotmStore
 
@@ -37,10 +37,11 @@ static func get_auth_implementation():
 		return _GotmAuthLocal
 	return _GotmAuth
 
-static func create(name: String, value: float, properties: Dictionary = {}):
+static func create(name: String, value: float, properties: Dictionary = {}, is_local: bool = false):
 	value = _GotmUtility.clean_for_json(value)
 	properties = _GotmUtility.clean_for_json(properties)
-	var data = yield(get_implementation().create("scores", {"name": name, "value": value, "props": properties}), "completed")
+	var implementation = _GotmScoreLocal if is_local else get_implementation()
+	var data = yield(implementation.create("scores", {"name": name, "value": value, "props": properties}), "completed")
 	if data:
 		_clear_cache()
 	return _format(data, _Gotm.create_instance("GotmScore"))
@@ -50,19 +51,19 @@ static func update(score_or_id, value = null, properties = null):
 	var id = _GotmUtility.coerce_resource_id(score_or_id)
 	value = _GotmUtility.clean_for_json(value)
 	properties = _GotmUtility.clean_for_json(properties)
-	var data = yield(get_implementation().update(id, _GotmUtility.delete_null({"value": value, "props": properties})), "completed")
+	var data = yield(get_implementation(id).update(id, _GotmUtility.delete_null({"value": value, "props": properties})), "completed")
 	if data:
 		_clear_cache()
 	return _format(data, _Gotm.create_instance("GotmScore") if id is String else score_or_id)
 
 static func delete(score_or_id) -> void:
 	var id = _GotmUtility.coerce_resource_id(score_or_id)
-	yield(get_implementation().delete(id), "completed")
+	yield(get_implementation(id).delete(id), "completed")
 	_clear_cache()
 
 static func fetch(score_or_id):
 	var id = _GotmUtility.coerce_resource_id(score_or_id)
-	var data = yield(get_implementation().fetch(id), "completed")
+	var data = yield(get_implementation(id).fetch(id), "completed")
 	return _format(data, _Gotm.create_instance("GotmScore"))
 
 static func encode_cursor(score_id_or_value, ascending: bool) -> String:
@@ -91,6 +92,7 @@ static func list(leaderboard, after, ascending: bool) -> Array:
 
 static func _list(leaderboard, after, ascending: bool, limit: int = 0) -> Array:
 	after = _GotmUtility.coerce_resource_id(after)
+	var after_id = after if after && after is String else null
 	var project = yield(_GotmUtility.get_yieldable(_get_project()), "completed")
 	if !project:
 		return []
@@ -117,7 +119,8 @@ static func _list(leaderboard, after, ascending: bool, limit: int = 0) -> Array:
 	})
 	if after_rank is int:
 		params.afterRank = after_rank
-	var data_list = yield(get_implementation().list("scores", "byScoreSort", params), "completed")
+	var implementation = _GotmScoreLocal if leaderboard.is_local else get_implementation(after_id)
+	var data_list = yield(implementation.list("scores", "byScoreSort", params), "completed")
 	if !data_list:
 		return []
 		
@@ -157,7 +160,8 @@ static func get_rank(leaderboard, score_id_or_value) -> int:
 		if !has_yielded:
 			yield(_GotmUtility.get_tree(), "idle_frame")
 		return 0
-	var stat = yield(get_implementation().fetch("stats/rank", "rankByScoreSort", params), "completed")
+	var implementation = _GotmScoreLocal if leaderboard.is_local else get_implementation(params.get("score"))
+	var stat = yield(implementation.fetch("stats/rank", "rankByScoreSort", params), "completed")
 	if !stat:
 		return 0
 	return stat.value
@@ -195,7 +199,8 @@ static func get_counts(leaderboard, minimum_value, maximum_value, segment_count)
 		params.min = float(minimum_value)
 	if maximum_value is float || maximum_value is int:
 		params.max = float(maximum_value)
-	var stats = yield(get_implementation().list("stats", "countByScoreSort", params), "completed")
+	var implementation = _GotmScoreLocal if leaderboard.is_local else get_implementation()
+	var stats = yield(implementation.list("stats", "countByScoreSort", params), "completed")
 	
 	if stats.size() != counts.size():
 		return counts
