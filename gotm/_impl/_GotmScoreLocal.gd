@@ -114,7 +114,24 @@ static func _fetch_rank(params) -> int:
 		rank += 1
 	return rank
 
-
+static func _match_props(subset, superset) -> bool:
+	if typeof(subset) != typeof(superset):
+		return false
+	if subset is Dictionary:
+		if subset.size() > superset.size():
+			return false
+		for key in subset:
+			if !(key in superset) || !_match_props(subset[key], superset[key]):
+				return false
+		return true
+	if subset is Array:
+		if subset.size() > superset.size():
+			return false
+		for i in range(0, subset.size()):
+			if !_match_props(subset[i], superset[i]):
+				return false
+		return true
+	return subset == superset
 
 static func _get_range_from_period(period: String) -> Array:
 	match period:
@@ -166,7 +183,7 @@ static func _match_score(score, params) -> bool:
 		return false
 	if params.get("max") is float && score.value > params.get("max"):
 		return false
-	if params.get("props") && !_GotmUtility.is_custom_user_prop_match(params.props, score.props):
+	if params.get("props") && !_match_props(params.props, score.props):
 		return false
 	if params.get("period"):
 		var period_range = _get_range_from_period(params.period)

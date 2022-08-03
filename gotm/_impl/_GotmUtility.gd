@@ -59,14 +59,12 @@ static func _get_keys(object) -> Array:
 			keys.append(property.name)
 	return keys
 
-static func coerce_resource_id(data) -> String:
-	if data is String:
-		return data
+static func coerce_resource_id(data):
 	if !(data is Object) && !(data is Dictionary):
-		return ""
+		return data
 	var id = data.get("id")
 	if !(id is String):
-		return ""
+		return data
 	return id
 
 
