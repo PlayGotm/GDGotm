@@ -26,7 +26,9 @@ class_name GotmQuery
 # A GotmQuery is used for complex filtering and sorting when fetching 
 # Gotm resources, such as GotmContent.
 
+# The current state of filters for this query. Is an array of Filter objects.
 var filters: Array = []
+# The current state of sorts for this query. Is an array of Sort objects.
 var sorts: Array = []
 
 # Fetch only things where the property_path's property equals the specified value.
@@ -66,7 +68,7 @@ func copy() -> GotmQuery:
 static func create(filters: Array = [], sorts: Array = []) -> GotmQuery:
 	return _GotmQuery.create(filters, sorts)
 
-
+# Represents a filter created by a call to GotmQuery.filter, GotmQuery.filter_min or GotmQuery.filter_max.
 class Filter:
 	var property_path: String
 	var value = null
@@ -75,6 +77,7 @@ class Filter:
 	var is_min_exclusive: bool = false
 	var is_max_exclusive: bool = false
 
+# Represents a sort created by a call to GotmQuery.sort.
 class Sort:
 	var property_path: String
 	var ascending: bool = false

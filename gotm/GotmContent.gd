@@ -50,20 +50,21 @@ var key: String
 # Optional name searchable with partial search.
 var name: String
 
-# Id of this content's data. Use GotmBlob.fetch_data(content.blob_id) to get the data as a PoolByteArray.
+# Unique identifier of this content's data. Use GotmBlob.fetch_data(content.blob_id) to get the data as a PoolByteArray.
 var blob_id: String
 
-# Optional metadata to attach to the score entry, 
+# Optional metadata to attach to the content, 
 # for example {level: "desert1", difficulty: "hard"}.
-# When fetching ranks and scores with GotmLeaderboard, you can optionally 
-# filter with these properties. 
+# When listing contents GotmContent.list, you can optionally 
+# filter and sort with these properties. 
 var properties: Dictionary
 
 # Optionally make this content inaccessible to other users. Private content can only be fetched by the user
-# who created it either via GotmContent.get_by_directory
+# who created it via GotmContent.list. Is useful for personal data such as game saves.
 var is_private: bool
 
 # Is true if this content was created with GotmContent.create_local and is only stored locally on the user's device.
+# Is useful for data that does not need to be accessible to other devices, such as game saves for offline games.
 var is_local: bool
 
 # UNIX epoch time (in milliseconds). Use OS.get_datetime_from_unix_time(score.created / 1000) to convert to date.
@@ -77,37 +78,39 @@ var created: int
 # METHODS
 ##############################################################
 
-# Create a score entry for the current user.
-# Scores can be fetched via a GotmLeaderboard instance.
+# Create content for the current user.
 # See PROPERTIES above for descriptions of the arguments.
 static func create(data = null, key: String = "", properties: Dictionary = {}, name: String = "", is_private: bool = false)  -> GotmContent:
 	return yield(_GotmContent.create(data, properties, key, name, is_private), "completed")
 
+# Create content that is only stored locally on the user's device. Local content is not accessible to any other player or device.
 static func create_local(data = null, key: String = "", properties: Dictionary = {}, name: String = "", is_private: bool = false)  -> GotmContent:
 	return yield(_GotmContent.create(data, properties, key, name, is_private, true), "completed")
 
-# Update this score.
+# Update existing content.
 # Null is ignored.
 static func update(content_or_id, data = null, key = null, properties = null, name = null) -> GotmContent:
 	return yield(_GotmContent.update(content_or_id, data, properties, key, name), "completed")
 
-# Delete this score.
+# Delete existing content.
 static func delete(content_or_id) -> void:
 	return yield(_GotmContent.delete(content_or_id), "completed")
 
-# Get an existing score.
+# Get existing content.
 static func fetch(content_or_id) -> GotmContent:
 	return yield(_GotmContent.fetch(content_or_id), "completed")
 
+# Get existing content by key.
 static func get_by_key(key: String) -> GotmContent:
 	return yield(_GotmContent.get_by_key(key), "completed")
 
+# Update existing content by key.
 static func update_by_key(key: String, data = null, new_key = null, properties = null, name = null) -> GotmContent:
 	return yield(_GotmContent.update_by_key(key, data, properties, new_key, name), "completed")
 
+# Delete existing content by key.
 static func delete_by_key(key: String) -> void:
 	return yield(_GotmContent.delete_by_key(key), "completed")
-
 
 # Use complex filtering with a GotmQuery instance.
 # For example, calling yield(GotmContent.list(GotmQuery.new().filter("properties/difficulty", "hard").sort("created")), "completed")
@@ -131,6 +134,7 @@ static func delete_by_key(key: String) -> void:
 # user's id is implicitly added. For example, doing GotmQuery.new().filter("is_private", true) would result
 # in GotmQuery.new().filter("is_private", true).filter("user_id", Gotm.user.id). This is because a user
 # is not permitted to view another user's private contents.
+# * is_local: The content's is_local field.
 # * directory: The "directory" of the content's key field. For example,
 # if a content's key is "a/b/c", then its directory is "a/b".
 # * extension: The "extension" of the content's key field. For example,
