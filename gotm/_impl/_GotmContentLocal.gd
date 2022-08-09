@@ -50,7 +50,7 @@ static func delete(id: String) -> void:
 	yield(_GotmUtility.get_tree(), "idle_frame")
 	var content = _LocalStore.fetch(id)
 	if content && content.data:
-		_LocalStore.delete(content.data)
+		_GotmBlobLocal.delete_sync(content.data)
 	_LocalStore.delete(id)
 
 static func fetch(path: String, query: String = "", params: Dictionary = {}, authenticate: bool = false) -> Dictionary:
