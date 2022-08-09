@@ -31,14 +31,14 @@ static func create(api: String, body: Dictionary):
 	if !(data is PoolByteArray):
 		data = var2bytes(data)
 		
-	var score = {
+	var blob = {
 		"path": _GotmUtility.create_resource_path(api),
 		"author": _GotmAuthLocal.get_user(),
 		"target": body.target,
-		"data": Marshalls.raw_to_base64(data),
 		"size": data.size()
 	}
-	return _format(_LocalStore.create(score))
+	_GotmUtility.write_file(_Gotm.get_local_path(blob.path), data)
+	return _format(_LocalStore.create(blob))
 #
 
 static func fetch(path: String, query: String = "", params: Dictionary = {}, authenticate: bool = false) -> Dictionary:
@@ -52,7 +52,7 @@ static func fetch(path: String, query: String = "", params: Dictionary = {}, aut
 		return
 	
 	if is_data:
-		return Marshalls.base64_to_raw(blob.data)
+		return _GotmUtility.read_file(_Gotm.get_local_path(blob.path), true)
 	
 	return _format(blob)
 
@@ -61,3 +61,10 @@ static func _format(data: Dictionary):
 		return
 	data = _GotmUtility.copy(data, {})
 	return data
+
+static func delete_sync(path: String):
+	var blob = _LocalStore.fetch(path)
+	if !blob:
+		return
+	_LocalStore.delete(path)
+	_GotmUtility.write_file(_Gotm.get_local_path(blob.path), null)

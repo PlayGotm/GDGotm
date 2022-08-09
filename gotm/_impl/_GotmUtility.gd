@@ -365,7 +365,35 @@ static func get_last_element(array):
 		return
 	return array[array.size() - 1]
 
+static func write_file(path: String, data):
+	if data == null:
+		Directory.new().remove(path)
+		return
+	
+	var file := File.new()
+	file.open(path, File.WRITE)
+	if !file.is_open():
+		var directory := Directory.new()
+		directory.make_dir_recursive(path.get_base_dir())
+		file.open(path, File.WRITE)
+	if file.is_open():
+		if data is String:
+			file.store_string(data)
+		else:
+			file.store_buffer(data)
+	file.close()
 
+static func read_file(path: String, as_binary: bool = false):
+	var file := File.new()
+	file.open(path, File.READ)
+	var content
+	if as_binary:
+		content = file.get_buffer(file.get_len()) if file.is_open() else PoolByteArray()
+	else:
+		content = file.get_as_text() if file.is_open() else ""
+	file.close()
+	return content
+	
 static func get_nested_value(path_or_parts, object, undefined_value = null, path_index: int = 0):
 	var parts: Array = path_or_parts if path_or_parts is Array else path_or_parts.split("/")
 	if path_index >= parts.size():

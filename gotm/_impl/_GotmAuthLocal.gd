@@ -30,20 +30,14 @@ static func _get_cache():
 		return _cache
 	
 	var file_path := _Gotm.get_local_path("auth.json")
-	var file = File.new()
-	file.open(file_path, File.READ_WRITE)
-	var content = file.get_as_text() if file.is_open() else ""
-	file.close()
+	var content = _GotmUtility.read_file(file_path)
 	if content:
 		_GotmUtility.copy(parse_json(content), _cache)
 	else:
 		_cache.token = _GotmUtility.create_id()
 		_cache.project = _GotmUtility.create_resource_path("games")
 		_cache.user = _GotmUtility.create_resource_path("users")
-		file = File.new()
-		file.open(file_path, File.WRITE)
-		file.store_string(to_json(_cache))
-		file.close()
+		_GotmUtility.write_file(file_path, to_json(_cache))
 	_cache.is_guest = true
 	return _cache
 

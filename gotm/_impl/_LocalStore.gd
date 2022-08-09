@@ -26,17 +26,17 @@ class_name _LocalStore
 
 const _global = {}
 
-static func get_all(path_or_api: String) -> Array:
+static func get_all(path_or_api) -> Array:
 	if !path_or_api:
 		return []
 	return _get_store(path_or_api).values()
 
-static func fetch(path: String):
+static func fetch(path):
 	if !path:
 		return
 	return _get_store(path).get(path)
 
-static func update(path: String, data: Dictionary) -> Dictionary:
+static func update(path, data: Dictionary) -> Dictionary:
 	var value = fetch(path)
 	if !value || !data:
 		return value
@@ -45,7 +45,7 @@ static func update(path: String, data: Dictionary) -> Dictionary:
 	_write_store(path)
 	return value
 
-static func delete(path: String) -> void:
+static func delete(path) -> void:
 	if !path:
 		return
 	_get_store(path).erase(path)
@@ -57,7 +57,7 @@ static func create(data: Dictionary) -> Dictionary:
 	return data
 
 
-static func _get_store(path_or_api: String):
+static func _get_store(path_or_api):
 	if !path_or_api:
 		return
 	var api = path_or_api.split("/")[0]
@@ -65,10 +65,8 @@ static func _get_store(path_or_api: String):
 	if existing is Dictionary:
 		return existing
 
-	var file = File.new()
-	file.open(_Gotm.get_local_path(api + ".json"), File.READ)
-	var content = file.get_as_text() if file.is_open() else ""
-	file.close()
+	
+	var content = _GotmUtility.read_file(_Gotm.get_local_path(api + ".json"))
 	if content:
 		_global[api] = parse_json(content)
 		if !_global[api]:
@@ -77,9 +75,6 @@ static func _get_store(path_or_api: String):
 		_global[api] = {}
 	return _global[api]
 	
-static func _write_store(path_or_api: String) -> void:
+static func _write_store(path_or_api) -> void:
 	var api = path_or_api.split("/")[0]
-	var file = File.new()
-	file.open(_Gotm.get_local_path(api + ".json"), File.WRITE)
-	file.store_string(to_json(_get_store(api)))
-	file.close()
+	_GotmUtility.write_file(_Gotm.get_local_path(api + ".json"), to_json(_get_store(api)))
