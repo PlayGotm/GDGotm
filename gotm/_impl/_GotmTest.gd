@@ -24,6 +24,10 @@ class_name _GotmTest
 #warnings-disable
 
 static func are_resources_equal(lhs, rhs) -> bool:
+	if lhs == rhs: 
+		return true
+	if !lhs || !rhs:
+		return false
 	if typeof(lhs) != typeof(rhs):
 		return false
 	if lhs is Array:
