@@ -90,6 +90,8 @@ static func _get_project_from_token(token: String) -> String:
 
 static func _refresh_auth(auth: _GotmAuthData) -> _GotmAuthData:
 	var refreshed: _GotmAuthData = yield(_create_authentication({"refreshToken": auth.refresh_token}), "completed")
+	if !refreshed:
+		return
 	refreshed.project_key = auth.project_key
 	return refreshed
 
@@ -156,10 +158,7 @@ const GUEST_AUTH_NAME := "guest_auth.json"
 
 
 static func _read_auth(name: String):
-	var file := File.new()
-	file.open(_Gotm.get_path(name), File.READ_WRITE)
-	var content = file.get_as_text() if file.is_open() else ""
-	file.close()
+	var content = _GotmUtility.read_file(_Gotm.get_path(name))
 	if !content:
 		return
 	var parsed = parse_json(content)
@@ -175,11 +174,7 @@ static func _write_auth(auth: _GotmAuthData):
 		name = PROJECT_AUTH_NAME
 	else:
 		name = GUEST_AUTH_NAME
-	var file := File.new()
-	file.open(_Gotm.get_path(name), File.WRITE)
-	if file.is_open():
-		file.store_string(to_json({"data": auth.data, "project_key": auth.project_key}))
-	file.close()
+	_GotmUtility.write_file(_Gotm.get_path(name), to_json({"data": auth.data, "project_key": auth.project_key}))
 
 static func _create_authentication(body: Dictionary = {}, headers: PoolStringArray = []) -> Dictionary:
 	var result = yield(_GotmUtility.fetch_json(_Gotm.get_global().apiOrigin + "/authentications", HTTPClient.METHOD_POST, body, headers), "completed")
