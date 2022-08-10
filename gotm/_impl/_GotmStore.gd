@@ -166,6 +166,15 @@ static func _request(path: String, method: int, body = null, authenticate: bool 
 	var result
 	if path.begins_with(_Gotm.get_global().storageApiEndpoint):
 		result = yield(_GotmUtility.fetch_data(path, method, body), "completed")
+	elif path.begins_with("blobs/upload") && body.get("data") is PoolByteArray:
+		body = body.duplicate()
+		var data = body.data
+		body.erase("data")
+		var bytes = PoolByteArray()
+		bytes += (to_json(body)).to_utf8()
+		bytes.append(0)
+		bytes += data
+		result = yield(_GotmUtility.fetch_json(_Gotm.get_global().apiWorkerOrigin + "/" + path, method, bytes), "completed")
 	else:
 		result = yield(_GotmUtility.fetch_json(_Gotm.get_global().apiOrigin + "/" + path, method, body), "completed")
 	if !result.ok:

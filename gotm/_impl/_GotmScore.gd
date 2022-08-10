@@ -48,7 +48,7 @@ static func create(name: String, value: float, properties: Dictionary = {}, is_l
 
 
 static func update(score_or_id, value = null, properties = null):
-	var id = _GotmUtility.coerce_resource_id(score_or_id)
+	var id = _coerce_id(score_or_id)
 	value = _GotmUtility.clean_for_json(value)
 	properties = _GotmUtility.clean_for_json(properties)
 	var data = yield(get_implementation(id).update(id, _GotmUtility.delete_null({"value": value, "props": properties})), "completed")
@@ -57,12 +57,12 @@ static func update(score_or_id, value = null, properties = null):
 	return _format(data, _Gotm.create_instance("GotmScore") if id is String else score_or_id)
 
 static func delete(score_or_id) -> void:
-	var id = _GotmUtility.coerce_resource_id(score_or_id)
+	var id = _coerce_id(score_or_id)
 	yield(get_implementation(id).delete(id), "completed")
 	_clear_cache()
 
 static func fetch(score_or_id):
-	var id = _GotmUtility.coerce_resource_id(score_or_id)
+	var id = _coerce_id(score_or_id)
 	var data = yield(get_implementation(id).fetch(id), "completed")
 	return _format(data, _Gotm.create_instance("GotmScore"))
 
@@ -91,7 +91,7 @@ static func list(leaderboard, after, ascending: bool) -> Array:
 	return yield(_list(leaderboard, after, ascending), "completed")
 
 static func _list(leaderboard, after, ascending: bool, limit: int = 0) -> Array:
-	after = _GotmUtility.coerce_resource_id(after)
+	after = _coerce_id(after)
 	var after_id = after if after && after is String else null
 	var project = yield(_GotmUtility.get_yieldable(_get_project()), "completed")
 	if !project:
@@ -131,7 +131,7 @@ static func _list(leaderboard, after, ascending: bool, limit: int = 0) -> Array:
 
 
 static func get_rank(leaderboard, score_id_or_value) -> int:
-	score_id_or_value = _GotmUtility.coerce_resource_id(score_id_or_value)
+	score_id_or_value = _coerce_id(score_id_or_value)
 	score_id_or_value = _GotmUtility.clean_for_json(score_id_or_value)
 	var project = _get_project()
 	var has_yielded := false
@@ -233,3 +233,7 @@ static func _format(data, score):
 	score.created = data.created
 	score.is_local = !!_LocalStore.fetch(data.path)
 	return score
+
+
+static func _coerce_id(resource_or_id):
+	return _GotmUtility.coerce_resource_id(resource_or_id, "scores")

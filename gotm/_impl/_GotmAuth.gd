@@ -36,6 +36,17 @@ class _GotmAuthData:
 	var project: String
 	var project_key: String
 
+static func fetch():
+	var auth = yield(get_auth_async(), "completed")
+	if !auth:
+		auth = _GotmAuthLocal.get_auth()
+	if !auth:
+		return
+	var instance = _Gotm.create_instance("GotmAuth")
+	instance.user_id = auth.owner
+	instance.is_registered = !auth.is_guest
+	return instance
+
 static func get_auth():
 	var auth = _global.auth
 	if !auth && !_global.has_read_from_file:

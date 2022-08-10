@@ -49,8 +49,10 @@ static func update(id: String, data: Dictionary):
 static func delete(id: String) -> void:
 	yield(_GotmUtility.get_tree(), "idle_frame")
 	var content = _LocalStore.fetch(id)
-	if content && content.data:
+	if content:
 		_GotmBlobLocal.delete_sync(content.data)
+		_GotmMarkLocal.delete_by_target_sync(id)
+		
 	_LocalStore.delete(id)
 
 static func fetch(path: String, query: String = "", params: Dictionary = {}, authenticate: bool = false) -> Dictionary:
@@ -74,15 +76,15 @@ const UNDEFINED = {}
 class ContentSearchPredicate:
 	var prop: String
 	func is_less_than(a, b) -> bool:
-		var a_value = a.value if a.has("value") else _GotmUtility.get_nested_value(prop, a, UNDEFINED)
-		var b_value = b.value if b.has("value") else _GotmUtility.get_nested_value(prop, b, UNDEFINED)
+		var a_value = a.value
+		var b_value = b.value
 		if _GotmUtility.is_strictly_equal(a_value, UNDEFINED) || _GotmUtility.is_strictly_equal(b_value, UNDEFINED):
 			return false
 		return _GotmUtility.is_less(a_value, b_value) || _GotmUtility.is_fuzzy_equal(a_value, b_value) && a.path < b.path
 
 	func is_greater_than(a, b) -> bool:
-		var a_value = a.value if a.has("value") else _GotmUtility.get_nested_value(prop, a, UNDEFINED)
-		var b_value = b.value if b.has("value") else _GotmUtility.get_nested_value(prop, b, UNDEFINED)
+		var a_value = a.value
+		var b_value = b.value
 		if _GotmUtility.is_strictly_equal(a_value, UNDEFINED) || _GotmUtility.is_strictly_equal(b_value, UNDEFINED):
 			return false
 		return _GotmUtility.is_greater(a_value, b_value) || _GotmUtility.is_fuzzy_equal(a_value, b_value) && a.path > b.path
@@ -129,9 +131,13 @@ static func _get_content_value(prop: String, content, undefined_value = null):
 	return undefined_value
 
 static func _match_content(content, params) -> bool:
-	var filters = params.get("filters")
-	if !filters:
-		return true
+	var sorts = params.get("sorts") if params.has("sorts") else []
+	var filters = params.get("filters") if params.has("filters") else []
+	
+	for sort in sorts:
+		var value = _get_content_value(sort.prop, content, UNDEFINED)
+		if _GotmUtility.is_strictly_equal(value, UNDEFINED):
+			return false
 	for filter in filters:
 		if filter.prop == "namePart":
 			if !filter.has("value") || !_GotmUtility.is_partial_search_match(filter.value, content.name):
@@ -166,14 +172,26 @@ static func _match_content(content, params) -> bool:
 
 static func _get_by_content_sort(params: Dictionary) -> Array:
 	var matches := []
+	params = params.duplicate()
+	var sort = _GotmUtility.get_last_element(params.sorts) if params.get("sorts") else {"prop": "created", "descending": true}
+	params.sorts = [sort]
+	var is_private = null
+	var filters = params.filters if params.has("filters") else []
+	for filter in filters:
+		if filter.prop == "private":
+			is_private = !!filter.get("value")
+	if is_private == null:
+		filters = filters.duplicate()
+		filters.append({"prop": "private", "value": false})
+		params.filters = filters
 	for content in _LocalStore.get_all("contents"):
 		if _match_content(content, params):
 			matches.append(content)
-
-	var sort = _GotmUtility.get_last_element(params.sorts) if params.get("sorts") else {"prop": "created", "descending": true}
 	var descending = !!sort.get("descending")
 	var predicate := ContentSearchPredicate.new()
 	predicate.prop = sort.prop
+	for m in matches:
+		m.value = _get_content_value(sort.prop, m, UNDEFINED)
 	matches.sort_custom(predicate, "is_greater_than" if descending else "is_less_than")
 	if params.get("after"):
 		var cursor = _decode_cursor(params.after)
@@ -181,7 +199,7 @@ static func _get_by_content_sort(params: Dictionary) -> Array:
 		var after_matches := []
 		for i in range(0, matches.size()):
 			var m = matches[i]
-			m = {"value": _GotmUtility.get_nested_value(sort.prop, m), "path": m.path}
+			m = {"value": m.value, "path": m.path}
 			if cursor_content.path == m.path && cursor_content.value == m.value:
 				continue
 			if descending && predicate.is_greater_than(cursor_content, m) || !descending && predicate.is_less_than(cursor_content, m):

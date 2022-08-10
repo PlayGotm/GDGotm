@@ -28,15 +28,15 @@ static func filter(query, property_path: String, value):
 	return query
 	
 static func filter_min(query, property_path: String, value, is_exclusive: bool = false):
-	query.filters.push({"property_path": property_path, "min_value": value, "is_min_exclusive": is_exclusive})
+	query.filters.append({"property_path": property_path, "min_value": value, "is_min_exclusive": is_exclusive})
 	return query
 
 static func filter_max(query, property_path: String, value, is_exclusive: bool = false):
-	query.filters.push({"property_path": property_path, "max_value": value, "is_max_exclusive": is_exclusive})
+	query.filters.append({"property_path": property_path, "max_value": value, "is_max_exclusive": is_exclusive})
 	return query
 
 static func sort(query, property_path: String, ascending: bool = false):
-	query.sorts.push({"property_path": property_path, "ascending": ascending})
+	query.sorts.append({"property_path": property_path, "descending": !ascending})
 	return query
 
 static func copy(query):

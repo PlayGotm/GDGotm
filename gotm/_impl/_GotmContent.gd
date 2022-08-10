@@ -26,7 +26,7 @@ class_name _GotmContent
 
 static func get_implementation(id = null):
 	var config := _Gotm.get_config()
-	if !_Gotm.is_global_feature(config.force_local_scores, config.beta_unsafe_force_global_scores) || _LocalStore.fetch(id):
+	if !_Gotm.is_global_feature(config.force_local_contents, config.beta_unsafe_force_global_contents) || _LocalStore.fetch(id):
 		return _GotmContentLocal
 	return _GotmStore
 
@@ -66,7 +66,7 @@ static func create(data = PoolByteArray(), properties: Dictionary = {}, key: Str
 # Update this score.
 # Null is ignored.
 static func update(content_or_id, data = null, properties = null, key = null, name = null):
-	var id = _GotmUtility.coerce_resource_id(content_or_id)
+	var id = _coerce_id(content_or_id)
 	if !id:
 		return
 	if key:
@@ -90,13 +90,13 @@ static func update(content_or_id, data = null, properties = null, key = null, na
 
 # Delete this score.
 static func delete(content_or_id) -> void:
-	var id = _GotmUtility.coerce_resource_id(content_or_id)
+	var id = _coerce_id(content_or_id)
 	yield(get_implementation(id).delete(id), "completed")
 	_clear_cache()
 
 # Get an existing score.
 static func fetch(content_or_id):
-	var id = _GotmUtility.coerce_resource_id(content_or_id)
+	var id = _coerce_id(content_or_id)
 	var data = yield(get_implementation(id).fetch(id), "completed")
 	return _format(data, _Gotm.create_instance("GotmContent"))
 
@@ -136,7 +136,7 @@ static func _format_filter(filter):
 
 static func list(query: GotmQuery, after_content_or_id = null) -> Array:
 	query = _GotmQuery.get_formatted(query)
-	var after_id = _GotmUtility.coerce_resource_id(after_content_or_id)
+	var after_id = _coerce_id(after_content_or_id)
 	var project = yield(_GotmUtility.get_yieldable(_get_project()), "completed")
 	if !project:
 		return
@@ -155,13 +155,13 @@ static func list(query: GotmQuery, after_content_or_id = null) -> Array:
 	for sort in query.sorts:
 		sort = _format_filter(sort)
 		if sort:
-			sort.append(sort)
+			sorts.append(sort)
 	if is_private:
 		filters.append({"prop": "author", "value": get_auth_implementation().get_auth().owner})
 	var params := {"filters": filters, "sorts": sorts, "target": project, "after": after_id}
 	_GotmUtility.delete_empty(params)
 	var implementation = _GotmContentLocal if is_local else get_implementation(after_id)
-	var data_list = yield(implementation.list("contents", "byContentSort", params), "completed")
+	var data_list = yield(implementation.list("contents", "byContentSort", params, is_private), "completed")
 	if !data_list:
 		return []
 
@@ -207,3 +207,5 @@ static func _format(data, content):
 	return content
 	
 	
+static func _coerce_id(resource_or_id):
+	return _GotmUtility.coerce_resource_id(resource_or_id, "contents")

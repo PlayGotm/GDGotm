@@ -65,3 +65,18 @@ var force_local_contents: bool = false
 # outside of https://gotm.io is not safe and is at your own risk. Your game may 
 # break if new backwards-incompatible versions of the beta features are released.
 var beta_unsafe_force_global_contents: bool = false
+
+# Marks are currently beta features and are always local when 
+# Gotm.is_live is false.
+# If true, the features are local even if a project key is provided.
+var force_local_marks: bool = false
+
+# Marks are currently beta features and are always local when 
+# Gotm.is_live is false.
+# If true and a project key is provided, the features are made global even if 
+# Gotm.is_live is false.
+#
+# UNSAFE NOTICE: Enabling global mode on beta features when your game is running
+# outside of https://gotm.io is not safe and is at your own risk. Your game may 
+# break if new backwards-incompatible versions of the beta features are released.
+var beta_unsafe_force_global_marks: bool = false

@@ -62,7 +62,7 @@ static func _format(data: Dictionary):
 	data = _GotmUtility.copy(data, {})
 	return data
 
-static func delete_sync(path: String):
+static func delete_sync(path):
 	var blob = _LocalStore.fetch(path)
 	if !blob:
 		return

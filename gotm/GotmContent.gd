@@ -67,10 +67,10 @@ var is_private: bool
 # Is useful for data that does not need to be accessible to other devices, such as game saves for offline games.
 var is_local: bool
 
-# UNIX epoch time (in milliseconds). Use OS.get_datetime_from_unix_time(score.created / 1000) to convert to date.
+# UNIX epoch time (in milliseconds). Use OS.get_datetime_from_unix_time(content.created / 1000) to convert to date.
 var updated: int
 
-# UNIX epoch time (in milliseconds). Use OS.get_datetime_from_unix_time(score.created / 1000) to convert to date.
+# UNIX epoch time (in milliseconds). Use OS.get_datetime_from_unix_time(content.created / 1000) to convert to date.
 var created: int
 
 
@@ -112,6 +112,12 @@ static func update_by_key(key: String, data = null, new_key = null, properties =
 static func delete_by_key(key: String) -> void:
 	return yield(_GotmContent.delete_by_key(key), "completed")
 
+static func upvote(content_or_id) -> void:
+	return yield(_GotmMark.create(content_or_id, "upvote"), "completed")
+
+static func downvote(content_or_id) -> void:
+	return yield(_GotmMark.create(content_or_id, "downvote"), "completed")
+
 # Use complex filtering with a GotmQuery instance.
 # For example, calling yield(GotmContent.list(GotmQuery.new().filter("properties/difficulty", "hard").sort("created")), "completed")
 # would fetch the latest created contents whose "properties" field contains {"difficulty": "hard"}.
@@ -123,9 +129,9 @@ static func delete_by_key(key: String) -> void:
 # List contents that come after a previously listed content.
 # 
 # The following keywords can be used to filter or sort contents:
-# * properties/*: Any value within the content's properties field. For example, 
-# if a content's "properties" field equals {"level": {"difficulty": "hard"}},
-# then a keyword of "properties/level/difficulty" refers to the nested "difficulty" field.
+# * properties/*: Any value within the content's properties field. For example, if a content's "properties" 
+# field equals {"level": {"difficulty": "hard"}}, then a keyword of "properties/level/difficulty" refers to 
+# the nested "difficulty" field. Contents that lack the keyword are excluded from the fetched results.
 # * key: The content's key field.
 # * name: The content's name field.
 # * user_id: The content's user_id field.
@@ -142,6 +148,7 @@ static func delete_by_key(key: String) -> void:
 # * namePart: Used for partial name search. For example, doing
 # GotmQuery.new().filter("namePart", "garlic") would match all contents
 # whose names contain "garlic". Does not support GotmQuery.filter_min, GotmQuery.filter_max or GotmQuery.sort.
+# * score: The number of upvotes minus the number of downvotes a content has gotten. Does not support GotmQuery.filter.
 # * updated: The content's updated field. Does not support GotmQuery.filter.
 # * created: The content's created field. Does not support GotmQuery.filter.
 # * size: The size of the data stored by the content. Does not support GotmQuery.filter.
@@ -151,7 +158,7 @@ static func delete_by_key(key: String) -> void:
 #
 # Limitations:
 # * The following keywords do not support GotmQuery.filter_min, GotmQuery.filter_max or GotmQuery.sort: namePart
-# * The following keywords do not support GotmQuery.filter: updated, created, size
+# * The following keywords do not support GotmQuery.filter: score, updated, created, size
 # * Contents can only be sorted by one keyword. For example, doing GotmQuery.new().sort("name").sort("key") would
 # sort the contents by key only, because it appeared last.
 # * GotmQuery.filter_min and GotmQuery.filter_max can only be used on the same keyword as GotmQuery.sort. For example,
