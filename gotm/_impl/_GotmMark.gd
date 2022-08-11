@@ -83,8 +83,9 @@ static func list_by_target(target_or_id, name) -> Array:
 		"owner": auth.owner,
 	})
 	var implementation = get_implementation(target_id)
-	var data_list = yield(implementation.list("marks", "byTargetAndOwnerAndName" if name else "byTargetAndOwner", params), "completed")
-	var local_data_list = yield(_GotmMarkLocal.list("marks", "byTargetAndOwnerAndName" if name else "byTargetAndOwner", params), "completed") if implementation != _GotmMarkLocal else []
+	var query = "byTargetAndOwnerAndName" if name else "byTargetAndOwner"
+	var data_list = yield(implementation.list("marks", query, params), "completed")
+	var local_data_list = yield(_GotmMarkLocal.list("marks", query, params), "completed") if implementation != _GotmMarkLocal else []
 	var marks = []
 	if data_list:
 		for data in data_list:
@@ -106,9 +107,13 @@ static func get_count(target_or_id, name) -> int:
 		"name": "marks/" + name,
 	}
 	var stat = yield(implementation.fetch("stats/sum", "received", params), "completed")
-	if !stat:
-		return 0
-	return stat.value
+	var local_stat = yield(_GotmMarkLocal.fetch("stats/sum", "received", params), "completed") if implementation != _GotmMarkLocal else []
+	var value: int = 0
+	if stat:
+		value += stat.value
+	if local_stat:
+		value += local_stat.value
+	return value
 
 static func _clear_cache():
 	get_implementation().clear_cache("marks")
