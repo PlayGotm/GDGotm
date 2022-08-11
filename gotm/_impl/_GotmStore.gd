@@ -93,9 +93,10 @@ static func _set_cache(path: String, data):
 	if !data:
 		_cache.erase(path)
 		return
-	for key in ["created", "updated", "expired"]:
-		if key in data:
-			data[key] = _GotmUtility.get_unix_time_from_iso(data[key])
+	if data is Dictionary:
+		for key in ["created", "updated", "expired"]:
+			if key in data:
+				data[key] = _GotmUtility.get_unix_time_from_iso(data[key])
 	_cache[path] = data
 	var timer := _GotmUtility.get_tree().create_timer(_eviction_timeout_seconds)
 	timer.connect("timeout", EvictionTimerHandler, "on_timeout", [path])
@@ -121,7 +122,7 @@ static func _cached_get_request(path: String, authenticate: bool = false) -> Dic
 	var value = yield(_request(path, HTTPClient.METHOD_GET, null, authenticate), "completed")
 	if value:
 		value = _set_cache(path, value)
-		if value.get("data") is Array && value.get("next") is String:
+		if value is Dictionary && value.get("data") is Array && value.get("next") is String:
 			for resource in value.data:
 				_set_cache(resource.path, resource)
 		

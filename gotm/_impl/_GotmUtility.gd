@@ -93,7 +93,6 @@ static func fetch_data(url: String, method: int = HTTPClient.METHOD_GET, body = 
 	var port = int(origin_parts[2]) if origin_parts.size() > 2 else -1
 	var path = url.replace(origin, "")
 	
-	var err = 0
 	var free_clients = _get_global().free_http_clients.get(origin)
 	if !(free_clients is Array):
 		free_clients = []
