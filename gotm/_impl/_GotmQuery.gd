@@ -88,6 +88,13 @@ static func get_formatted(query):
 		sort = _format_sort(sort)
 		if sort:
 			sorts.append(sort)
+	if !sorts:
+		var range_sort := ""
+		for filter in filters:
+			if filter.has("min") || filter.has("max"):
+				range_sort = filter.prop
+		if range_sort:
+			sorts.append({"prop": range_sort, "descending": true})
 	
 	query.filters = filters
 	query.sorts = sorts
