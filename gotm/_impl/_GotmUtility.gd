@@ -85,13 +85,29 @@ static func decode_cursor(cursor: String) -> Array:
 	return parse_json(Marshalls.base64_to_utf8(cursor.replace("-", "+").replace("_", "/") + "=="))
 
 
-static func fetch_data(url: String, method: int = HTTPClient.METHOD_GET, body = null, headers: PoolStringArray = []) -> FetchDataResult:
+static func parse_url(url: String):
 	var url_parts = url.split("/")
 	var origin = url_parts[0] + "//" + url_parts[2]
 	var origin_parts = origin.split(":")
 	var host = origin_parts[0] + ":" + origin_parts[1]
 	var port = int(origin_parts[2]) if origin_parts.size() > 2 else -1
 	var path = url.replace(origin, "")
+	var query_index = path.find("?")
+	var pathname = path
+	var query = ""
+	if query_index >= 0:
+		pathname = path.substr(0, query_index)
+		query = path.substr(query_index, path.length()).replace(" ", "%20")
+	return {"origin": origin, "host": host, "port": port, "pathname": pathname, "query": query, "path": pathname + query}
+	
+
+static func fetch_data(url: String, method: int = HTTPClient.METHOD_GET, body = null, headers: PoolStringArray = []) -> FetchDataResult:
+	var parsed_url = parse_url(url)
+	var origin = parsed_url.origin
+	var host = parsed_url.host
+	var port = parsed_url.port
+	var path = parsed_url.path
+	
 	
 	var free_clients = _get_global().free_http_clients.get(origin)
 	if !(free_clients is Array):
