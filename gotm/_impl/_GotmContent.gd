@@ -181,6 +181,8 @@ static func delete_by_key(key: String) -> void:
 static func _clear_cache():
 	get_implementation().clear_cache("contents")
 	get_implementation().clear_cache("blobs")
+	get_implementation().clear_cache(_Gotm.get_global().storageApiEndpoint)
+	get_implementation().clear_cache("marks")
 
 static func _get_project() -> String:
 	var Auth = get_auth_implementation()

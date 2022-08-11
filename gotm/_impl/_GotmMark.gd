@@ -54,8 +54,7 @@ static func create(target_or_id, name: String, is_local: bool = false):
 		return
 	var implementation = _GotmMarkLocal if is_local else get_implementation(target_id)
 	if implementation != _GotmMarkLocal && !(yield(_GotmAuth.fetch(), "completed")).is_registered:
-		push_error("Only registered users can create non-local marks. Target is '" + _GotmUtility.to_stable_json(target_id) + "' and name is '" + _GotmUtility.to_stable_json(name) + "'.")
-		return
+		implementation = _GotmMarkLocal
 	var data = yield(implementation.create("marks", {"target": target_id, "name": name}), "completed")
 	if data:
 		_clear_cache()
@@ -83,14 +82,16 @@ static func list_by_target(target_or_id, name) -> Array:
 		"target": target_id,
 		"owner": auth.owner,
 	})
-	var implementation = get_implementation(target_or_id)
+	var implementation = get_implementation(target_id)
 	var data_list = yield(implementation.list("marks", "byTargetAndOwnerAndName" if name else "byTargetAndOwner", params), "completed")
-	if !data_list:
-		return []
-	
+	var local_data_list = yield(_GotmMarkLocal.list("marks", "byTargetAndOwnerAndName" if name else "byTargetAndOwner", params), "completed") if implementation != _GotmMarkLocal else []
 	var marks = []
-	for data in data_list:
-		marks.append(_format(data, _Gotm.create_instance("GotmMark")))
+	if data_list:
+		for data in data_list:
+			marks.append(_format(data, _Gotm.create_instance("GotmMark")))
+	if local_data_list:
+		for data in local_data_list:
+			marks.append(_format(data, _Gotm.create_instance("GotmMark")))
 	return marks 	
 
 static func get_count(target_or_id, name) -> int:

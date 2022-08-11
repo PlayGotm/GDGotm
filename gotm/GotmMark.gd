@@ -27,9 +27,10 @@ class_name GotmMark
 # BETA FEATURE
 # A GotmMark is an action that a user assigns to something, for example
 # an upvote on a GotmContent.
-# Unless the mark target is local, only registered users can create marks 
-# with GotmMark.create (see GotmAuth.is_registered).
-# Unregistered users can only create marks with GotmMark.create_local.
+# Only registered users (see GotmAuth.is_registered) can create non-local
+# marks with GotmMark.create. If an unregistered user creates a mark
+# with GotmMark.create, the mark will be local as if it was created 
+# with GotmMark.create_local.
 
 ##############################################################
 # PROPERTIES
@@ -65,8 +66,9 @@ var target_id: String
 # * upvote, downvote
 var name: String
 
-# Is true if this mark was created with GotmMark.create_local and is only stored locally on the user's device.
-# Is useful for data that does not need to be accessible to other devices, such bookmarking favorite content.
+# Is true if this mark was created by an unregistered user or created with GotmMark.create_local.
+# Local marks are only stored locally on the user's devicem, and are useful for data that does not 
+# need to be accessible to other devices, such as bookmarking favorite content.
 var is_local: bool
 
 # UNIX epoch time (in milliseconds). Use OS.get_datetime_from_unix_time(mark.created / 1000) to convert to date.
@@ -79,12 +81,12 @@ var created: int
 
 # Create a mark for the current user.
 # See PROPERTIES above for descriptions of the arguments.
-# Unless the target is local, the current user must be registered to create marks (see GotmAuth.is_registered).
+# If the target is local or the current user is unregistered (see GotmAuth.is_registered), the mark will be local as if 
+# it was created by GotmMark.create_local.
 static func create(target_or_id, name: String) -> GotmMark:
 	return yield(_GotmMark.create(target_or_id, name), "completed")
 
 # Create a mark that is only stored locally on the user's device. Local marks are not accessible to any other player or device.
-# Both registered and unregistered user can create local marks.
 static func create_local(target_or_id, name: String) -> GotmMark:
 	return yield(_GotmMark.create_local(target_or_id, name, true), "completed")
 
