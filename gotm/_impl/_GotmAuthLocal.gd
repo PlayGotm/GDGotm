@@ -33,7 +33,7 @@ static func _get_cache():
 	var content = _GotmUtility.read_file(file_path)
 	if content:
 		_GotmUtility.copy(parse_json(content), _cache)
-		if !_cache.has("owner") && _cache.has("user"):
+		if !_cache.get("owner") && _cache.get("user"):
 			_cache.owner = _cache.user
 			_cache.erase("user")
 			_GotmUtility.write_file(file_path, to_json(_cache))
