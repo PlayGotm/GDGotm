@@ -28,7 +28,7 @@ class_name _GotmScore
 
 static func get_implementation(id = null):
 	var config := _Gotm.get_config()
-	if !_Gotm.is_global_feature(config.force_local_scores, config.beta_unsafe_force_global_scores) || _LocalStore.fetch(id):
+	if !_Gotm.is_global_api("scores") || _LocalStore.fetch(id):
 		return _GotmScoreLocal
 	return _GotmStore
 

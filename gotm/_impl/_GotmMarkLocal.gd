@@ -75,11 +75,11 @@ static func list(api: String, query: String, params: Dictionary = {}, authentica
 	if query == "byTargetAndOwner":
 		for mark in _LocalStore.get_all("marks"):
 			if mark.target == params.target && mark.owner == params.owner:
-				marks.append(mark)
+				marks.append(_format(mark))
 	elif query == "byTargetAndOwnerAndName":
 		for mark in _LocalStore.get_all("marks"):
 			if mark.target == params.target && mark.owner == params.owner && mark.name == params.name:
-				marks.append(mark)
+				marks.append(_format(mark))
 	return marks
 
 static func clear_cache(path: String) -> void:

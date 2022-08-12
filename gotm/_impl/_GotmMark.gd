@@ -28,7 +28,7 @@ class_name _GotmMark
 
 static func get_implementation(id = null):
 	var config := _Gotm.get_config()
-	if !_Gotm.is_global_feature(config.force_local_marks, config.beta_unsafe_force_global_marks) || _LocalStore.fetch(id):
+	if !_Gotm.is_global_api("marks") || _LocalStore.fetch(id):
 		return _GotmMarkLocal
 	return _GotmStore
 
@@ -85,7 +85,9 @@ static func list_by_target(target_or_id, name) -> Array:
 	var implementation = get_implementation(target_id)
 	var query = "byTargetAndOwnerAndName" if name else "byTargetAndOwner"
 	var data_list = yield(implementation.list("marks", query, params), "completed")
-	var local_data_list = yield(_GotmMarkLocal.list("marks", query, params), "completed") if implementation != _GotmMarkLocal else []
+	var local_params = params.duplicate()
+	local_params.owner = _GotmAuthLocal.get_user()
+	var local_data_list = yield(_GotmMarkLocal.list("marks", query, local_params), "completed") if implementation != _GotmMarkLocal else []
 	var marks = []
 	if data_list:
 		for data in data_list:

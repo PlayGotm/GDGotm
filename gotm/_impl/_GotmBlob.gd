@@ -26,7 +26,7 @@ class_name _GotmBlob
 
 static func get_implementation(id = null):
 	var config := _Gotm.get_config()
-	if _LocalStore.fetch(id):
+	if _LocalStore.fetch(id) || !_Gotm.has_global_api():
 		return _GotmBlobLocal
 	return _GotmStore
 

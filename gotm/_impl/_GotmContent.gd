@@ -26,7 +26,7 @@ class_name _GotmContent
 
 static func get_implementation(id = null):
 	var config := _Gotm.get_config()
-	if !_Gotm.is_global_feature(config.force_local_contents, config.beta_unsafe_force_global_contents) || _LocalStore.fetch(id):
+	if !_Gotm.is_global_api("contents") || _LocalStore.fetch(id):
 		return _GotmContentLocal
 	return _GotmStore
 

@@ -73,4 +73,18 @@ static func get_singleton():
 		return
 	return Engine.get_singleton("Gotm")
 
+static func is_global_api(api: String) -> bool:
+	var config := get_config()
+	match api:
+		"scores":
+			return is_global_feature(config.force_local_scores, config.beta_unsafe_force_global_scores)
+		"contents":
+			return is_global_feature(config.force_local_contents, config.beta_unsafe_force_global_contents)
+		"marks":
+			return is_global_feature(config.force_local_marks, config.beta_unsafe_force_global_marks)
+		_:
+			return false
 
+
+static func has_global_api() -> bool:
+	return is_global_api("scores") || is_global_api("contents") || is_global_api("marks")
