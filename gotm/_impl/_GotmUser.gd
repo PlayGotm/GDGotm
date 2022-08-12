@@ -24,7 +24,7 @@ class_name _GotmUser
 #warnings-disable
 
 static func get_implementation():
-	if !_Gotm.get_project_key():
+	if !_Gotm.has_global_api():
 		return _GotmUserLocal
 	return _GotmStore
 
