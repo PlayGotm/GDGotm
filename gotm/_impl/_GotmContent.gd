@@ -139,7 +139,7 @@ static func list(query: GotmQuery, after_content_or_id = null) -> Array:
 	var after_id = _coerce_id(after_content_or_id)
 	var project = yield(_GotmUtility.get_yieldable(_get_project()), "completed")
 	if !project:
-		return
+		return []
 	var is_local := false
 	var is_private := false
 	var filters := []
@@ -157,7 +157,12 @@ static func list(query: GotmQuery, after_content_or_id = null) -> Array:
 		if sort:
 			sorts.append(sort)
 	if is_private:
-		filters.append({"prop": "author", "value": get_auth_implementation().get_auth().owner})
+		var auth = get_auth_implementation().get_auth()
+		if auth.is_guest:
+			is_local = true
+			filters.append({"prop": "author", "value": _GotmAuthLocal.get_user()})
+		else:
+			filters.append({"prop": "author", "value": auth.owner})
 	var params := {"filters": filters, "sorts": sorts, "target": project, "after": after_id}
 	_GotmUtility.delete_empty(params)
 	var implementation = _GotmContentLocal if is_local else get_implementation(after_id)
