@@ -125,7 +125,11 @@ static func _get_refreshed_project_auth(auth: _GotmAuthData):
 		return formatted
 
 	# We manage user auths ourselves.
-	var user_auth = _read_auth(GUEST_AUTH_NAME)
+	var user_auth
+#	if _Gotm.get_global().apiOrigin.begins_with("http://localhost"):
+#		user_auth = yield(_create_development_user_authentication(), "completed")
+	if !user_auth:
+		user_auth = _read_auth(GUEST_AUTH_NAME)
 	if !user_auth:
 		user_auth = yield(_create_authentication(), "completed")
 	if !_is_auth_valid(user_auth) && user_auth && user_auth.refresh_token:
@@ -183,8 +187,10 @@ static func _write_auth(auth: _GotmAuthData):
 	var name := ""
 	if auth.project:
 		name = PROJECT_AUTH_NAME
-	else:
+	elif auth.is_guest:
 		name = GUEST_AUTH_NAME
+	else:
+		return
 	_GotmUtility.write_file(_Gotm.get_path(name), to_json({"data": auth.data, "project_key": auth.project_key}))
 
 static func _create_authentication(body: Dictionary = {}, headers: PoolStringArray = []) -> Dictionary:
@@ -192,3 +198,13 @@ static func _create_authentication(body: Dictionary = {}, headers: PoolStringArr
 	if !result.ok:
 		return
 	return _format_auth_data(result.data)
+
+static func _create_development_user_authentication() -> Dictionary:
+	var email = "gdgotm@mail.com"
+	var result = yield(_GotmUtility.fetch_json(_Gotm.get_global().apiOrigin + "/authentications/email?query=withCallbackUrl&callbackUrl=https://website.com&email=" + email), "completed")
+	if !result.ok || !(result.data.token is String):
+		return
+	var sign_in_url = result.data.token
+	sign_in_url += "&email=" + email
+	
+	return yield(_create_authentication({"signInUrl": sign_in_url}), "completed")
