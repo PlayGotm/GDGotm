@@ -36,6 +36,9 @@ var id: String
 # The size of the blob's data in bytes.
 var size: int
 
+# Is true if this blob is only stored locally on the user's device.
+var is_local: bool
+
 ##############################################################
 # METHODS
 ##############################################################

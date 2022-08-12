@@ -26,12 +26,9 @@ class_name _Gotm
 class __GotmGlobalData:
 	var config: GotmConfig
 	var version: String = "0.0.1"
-#	var apiOrigin: String = "https://api.gotm.io"
-	var apiOrigin: String = "http://localhost:7080"
-#	var apiWorkerOrigin: String = "https://gotm-api-worker-eubrk3zsia-uk.a.run.app"
-	var apiWorkerOrigin: String = "http://localhost:7880"
-#	var storageApiEndpoint: String = "https://storage.googleapis.com/gotm-api-production-d13f0.appspot.com"
-	var storageApiEndpoint: String = "http://localhost:7180"
+	var apiOrigin: String = "https://api.gotm.io"
+	var apiWorkerOrigin: String = "https://gotm-api-worker-eubrk3zsia-uk.a.run.app"
+	var storageApiEndpoint: String = "https://storage.googleapis.com/gotm-api-production-d13f0.appspot.com"
 	var classes: Dictionary = {}
 
 const _version = "0.0.1"

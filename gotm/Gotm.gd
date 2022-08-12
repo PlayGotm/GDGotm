@@ -66,7 +66,7 @@ var lobby: GotmLobby = null
 # Initialize Gotm with the provided configuration.
 # See GotmConfig for more details.
 static func initialize(config = GotmConfig.new()) -> void:
-	_Gotm.initialize(config, {"GotmScore": GotmScore, "GotmPeriod": GotmPeriod, "GotmUser": GotmUser, "GotmQuery": GotmQuery, "GotmContent": GotmContent, "GotmAuth": GotmAuth, "GotmMark": GotmMark})
+	_Gotm.initialize(config, {"GotmScore": GotmScore, "GotmPeriod": GotmPeriod, "GotmUser": GotmUser, "GotmQuery": GotmQuery, "GotmContent": GotmContent, "GotmAuth": GotmAuth, "GotmMark": GotmMark, "GotmBlob": GotmBlob})
 
 # The API is live when the game runs on gotm.io.
 # Running the game in the web player (gotm.io/web-player) also counts as live.
