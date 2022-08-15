@@ -280,8 +280,13 @@ static func encode_url_component(string: String) -> String:
 			encoded += "%%%02X" % [c]
 	return encoded
 
+static func get_engine_unix_time() -> int:
+	var global := _get_global()
+	return global.start_unix_time + OS.get_ticks_msec() - global.start_ticks
+	
+
 # Converts UNIX epoch time in milliseconds to a date ISO 8601 string.
-static func get_iso_from_unix_time(unix_time_ms: int = OS.get_unix_time() * 1000 + OS.get_ticks_msec() % 1000) -> String:
+static func get_iso_from_unix_time(unix_time_ms: int = get_engine_unix_time()) -> String:
 	var datetime = OS.get_datetime_from_unix_time(unix_time_ms / 1000)
 	return "%04d-%02d-%02dT%02d:%02d:%02d.%03dZ" % [datetime.year, datetime.month, datetime.day, datetime.hour, datetime.minute, datetime.second, unix_time_ms % 1000]
 
@@ -321,6 +326,8 @@ class GlobalData:
 	var rng := RandomNumberGenerator.new()
 	var search_string_encoders := _create_search_string_encoders()
 	var free_http_clients := {}
+	var start_unix_time = OS.get_unix_time() * 1000
+	var start_ticks = OS.get_ticks_msec()
 	
 	func _init():
 		rng.randomize()
