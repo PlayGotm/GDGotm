@@ -72,11 +72,11 @@ static func encode_cursor(score_id_or_value, ascending: bool) -> String:
 		var score = yield(fetch(score_id_or_value), "completed")
 		if !score:
 			return ""
-		return _GotmUtility.encode_cursor([_GotmScoreUtility.encode_cursor_value(score.value, score.created), score.id.replace("/", "-") + "~"])
+		return _GotmUtility.encode_cursor([[score.value, score.created], score.id.replace("/", "-") + "~"])
 	elif score_id_or_value is float || score_id_or_value is int:
 		yield(_GotmUtility.get_tree(), "idle_frame")
 		var created = 253402300799000 if ascending else 0
-		return _GotmUtility.encode_cursor([_GotmScoreUtility.encode_cursor_value(float(score_id_or_value), created), "~"])
+		return _GotmUtility.encode_cursor([[float(score_id_or_value), created], "~"])
 	
 	return ""
 

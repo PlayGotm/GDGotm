@@ -197,35 +197,23 @@ class ScoreSearchPredicate:
 	var is_oldest_first: bool = false
 	
 	func is_less_than(a, b) -> bool:
-		if a.value is String && b.value is String:
-			if a.value.length() < b.value.length() || a.value.length() == b.value.length() && a.value.casecmp_to(b.value) < 0:
-				return true
-		else:
-			if a.value < b.value:
-				return true
-		
+		if a.value < b.value:
+			return true
 		if a.value != b.value:
 			return false
 		if a.created == b.created && a.path < b.path:
 			return true
-			
 		if is_oldest_first:
 			return a.created > b.created
 		return a.created < b.created
 
 	func is_greater_than(a, b) -> bool:
-		if a.value is String && b.value is String:
-			if a.value.length() > b.value.length() || a.value.length() == b.value.length() && a.value.casecmp_to(b.value) > 0:
-				return true
-		else:
-			if a.value > b.value:
-				return true
-				
+		if a.value > b.value:
+			return true
 		if a.value != b.value:
 			return false
 		if a.created == b.created && a.path > b.path:
 			return true
-		
 		if is_oldest_first:
 			return a.created < b.created
 		return a.created > b.created
@@ -254,11 +242,11 @@ static func _fetch_by_score_sort(params) -> Array:
 		matches[i] = _format(matches[i])
 	if params.get("after"):
 		var cursor = _decode_cursor(params.after)
-		var cursor_score = {"value": cursor[0], "path": cursor[1], "created": 0}
+		var cursor_score = {"value": cursor[0][0], "path": cursor[1], "created": cursor[0][1]}
 		var after_matches := []
 		for i in range(0, matches.size()):
 			var m = matches[i]
-			m = {"value": _GotmScoreUtility.encode_cursor_value(m.value, m.created)._bigint, "path": m.path, "created": m.created}
+			m = {"value": m.value, "path": m.path, "created": m.created}
 			if cursor_score.path == m.path && cursor_score.value == m.value:
 				continue
 			if descending && predicate.is_greater_than(cursor_score, m) || !descending && predicate.is_less_than(cursor_score, m):
@@ -277,10 +265,10 @@ static func _fetch_by_score_sort(params) -> Array:
 
 static func _decode_cursor(cursor: String) -> Array:
 	var decoded := _GotmUtility.decode_cursor(cursor)
-	decoded[0] = decoded[0]._bigint
+	decoded[0][0] = float(decoded[0][0])
+	decoded[0][1] = int(decoded[0][1])
 	var target: String = decoded[1]
-	if target:
-		decoded[1] = target.substr(0, target.length() - 1).replace("-", "/")
+	decoded[1] = target.substr(0, target.length() - 1).replace("-", "/")
 	return decoded
 
 static func _format(data: Dictionary):
