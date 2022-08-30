@@ -23,7 +23,7 @@
 class_name _GotmAuth
 #warnings-disable
 
-const _global := {"auth": null, "queue": null, "has_read_from_file": false, "user_id": null}
+const _global := {"auth": null, "queue": null, "has_read_from_file": false, "gotm_auth": null}
 
 class _GotmAuthData:
 	var data: Dictionary
@@ -38,6 +38,8 @@ class _GotmAuthData:
 
 static func fetch():
 	var auth = yield(get_auth_async(), "completed")
+	if !auth:
+		auth = _global.gotm_auth
 	if !auth:
 		auth = _GotmAuthLocal.get_auth()
 	if !auth:
@@ -73,8 +75,8 @@ static func get_auth_async():
 	_global.queue = queue
 	
 	var gotm = _Gotm.get_singleton()
-	if gotm && !_global.user_id:
-		_global.user_id = yield(gotm.get_user_id(), "completed")
+	if gotm && !_global.gotm_auth:
+		_global.gotm_auth = _format_auth_data(yield(gotm.get_auth(), "completed"))
 		auth = get_auth()
 		_global.auth = auth
 	if !auth:
@@ -147,9 +149,9 @@ static func _is_auth_valid(auth: _GotmAuthData) -> bool:
 		return false
 	if auth.project && auth.project_key != _Gotm.get_project_key():
 		return false
-	var gotm = _Gotm.get_singleton()
-	if gotm:
-		if !auth.owner || auth.owner != _global.user_id:
+	
+	if _Gotm.get_singleton():
+		if !auth.owner || !_global.gotm_auth || auth.owner != _global.gotm_auth.owner:
 			return false
 	return true
 

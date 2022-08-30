@@ -103,7 +103,7 @@ static func fetch(mark_or_id) -> GotmMark:
 static func list_by_target(target_or_id, name: String = "") -> Array:
 	return yield(_GotmMark.list_by_target(target_or_id, name), "completed")
 
-# Get the number of marks with a certain name that have been assigned to 
-# a target by all users.
-static func get_count(target_or_id, name: String) -> int:
+# Get the number of marks all users have assigned to a target.
+# If name is provided, only count marks with that name.
+static func get_count(target_or_id, name: String = "") -> int:
 	return yield(_GotmMark.get_count(target_or_id, name), "completed")

@@ -80,6 +80,10 @@ static func update(content_or_id, data = null, properties = null, key = null, na
 		"name": name,
 	})
 	if data != null:
+		if data is Node:
+			var packed_scene = PackedScene.new()
+			packed_scene.pack(data)
+			data = packed_scene
 		var blob = yield(get_blob_implementation(id).create("blobs/upload", {"target": id, "data": data}), "completed")
 		if blob:
 			body.data = blob.path
@@ -95,22 +99,35 @@ static func delete(content_or_id) -> void:
 	_clear_cache()
 
 # Get an existing score.
-static func fetch(content_or_id):
+static func fetch(content_or_id, type = ""):
 	var id = _coerce_id(content_or_id)
+	if type == "properties" && content_or_id is Object && content_or_id.has("properties"):
+		yield(_GotmUtility.get_tree(), "idle_frame")
+		return content_or_id.properties
 	var data = yield(get_implementation(id).fetch(id), "completed")
+	if data && type:
+		if type == "properties":
+			return data.props
+		return yield(_GotmBlob.get_data(data.data, type), "completed")
 	return _format(data, _Gotm.create_instance("GotmContent"))
+	
 
-static func get_by_key(key: String):
+static func get_by_key(key: String, type = ""):
 	var project = yield(_GotmUtility.get_yieldable(_get_project()), "completed")
 	if !project || !key:
 		return
-	var local_content = _GotmContentLocal.get_by_key_sync(key)
-	if local_content:
-		return _format(local_content[0], _Gotm.create_instance("GotmContent"))
-	var data_list = yield(get_implementation().list("contents", "byKey", {"target": project, "key": key}), "completed")
+	var data_list
+	data_list = _GotmContentLocal.get_by_key_sync(key)
+	if !data_list:
+		data_list = yield(get_implementation().list("contents", "byKey", {"target": project, "key": key}), "completed")
 	if !data_list:
 		return
-	return _format(data_list[0], _Gotm.create_instance("GotmContent"))
+	var data = data_list[0]
+	if data && type:
+		if type == "properties":
+			return data.props
+		return yield(_GotmBlob.get_data(data.data, type), "completed")
+	return _format(data, _Gotm.create_instance("GotmContent"))
 
 static func _format_filter(filter):
 	filter = filter.duplicate(true)

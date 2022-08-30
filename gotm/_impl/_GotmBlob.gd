@@ -36,12 +36,22 @@ static func fetch(blob_or_id):
 	var data = yield(get_implementation(id).fetch(id), "completed")
 	return _format(data, _Gotm.create_instance("GotmBlob"))
 
-static func fetch_data(blob_or_id):
+static func fetch_data(blob_or_id, type = ""):
 	var id = _coerce_id(blob_or_id)
 	if !id:
 		yield(_GotmUtility.get_tree(), "idle_frame")
 		return
-	return yield(get_implementation(id).fetch(_Gotm.get_global().storageApiEndpoint + "/" + id), "completed")
+	var data = yield(get_implementation(id).fetch(_Gotm.get_global().storageApiEndpoint + "/" + id), "completed")
+	if !data || !type:
+		return data
+		
+	match type:
+		"node":
+			return bytes2var(data).instance()			
+		"variant":
+			return bytes2var(data)
+		_:
+			return data
 
 static func _coerce_id(resource_or_id):
 	return _GotmUtility.coerce_resource_id(resource_or_id, "blobs")

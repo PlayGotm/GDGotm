@@ -48,5 +48,5 @@ static func fetch(blob_or_id) -> GotmBlob:
 	return yield(_GotmBlob.fetch(blob_or_id), "completed")
 
 # Get the blob's data as a PoolByteArray.
-static func fetch_data(blob_or_id) -> PoolByteArray:
-	return yield(_GotmBlob.fetch_data(blob_or_id), "completed")
+static func get_data(blob_or_id) -> PoolByteArray:
+	return yield(_GotmBlob.get_data(blob_or_id), "completed")

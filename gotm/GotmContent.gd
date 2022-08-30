@@ -50,7 +50,7 @@ var key: String
 # Optional name searchable with partial search.
 var name: String
 
-# Unique identifier of this content's data. Use GotmBlob.fetch_data(content.blob_id) to get the data as a PoolByteArray.
+# Unique identifier of this content's data. Use GotmBlob.get_ta(content.blob_id) to get the data as a PoolByteArray.
 var blob_id: String
 
 # Optional metadata to attach to the content, 
@@ -112,11 +112,38 @@ static func update_by_key(key: String, data = null, new_key = null, properties =
 static func delete_by_key(key: String) -> void:
 	return yield(_GotmContent.delete_by_key(key), "completed")
 
-static func upvote(content_or_id) -> void:
-	return yield(_GotmMark.create(content_or_id, "upvote"), "completed")
+# Get existing content's data as bytes.
+static func get_data(content_or_id) -> PoolByteArray:
+	return yield(_GotmContent.fetch(content_or_id, "data"), "completed")
 
-static func downvote(content_or_id) -> void:
-	return yield(_GotmMark.create(content_or_id, "downvote"), "completed")
+# Get existing content's data as an instanced Node.
+static func get_node(content_or_id) -> Node:
+	return yield(_GotmContent.fetch(content_or_id, "node"), "completed")
+
+# Get existing content's data as a Variant.
+static func get_variant(content_or_id):
+	return yield(_GotmContent.fetch(content_or_id, "variant"), "completed")
+
+# Get existing content's properties.
+static func get_properties(content_or_id):
+	return yield(_GotmContent.fetch(content_or_id, "properties"), "completed")
+
+
+# Get existing content's data as bytes by key.
+static func get_data_by_key(key: String) -> PoolByteArray:
+	return yield(_GotmContent.get_by_key(key, "data"), "completed")
+
+# Get existing content's data as an instanced Node by key.
+static func get_node_by_key(key: String) -> Node:
+	return yield(_GotmContent.get_by_key(key, "node"), "completed")
+
+# Get existing content's data as a Variant by key.
+static func get_variant_by_key(key: String):
+	return yield(_GotmContent.get_by_key(key, "variant"), "completed")
+
+# Get existing content's properties bytes by key.
+static func get_properties_by_key(key: String) -> Dictionary:
+	return yield(_GotmContent.get_by_key(key, "properties"), "completed")
 
 # Use complex filtering with a GotmQuery instance.
 # For example, calling yield(GotmContent.list(GotmQuery.new().filter("properties/difficulty", "hard").sort("created")), "completed")
@@ -141,12 +168,14 @@ static func downvote(content_or_id) -> void:
 # in GotmQuery.new().filter("is_private", true).filter("user_id", Gotm.user.id). This is because a user
 # is not permitted to view another user's private contents.
 # * is_local: The content's is_local field.
+# * upvote_user_id: Id of user that has upvoted the content.
+# * downvote_user_id: Id of user that has downvoted the content.
 # * directory: The "directory" of the content's key field. For example,
 # if a content's key is "a/b/c", then its directory is "a/b".
 # * extension: The "extension" of the content's key field. For example,
 # if a content's key is "a/b/c.txt", then its extension is "txt".
-# * namePart: Used for partial name search. For example, doing
-# GotmQuery.new().filter("namePart", "garlic") would match all contents
+# * name_part: Used for partial name search. For example, doing
+# GotmQuery.new().filter("name_part", "garlic") would match all contents
 # whose names contain "garlic". Does not support GotmQuery.filter_min, GotmQuery.filter_max or GotmQuery.sort.
 # * score: The number of upvotes minus the number of downvotes a content has gotten. Does not support GotmQuery.filter.
 # * updated: The content's updated field. Does not support GotmQuery.filter.
@@ -157,7 +186,7 @@ static func downvote(content_or_id) -> void:
 # GotmQuery.filter_max and GotmQuery.sort, which you can read about below.
 #
 # Limitations:
-# * The following keywords do not support GotmQuery.filter_min, GotmQuery.filter_max or GotmQuery.sort: namePart
+# * The following keywords do not support GotmQuery.filter_min, GotmQuery.filter_max or GotmQuery.sort: name_part
 # * The following keywords do not support GotmQuery.filter: score, updated, created, size
 # * Contents can only be sorted by one keyword. For example, doing GotmQuery.new().sort("name").sort("key") would
 # sort the contents by key only, because it appeared last.
