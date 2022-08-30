@@ -28,7 +28,7 @@ var key: String
 ## Optional name searchable with partial search.
 var name: String
 
-## Unique identifier of this content's data. Use GotmBlob.get_ta(content.blob_id) to get the data as a PoolByteArray.
+## Unique identifier of this content's data. Use GotmBlob.get_data(content.blob_id) to get the data as a PoolByteArray.
 var blob_id: String
 
 ## Optional metadata to attach to the content, 
