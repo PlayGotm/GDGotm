@@ -27,7 +27,7 @@ signal files_dropped(files, screen)
 ##############################################################
 # PROPERTIES
 ##############################################################
-## These are all read only.
+# These are all read only.
 
 ## Player information.
 var user: GotmUser = GotmUser.new()
