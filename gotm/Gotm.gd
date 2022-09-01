@@ -7,6 +7,22 @@ extends Node
 ## Add this script as a global autoload. Make sure the global autoload is named 
 ## "Gotm". It must be named "Gotm" for it to work.
 ##
+## See also:
+## * GotmAuth
+## * GotmBlob
+## * GotmConfig
+## * GotmContent
+## * GotmDebug
+## * GotmFile
+## * GotmLeaderboard
+## * GotmLobby
+## * GotmLobbyFetch
+## * GotmMark
+## * GotmPeriod
+## * GotmQuery
+## * GotmScore
+## * GotmUser
+##
 ## @tutorial: https://gotm.io/docs/gdgotm
 
 
