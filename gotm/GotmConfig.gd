@@ -1,6 +1,10 @@
 class_name GotmConfig
 #warnings-disable
 
+
+## Configuration options when initializing GDGotm.
+
+
 ## The project key gives your game access to Gotm's cloud and lets you share data
 ## between players, for example scores and leaderboards. You can create a key in 
 ## your game's Gotm dashboard (https://gotm.io/dashboard).

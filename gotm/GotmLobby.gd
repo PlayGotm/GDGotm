@@ -6,6 +6,8 @@ class_name GotmLobby
 ##
 ## Lobbies can be joined either directly through an 'invite_link', or by
 ## joining lobbies fetched with the 'GotmLobbyFetch' class.
+##
+## @tutorial: https://gotm.io/docs/lobby
 
 ##############################################################
 # SIGNALS

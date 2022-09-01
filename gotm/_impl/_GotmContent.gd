@@ -25,10 +25,6 @@ static func is_guest():
 		return true
 	return !!auth.is_guest
 
-
-# Create a score entry for the current user.
-# Scores can be fetched via a GotmLeaderboard instance.
-# See PROPERTIES above for descriptions of the arguments.
 static func create(data = PoolByteArray(), properties: Dictionary = {}, key: String = "", name: String = "", is_private: bool = false, is_local: bool = false):
 	properties = _GotmUtility.clean_for_json(properties)
 	var implementation = _GotmContentLocal if is_local || is_private && yield(is_guest(), "completed") else get_implementation()
@@ -41,8 +37,6 @@ static func create(data = PoolByteArray(), properties: Dictionary = {}, key: Str
 	_clear_cache()
 	return content
 
-# Update this score.
-# Null is ignored.
 static func update(content_or_id, data = null, properties = null, key = null, name = null):
 	var id = _coerce_id(content_or_id)
 	if !id:
@@ -70,13 +64,11 @@ static func update(content_or_id, data = null, properties = null, key = null, na
 		_clear_cache()
 	return _format(content, _Gotm.create_instance("GotmContent"))
 
-# Delete this score.
 static func delete(content_or_id) -> void:
 	var id = _coerce_id(content_or_id)
 	yield(get_implementation(id).delete(id), "completed")
 	_clear_cache()
 
-# Get an existing score.
 static func fetch(content_or_id, type = ""):
 	var id = _coerce_id(content_or_id)
 	if type == "properties" && content_or_id is Object && content_or_id.has("properties"):

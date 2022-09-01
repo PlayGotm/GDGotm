@@ -2,7 +2,8 @@ class_name GotmLobbyFetch
 #warnings-disable
 
 ## Used for fetching non-hidden and non-locked lobbies.
-
+##
+## @tutorial: https://gotm.io/docs/lobby
 
 
 ##############################################################

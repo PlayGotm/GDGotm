@@ -2,9 +2,6 @@ class_name _GotmPeriod
 #warnings-disable
 
 
-# A utility class for representing a time period.
-
-
 class TimeGranularity:
 	const YEAR = "year"
 	const MONTH = "month"

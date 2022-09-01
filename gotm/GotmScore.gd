@@ -4,6 +4,8 @@ class_name GotmScore
 ##BETA FEATURE
 ## A score entry used for leaderboards.
 ## To fetch ranks and scores, see the GotmLeaderboard class.
+##
+## @tutorial: https://gotm.io/docs/leaderboard
 
 ##############################################################
 # PROPERTIES

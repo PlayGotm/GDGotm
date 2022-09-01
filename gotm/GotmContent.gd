@@ -6,6 +6,8 @@ class_name GotmContent
 ## A GotmContent is a piece of data that is used to affect your game's
 ## content dynamically, such as player-generated content, game saves,
 ## downloadable packs/mods or remote configuration.
+##
+## @tutorial: https://gotm.io/docs/content
 
 ##############################################################
 # PROPERTIES
@@ -23,23 +25,23 @@ var id: String
 var user_id: String
 
 ## Optional unique key.
-var key: String
+var key: String = ""
 
 ## Optional name searchable with partial search.
-var name: String
+var name: String = ""
 
 ## Unique identifier of this content's data. Use GotmBlob.get_data(content.blob_id) to get the data as a PoolByteArray.
-var blob_id: String
+var blob_id: String = ""
 
 ## Optional metadata to attach to the content, 
 ## for example {level: "desert1", difficulty: "hard"}.
 ## When listing contents GotmContent.list, you can optionally 
 ## filter and sort with these properties. 
-var properties: Dictionary
+var properties: Dictionary = {}
 
 ## Optionally make this content inaccessible to other users. Private content can only be fetched by the user
 ## who created it via GotmContent.list. Is useful for personal data such as game saves.
-var is_private: bool
+var is_private: bool = false
 
 ## Is true if this content was created with GotmContent.create_local and is only stored locally on the user's device.
 ## Is useful for data that does not need to be accessible to other devices, such as game saves for offline games.
@@ -127,11 +129,8 @@ static func get_properties_by_key(key: String) -> Dictionary:
 ## For example, calling yield(GotmContent.list(GotmQuery.new().filter("properties/difficulty", "hard").sort("created")), "completed")
 ## would fetch the latest created contents whose "properties" field contains {"difficulty": "hard"}.
 ##
-## @param query
-## List contents according to the filters and sorts of the GotmQuery instance.
-##
-## @param after_content_or_id
-## List contents that come after a previously listed content.
+## @param query List contents according to the filters and sorts of the GotmQuery instance.
+## @param after_content_or_id List contents that come after a previously listed content.
 ## 
 ## The following keywords can be used to filter or sort contents:
 ## * properties/*: Any value within the content's properties field. For example, if a content's "properties" 
