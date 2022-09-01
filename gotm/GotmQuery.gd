@@ -48,22 +48,22 @@ static func create(filters: Array = [], sorts: Array = []) -> GotmQuery:
 
 ## Represents a filter created by a call to GotmQuery.filter, GotmQuery.filter_min or GotmQuery.filter_max.
 class Filter:
-	## The path of the property to apply the filter to.
+## The path of the property to apply the filter to.
 	var property_path: String
-	## Value which the property must be equal to.
+## Value which the property must be equal to.
 	var value = null
-	## Value which the property must be greater than or equal to.
+## Value which the property must be greater than or equal to.
 	var min_value = null
-	## Value which the property must be lesser than or equal to.
+## Value which the property must be lesser than or equal to.
 	var max_value = null
-	## If true, the property's value  must be greater than min_value.
+## If true, the property's value  must be greater than min_value.
 	var is_min_exclusive: bool = false
-	## If true, the proeprty's value must be lesser than max_value.
+## If true, the proeprty's value must be lesser than max_value.
 	var is_max_exclusive: bool = false
 
 ## Represents a sort created by a call to GotmQuery.sort.
 class Sort:
-	## The path of the property to sort by.
+## The path of the property to sort by.
 	var property_path: String
-	## If true, sort in ascending order so that the lowest value comes first.
+## If true, sort in ascending order so that the lowest value comes first.
 	var ascending: bool = false

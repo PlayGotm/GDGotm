@@ -6,19 +6,19 @@ class_name GotmPeriod
 
 ## A certain time unit.
 class TimeGranularity:
-	## A year starts on the first day of the year and ends on the last day of the year.
-	## A sliding year starts 365 ago and ends now.
+## A year starts on the first day of the year and ends on the last day of the year.
+## A sliding year starts 365 ago and ends now.
 	const YEAR = "year"
-	## A month starts on the first day of the month and ends on the last day of the month.
-	## A sliding month starts 30 days ago and ends now.
+## A month starts on the first day of the month and ends on the last day of the month.
+## A sliding month starts 30 days ago and ends now.
 	const MONTH = "month"
-	## A week starts on the week's Monday and ends on the week's Sunday.
-	## A sliding week starts 7 days ago and ends now.
+## A week starts on the week's Monday and ends on the week's Sunday.
+## A sliding week starts 7 days ago and ends now.
 	const WEEK = "week"
-	## A day starts on the first millisecond of the day and ends at the last millisecond of the day.
-	## A sliding day starts 24 hours ago and ends now.
+## A day starts on the first millisecond of the day and ends at the last millisecond of the day.
+## A sliding day starts 24 hours ago and ends now.
 	const DAY = "day"
-	## Starts at the absolute beginning of time and ends at the absolut ending of time.
+## Starts at the absolute beginning of time and ends at the absolut ending of time.
 	const ALL = ""
 
 ## Current time unit.
