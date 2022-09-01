@@ -2,14 +2,12 @@ extends Node
 #warnings-disable
 
 
-## Official GDScript API for games on gotm.io
-## This plugin serves as a polyfill while developing against the API locally.
-##
-## The 'real' API calls are only available when running the game live on gotm.io. 
-## Running the game in the web player (gotm.io/web-player) also counts as live.
+## This is the entrypoint to GDGotm.
 ##
 ## Add this script as a global autoload. Make sure the global autoload is named 
 ## "Gotm". It must be named "Gotm" for it to work.
+##
+## @tutorial: https://gotm.io/docs/gdgotm
 
 
 ##############################################################
@@ -40,7 +38,7 @@ var lobby: GotmLobby = null
 # METHODS
 ##############################################################
 
-## Initialize Gotm with the provided configuration.
+## Initialize GDGotm with the provided configuration.
 ## See GotmConfig for more details.
 static func initialize(config = GotmConfig.new()) -> void:
 	_Gotm.initialize(config, {"GotmScore": GotmScore, "GotmPeriod": GotmPeriod, "GotmUser": GotmUser, "GotmQuery": GotmQuery, "GotmContent": GotmContent, "GotmAuth": GotmAuth, "GotmMark": GotmMark, "GotmBlob": GotmBlob})

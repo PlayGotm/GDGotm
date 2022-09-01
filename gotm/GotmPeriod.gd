@@ -2,7 +2,7 @@ class_name GotmPeriod
 #warnings-disable
 
 
-# A utility class for representing a time period.
+## A utility class for representing a time period.
 
 
 class TimeGranularity:
