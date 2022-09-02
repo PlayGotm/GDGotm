@@ -20,7 +20,7 @@ var user_id: String
 
 ## Is true if the user has a registered account.
 ## Some functions in this plugin requires that the current user
-## is registered, for example GotmContent.upvote.
+## is registered, for example GotmMark.create.
 var is_registered: bool
 
 ##############################################################
