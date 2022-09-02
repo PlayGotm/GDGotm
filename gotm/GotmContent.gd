@@ -3,6 +3,7 @@ class_name GotmContent
 
 
 ## BETA FEATURE
+##
 ## A GotmContent is a piece of data that is used to affect your game's
 ## content dynamically, such as player-generated content, game saves,
 ## downloadable packs/mods or remote configuration.

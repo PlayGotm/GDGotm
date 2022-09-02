@@ -2,13 +2,14 @@ class_name GotmMark
 #warnings-disable
 
 
-# BETA FEATURE
-# A GotmMark is an action that a user assigns to something, for example
-# an upvote on a GotmContent.
-# Only registered users (see GotmAuth.is_registered) can create non-local
-# marks with GotmMark.create. If an unregistered user creates a mark
-# with GotmMark.create, the mark will be local as if it was created 
-# with GotmMark.create_local.
+## BETA FEATURE
+##
+## A GotmMark is an action that a user assigns to something, for example
+## an upvote on a GotmContent.
+## Only registered users (see GotmAuth.is_registered) can create non-local
+## marks with GotmMark.create. If an unregistered user creates a mark
+## with GotmMark.create, the mark will be local as if it was created 
+## with GotmMark.create_local.
 
 ##############################################################
 # PROPERTIES

@@ -1,7 +1,8 @@
 class_name GotmScore
 #warnings-disable
 
-##BETA FEATURE
+## BETA FEATURE
+##
 ## A score entry used for leaderboards.
 ## To fetch ranks and scores, see the GotmLeaderboard class.
 ##

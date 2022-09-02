@@ -2,6 +2,7 @@ class_name GotmLeaderboard
 #warnings-disable
 
 ## BETA FEATURE
+##
 ## Used for fetching ranks and scores.
 ## You do not need to create a leaderboard before creating scores.
 ##
