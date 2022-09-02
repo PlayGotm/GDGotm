@@ -52,6 +52,7 @@ var created: int
 static func create(name: String, value: float, properties: Dictionary = {}) -> GotmScore:
 	return yield(_GotmScore.create(name, value, properties, false), "completed")
 
+## Create a score that is only stored locally on the user's device. Local scores are not accessible to any other player or device.
 static func create_local(name: String, value: float, properties: Dictionary = {}) -> GotmScore:
 	return yield(_GotmScore.create(name, value, properties, true), "completed")
 
