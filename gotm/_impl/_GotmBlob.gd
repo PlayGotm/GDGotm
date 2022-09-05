@@ -14,7 +14,7 @@ static func fetch(blob_or_id):
 	var data = yield(get_implementation(id).fetch(id), "completed")
 	return _format(data, _Gotm.create_instance("GotmBlob"))
 
-static func fetch_data(blob_or_id, type = ""):
+static func get_data(blob_or_id, type = ""):
 	var id = _coerce_id(blob_or_id)
 	if !id:
 		yield(_GotmUtility.get_tree(), "idle_frame")
@@ -38,6 +38,6 @@ static func _format(data, blob):
 	if !data || !blob:
 		return
 	blob.id = data.path
-	blob.size = data.size
+	blob.size = int(data.size)
 	blob.is_local = !!_LocalStore.fetch(data.path)
 	return blob
