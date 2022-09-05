@@ -63,7 +63,7 @@ static func list(api: String, query: String, params: Dictionary = {}, authentica
 static func clear_cache(path: String) -> void:
 	pass
 
-static func _format(data: Dictionary):
+static func _format(data):
 	if !data:
 		return
 	data = _GotmUtility.copy(data, {})

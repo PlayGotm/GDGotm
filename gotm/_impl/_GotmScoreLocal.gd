@@ -249,7 +249,7 @@ static func _decode_cursor(cursor: String) -> Array:
 	decoded[1] = target.substr(0, target.length() - 1).replace("-", "/")
 	return decoded
 
-static func _format(data: Dictionary):
+static func _format(data):
 	if !data:
 		return
 	data = _GotmUtility.copy(data, {})
