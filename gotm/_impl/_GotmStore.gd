@@ -97,6 +97,26 @@ static func _cached_get_request(path: String, authenticate: bool = false) -> Dic
 	queue_signal.trigger()
 	return value
 
+
+const _token_bucket := {}
+static func _take_rate_limiting_token() -> bool:
+	if !_token_bucket.has("count"):
+		_token_bucket.capacity = 60
+		_token_bucket.count = _token_bucket.capacity
+		_token_bucket.fill_per_second = 2
+		_token_bucket.tick_seconds = OS.get_ticks_msec() / 1000
+	
+	var tick_seconds = OS.get_ticks_msec() / 1000
+	var fill = _token_bucket.fill_per_second * (tick_seconds - _token_bucket.tick_seconds)
+	_token_bucket.count = min(_token_bucket.count + fill, _token_bucket.capacity)
+	_token_bucket.tick_seconds = tick_seconds
+	
+	if _token_bucket.count <= 0:
+		return false
+	
+	_token_bucket.count -= 1
+	return true
+
 static func _request(path, method: int, body = null, authenticate: bool = false) -> Dictionary:
 	if !path:
 		yield(_GotmUtility.get_tree(), "idle_frame")
@@ -130,7 +150,10 @@ static func _request(path, method: int, body = null, authenticate: bool = false)
 			path += "&"
 		path += "$httpHeaders=" + _GotmUtility.encode_url_component(header_string)
 		
-		
+	
+	while !_take_rate_limiting_token():
+		yield(_GotmUtility.get_tree(), "idle_frame")
+	
 	var result
 	if path.begins_with(_Gotm.get_global().storageApiEndpoint):
 		result = yield(_GotmUtility.fetch_data(path, method, body), "completed")
