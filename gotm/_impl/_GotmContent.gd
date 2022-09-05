@@ -25,12 +25,24 @@ static func is_guest():
 		return true
 	return !!auth.is_guest
 
-static func create(data = PoolByteArray(), properties: Dictionary = {}, key: String = "", name: String = "", is_private: bool = false, is_local: bool = false):
+
+static func _coerce_ids(contents_or_ids) -> Array:
+	if !contents_or_ids:
+		return []
+	var ids := []
+	for content_or_id in contents_or_ids:
+		var id = _coerce_id(content_or_id)
+		if id && id is String:
+			ids.append(id)
+	return ids
+
+static func create(data = PoolByteArray(), properties: Dictionary = {}, key: String = "", name: String = "", parent_ids: Array = [], is_private: bool = false, is_local: bool = false):
 	properties = _GotmUtility.clean_for_json(properties)
+	parent_ids = _coerce_ids(parent_ids)
 	var implementation = _GotmContentLocal if is_local || is_private && yield(is_guest(), "completed") else get_implementation()
 	if key && yield(get_by_key(key), "completed"):
 		return
-	var content = yield(implementation.create("contents", {"props": properties, "key": key, "name": name, "private": is_private}), "completed")
+	var content = yield(implementation.create("contents", {"props": properties, "key": key, "name": name, "private": is_private, "parents": parent_ids}), "completed")
 	content = _format(content, _Gotm.create_instance("GotmContent"))
 	if data != null:
 		return yield(update(content, data), "completed")
@@ -118,6 +130,13 @@ static func _format_filter(filter):
 			var value = filter.get("key")
 			if value is int || value is float:
 				filter[key] = _GotmUtility.get_iso_from_unix_time(filter[key])
+	elif filter.prop == "parent_ids":
+		filter.prop = "parents"
+		if filter.has("value"):
+			if filter.value is Array:
+				filter.value = _coerce_ids(filter.value)
+			else:
+				filter.value = [_coerce_id(filter.value)]
 	return filter
 
 
@@ -197,6 +216,7 @@ static func _format(data, content):
 	content.is_private = data.private
 	content.updated = data.updated
 	content.created = data.created
+	content.parent_ids = data.parents
 	content.is_local = !!_LocalStore.fetch(data.path)
 	return content
 	

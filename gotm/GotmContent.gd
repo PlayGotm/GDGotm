@@ -40,6 +40,10 @@ var blob_id: String = ""
 ## filter and sort with these properties. 
 var properties: Dictionary = {}
 
+## Optionally make this content a child to other contents.
+## If all parents are deleted, this content is deleted too.
+var parent_ids: Array = []
+
 ## Optionally make this content inaccessible to other users. Private content can only be fetched by the user
 ## who created it via GotmContent.list. Is useful for personal data such as game saves.
 var is_private: bool = false
@@ -61,16 +65,16 @@ var created: int
 
 ## Create content for the current user.
 ## See PROPERTIES above for descriptions of the arguments.
-static func create(data = null, key: String = "", properties: Dictionary = {}, name: String = "", is_private: bool = false)  -> GotmContent:
-	return yield(_GotmContent.create(data, properties, key, name, is_private), "completed")
+static func create(data = null, key: String = "", properties: Dictionary = {}, name: String = "", parent_ids: Array = [], is_private: bool = false)  -> GotmContent:
+	return yield(_GotmContent.create(data, properties, key, name, parent_ids, is_private), "completed")
 
 ## Create content that is only stored locally on the user's device. Local content is not accessible to any other player or device.
-static func create_local(data = null, key: String = "", properties: Dictionary = {}, name: String = "", is_private: bool = false)  -> GotmContent:
-	return yield(_GotmContent.create(data, properties, key, name, is_private, true), "completed")
+static func create_local(data = null, key: String = "", properties: Dictionary = {}, name: String = "", parent_ids: Array = [], is_private: bool = false)  -> GotmContent:
+	return yield(_GotmContent.create(data, properties, key, name, parent_ids, is_private, true), "completed")
 
 ## Update existing content.
 ## Null is ignored.
-static func update(content_or_id, data = null, key = null, properties = null, name = null) -> GotmContent:
+static func update(content_or_id, data = null, key = null, properties = null, name = null, parent_ids = null) -> GotmContent:
 	return yield(_GotmContent.update(content_or_id, data, properties, key, name), "completed")
 
 ## Delete existing content.

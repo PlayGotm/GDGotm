@@ -15,6 +15,7 @@ static func create(api: String, data: Dictionary):
 		"private": data.private,
 		"data": "",
 		"props": data.props,
+		"parents": data.parents,
 		"updated": created,
 		"created": created
 	}
@@ -27,11 +28,24 @@ static func update(id: String, data: Dictionary):
 static func delete(id: String) -> void:
 	yield(_GotmUtility.get_tree(), "idle_frame")
 	var content = _LocalStore.fetch(id)
-	if content:
-		_GotmBlobLocal.delete_sync(content.data)
-		_GotmMarkLocal.delete_by_target_sync(id)
+	if !content:
+		return
 		
+	_GotmBlobLocal.delete_sync(content.data)
+	_GotmMarkLocal.delete_by_target_sync(id)
 	_LocalStore.delete(id)
+	var to_delete := []
+	for child in _LocalStore.get_all("contents"):
+		var parents: Array = child.get("parents")
+		if !parents:
+			continue
+		if !parents.has(id):
+			continue
+		parents.erase(id)
+		if !parents:
+			to_delete.append(child)
+	for child in to_delete:
+		delete(child.path)
 
 static func fetch(path: String, query: String = "", params: Dictionary = {}, authenticate: bool = false) -> Dictionary:
 	yield(_GotmUtility.get_tree(), "idle_frame")
@@ -121,6 +135,19 @@ static func _match_content(content, params) -> bool:
 			if !filter.has("value") || !_GotmUtility.is_partial_search_match(filter.value, content.name):
 				return false
 			continue
+		if filter.prop == "parents":
+			if !filter.has("value") || !(filter.value is Array):
+				return false
+			if filter.value:
+				for parent in filter.value:
+					if !content.parents.has(parent):
+						return false
+			else:
+				if content.parents:
+					return false
+				
+				
+			continue
 		
 		var value = _get_content_value(filter.prop, content, UNDEFINED)
 		if _GotmUtility.is_strictly_equal(value, UNDEFINED):
@@ -205,10 +232,12 @@ static func get_by_key_sync(key: String):
 			return [_format(content)]
 	return []
 
-static func _format(data: Dictionary):
+static func _format(data):
 	if !data:
 		return
 	data = _GotmUtility.copy(data, {})
+	if !data.has("parents"):
+		data.parents = []
 	data.updated = _GotmUtility.get_unix_time_from_iso(data.updated)
 	data.created = _GotmUtility.get_unix_time_from_iso(data.created)
 	return data
