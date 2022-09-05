@@ -34,7 +34,7 @@ static func fetch(path: String, query: String = "", params: Dictionary = {}, aut
 	
 	return _format(blob)
 
-static func _format(data: Dictionary):
+static func _format(data):
 	if !data:
 		return
 	data = _GotmUtility.copy(data, {})
