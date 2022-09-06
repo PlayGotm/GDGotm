@@ -150,8 +150,9 @@ static func get_properties_by_key(key: String) -> Dictionary:
 ## in GotmQuery.new().filter("is_private", true).filter("user_id", Gotm.user.id). This is because a user
 ## is not permitted to view another user's private contents.
 ## * is_local: The content's is_local field.
-## * upvote_user_id: Id of user that has upvoted the content.
-## * downvote_user_id: Id of user that has downvoted the content.
+## * parent_ids: Array of ids of contents that are parents to the content. All contents that has all of the 
+## provided ids as parents are included in the list. For example, filtering with a parent_ids value of [a, b]
+## would include all content that have a and b as parents, such as [a, b, c] and [a, b], but not [a], [b] or [a, c].
 ## * directory: The "directory" of the content's key field. For example,
 ## if a content's key is "a/b/c", then its directory is "a/b".
 ## * extension: The "extension" of the content's key field. For example,
