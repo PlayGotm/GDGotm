@@ -76,8 +76,9 @@ static func _cached_get_request(path: String, authenticate: bool = false) -> Dic
 		return
 	
 	if path in _cache:
+		var value = _cache[path]
 		yield(_GotmUtility.get_tree(), "idle_frame")
-		return _cache[path]
+		return value
 	
 	if path in _signal_cache:
 		yield(_signal_cache[path].add(), "completed")
