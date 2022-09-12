@@ -8,7 +8,7 @@
 
 # Install
 
-_Supports versions 3.1.0 and newer._
+_Supports versions 3.2.0 and newer._
 
 ## 1. Download
 
