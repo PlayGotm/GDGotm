@@ -146,7 +146,29 @@ static func fetch_data(url: String, method: int = HTTPClient.METHOD_GET, body = 
 	free_clients.append(client)
 	if !has_yielded:
 		yield(get_tree(), "idle_frame")
+	if OS.get_name () != "HTML5" && response.headers.get("content-encoding") == "gzip":
+		response.data = decompress_gzip(response.data)
 	return response
+
+
+## Only supported in 3.4.0 and later.
+static func suppress_error_messages(suppress: bool) -> void:
+	Engine.set("print_error_messages", !suppress)
+
+static func decompress_gzip(data: PoolByteArray) -> PoolByteArray:
+	if data.empty():
+		return PoolByteArray()
+	var decompressed_size: int = data.size() * 2
+	for i in range(0, 8):
+		suppress_error_messages(true)
+		var decompressed := data.decompress(decompressed_size, File.COMPRESSION_GZIP)
+		suppress_error_messages(false)
+		if !decompressed.empty():
+			return decompressed
+		decompressed_size *= 2
+	
+	return PoolByteArray()
+
 
 static func fetch_json(url: String, method: int = HTTPClient.METHOD_GET, body = null, headers: PoolStringArray = []) -> FetchDataResult:
 	var result = yield(fetch_data(url, method, body, headers), "completed")
