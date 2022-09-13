@@ -25,9 +25,9 @@ static func get_data(blob_or_id, type = ""):
 		
 	match type:
 		"node":
-			return bytes2var(data).instance()			
+			return bytes2var(data, true).instance()			
 		"variant":
-			return bytes2var(data)
+			return bytes2var(data, true)
 		_:
 			return data
 

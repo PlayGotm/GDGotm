@@ -65,9 +65,11 @@ static func update(content_or_id, data = null, properties = null, key = null, na
 	})
 	if data != null:
 		if data is Node:
-			var packed_scene = PackedScene.new()
+			var packed_scene := PackedScene.new()
 			packed_scene.pack(data)
 			data = packed_scene
+		if !(data is PoolByteArray):
+			data = var2bytes(data, true)
 		var blob = yield(get_blob_implementation(id).create("blobs/upload", {"target": id, "data": data}), "completed")
 		if blob:
 			body.data = blob.path

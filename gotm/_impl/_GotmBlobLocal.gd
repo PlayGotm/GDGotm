@@ -7,7 +7,7 @@ static func create(api: String, body: Dictionary):
 	api = api.split("/")[0]
 	var data = body.data
 	if !(data is PoolByteArray):
-		data = var2bytes(data)
+		return
 		
 	var blob = {
 		"path": _GotmUtility.create_resource_path(api),
