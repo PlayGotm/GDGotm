@@ -2,12 +2,15 @@ class_name _GotmBlobLocal
 #warnings-disable
 
 
-static func create(api: String, body: Dictionary):
+static func create(
+				api:String, 
+				body:Dictionary
+			)->Dictionary:
 	yield(_GotmUtility.get_tree(), "idle_frame")
 	api = api.split("/")[0]
-	var data = body.data
-	if !(data is PoolByteArray):
-		return
+	var data = body.get('data')
+	if !data or !(data is PoolByteArray):
+		return null
 		
 	var blob = {
 		"path": _GotmUtility.create_resource_path(api),
@@ -17,32 +20,36 @@ static func create(api: String, body: Dictionary):
 	}
 	_GotmUtility.write_file(_Gotm.get_local_path(blob.path), data)
 	return _format(_LocalStore.create(blob))
-#
 
-static func fetch(path: String, query: String = "", params: Dictionary = {}, authenticate: bool = false) -> Dictionary:
+static func fetch(
+				path:String, 
+				query:String = "", 
+				params:Dictionary = {}, 
+				authenticate:bool = false
+			):
 	yield(_GotmUtility.get_tree(), "idle_frame")
 	var is_data = path.begins_with(_Gotm.get_global().storageApiEndpoint)
 	if is_data:
-		path = path.replace(_Gotm.get_global().storageApiEndpoint + "/", "")
+		path = path.replace("%s/"%[_Gotm.get_global().storageApiEndpoint], "")
 	
 	var blob = _LocalStore.fetch(path)
 	if !blob:
-		return
+		return {}
 	
 	if is_data:
-		return _GotmUtility.read_file(_Gotm.get_local_path(blob.path), true)
+		return _GotmUtility.read_file(_Gotm.get_local_path(blob.get("path","")), true)
 	
 	return _format(blob)
 
-static func _format(data):
+static func _format(data:Dictionary)->Dictionary:
 	if !data:
-		return
+		return {}
 	data = _GotmUtility.copy(data, {})
 	return data
 
-static func delete_sync(path):
+static func delete_sync(path:String)->void:
 	var blob = _LocalStore.fetch(path)
 	if !blob:
 		return
 	_LocalStore.delete(path)
-	_GotmUtility.write_file(_Gotm.get_local_path(blob.path), null)
+	_GotmUtility.write_file(_Gotm.get_local_path(blob.get("path","")), null)

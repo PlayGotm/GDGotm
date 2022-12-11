@@ -1,34 +1,38 @@
 class_name _GotmAuthLocal
 #warnings-disable
 
-const _cache := {"token": "", "project": "", "owner": ""}
+const CACHE:Dictionary = {
+					"token": "", 
+					"project": "", 
+					"owner": ""
+				}
 
-static func _get_cache():
-	if _cache.token:
-		return _cache
+static func _get_cache()->Dictionary:
+	if CACHE.get('token'):
+		return CACHE
 	
-	var file_path := _Gotm.get_local_path("auth.json")
+	var file_path:String = _Gotm.get_local_path("auth.json")
 	var content = _GotmUtility.read_file(file_path)
 	if content:
-		_GotmUtility.copy(parse_json(content), _cache)
-		if !_cache.get("owner") && _cache.get("user"):
-			_cache.owner = _cache.user
-			_cache.erase("user")
-			_GotmUtility.write_file(file_path, to_json(_cache))
+		_GotmUtility.copy(parse_json(content), CACHE)
+		if !CACHE.get('owner') && CACHE.get('user'):
+			CACHE['owner'] = CACHE.user
+			CACHE.erase("user")
+			_GotmUtility.write_file(file_path, to_json(CACHE))
 	else:
-		_cache.token = _GotmUtility.create_id()
-		_cache.project = _GotmUtility.create_resource_path("games")
-		_cache.owner = _GotmUtility.create_resource_path("users")
-		_GotmUtility.write_file(file_path, to_json(_cache))
-	_cache.is_guest = true
-	return _cache
+		CACHE['token'] = _GotmUtility.create_id()
+		CACHE['project'] = _GotmUtility.create_resource_path("games")
+		CACHE['owner'] = _GotmUtility.create_resource_path("users")
+		_GotmUtility.write_file(file_path, to_json(CACHE))
+	CACHE["is_guest"] = true
+	return CACHE
 
-static func get_user() -> String:
+static func get_user()->String:
 	return _get_cache().owner
 
-static func get_auth():
+static func get_auth()->Dictionary:
 	return _get_cache()
 
-static func get_auth_async():
+static func get_auth_async()->Dictionary:
 	yield(_GotmUtility.get_tree(), "idle_frame")
 	return get_auth()

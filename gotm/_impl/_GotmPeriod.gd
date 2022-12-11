@@ -1,7 +1,6 @@
 class_name _GotmPeriod
 #warnings-disable
 
-
 class TimeGranularity:
 	const YEAR = "year"
 	const MONTH = "month"
@@ -12,18 +11,23 @@ class TimeGranularity:
 
 const MS_PER_DAY := 1000 * 60 * 60 * 24
 
-static func all():
+static func all():##->GotmPeriod
 	return _Gotm.create_instance("GotmPeriod")
 
-static func sliding(granularity: String):
+static func sliding(granularity:String):##->GotmPeriod
 	var period = _Gotm.create_instance("GotmPeriod")
 	period.granularity = granularity
 	return period
 
-static func offset(granularity: String, offset: int = 0):
+static func offset(granularity: String, offset: int = 0):##->GotmPeriod
 	return now(granularity).move(granularity, offset)
 
-static func at(granularity: String, year: int = -1, month: int = -1, day: int = -1):
+static func at(
+			granularity:String, 
+			year:int = -1, 
+			month:int = -1, 
+			day:int = -1
+		): ##->GotmPeriod
 	var period = _Gotm.create_instance("GotmPeriod")
 	period.granularity = granularity
 	var date = OS.get_date(true)
@@ -46,11 +50,11 @@ static func at(granularity: String, year: int = -1, month: int = -1, day: int = 
 		period.move(TimeGranularity.DAY, day - 1)
 	return period
 
-static func now(granularity: String):
+static func now(granularity:String):##->GotmPeriod
 	return at(granularity)
 
 
-static func duplicate(period):
+static func duplicate(period):##->GotmPeriod
 	var copy = _Gotm.create_instance("GotmPeriod")
 	copy.granularity = period.granularity
 	copy.year = period.year
@@ -58,7 +62,11 @@ static func duplicate(period):
 	copy.day = period.day
 	return copy
 
-static func move(period, granularity: String, offset: int = 0):
+static func move(
+			period, ##->GotmPeriod
+			granularity: String, 
+			offset: int = 0
+		):##->GotmPeriod
 	match granularity:
 		TimeGranularity.YEAR:
 			period.year += offset
@@ -94,7 +102,7 @@ static func move(period, granularity: String, offset: int = 0):
 	
 	return period
 
-static func to_unix_time(period) -> int:
+static func to_unix_time(period)->int:
 	if period_to_string(period) == period.granularity:
 		return offset(period.granularity, -1).to_unix_time()
 	return OS.get_unix_time_from_datetime({
@@ -106,19 +114,19 @@ static func to_unix_time(period) -> int:
 		"second": 0
 	}) * 1000
 
-static func get_start_datetime(period, utc: bool = false) -> Dictionary:
+static func get_start_datetime(period, utc:bool =false)->Dictionary:
 	var unix = to_unix_time(period)
 	if !utc:
 		unix += _GotmUtility.get_unix_offset()
 	return OS.get_datetime_from_unix_time(unix / 1000)
 
-static func get_end_datetime(period, utc: bool = false) -> Dictionary:
+static func get_end_datetime(period, utc:bool = false)->Dictionary:
 	var unix = duplicate(period).move(period.granularity, 1).to_unix_time()
 	if !utc:
 		unix += _GotmUtility.get_unix_offset()
 	return OS.get_datetime_from_unix_time((unix / 1000) - 1)
 
-static func period_to_string(period) -> String:
+static func period_to_string(period)->String:
 	match period.granularity:
 		TimeGranularity.YEAR:
 			if !(period.year >= 1):
