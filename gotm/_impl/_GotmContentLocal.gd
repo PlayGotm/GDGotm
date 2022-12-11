@@ -2,7 +2,7 @@ class_name _GotmContentLocal
 #warnings-disable
 
 
-static func create(api: String, data: Dictionary):
+static func create(api: String, data: Dictionary): ##->GotmContent?
 	yield(_GotmUtility.get_tree(), "idle_frame")
 	if data.key && get_by_key_sync(data.key):
 		return
@@ -10,31 +10,31 @@ static func create(api: String, data: Dictionary):
 	var score = {
 		"path": _GotmUtility.create_resource_path(api),
 		"author": _GotmAuthLocal.get_user(),
-		"name": data.name,
-		"key": data.key,
-		"private": data.private,
+		"name": data.get('name',''),
+		"key": data.get('key',''),
+		"private": data.get('private',false),
 		"data": "",
-		"props": data.props,
-		"parents": data.parents,
+		"props": data.get('props',{}),
+		"parents": data.get('parents',[]),
 		"updated": created,
 		"created": created
 	}
 	return _format(_LocalStore.create(score))
 
-static func update(id: String, data: Dictionary):
+static func update(id: String, data: Dictionary):##->GotmContent
 	yield(_GotmUtility.get_tree(), "idle_frame")
 	return _format(_LocalStore.update(id, data))
 
-static func delete(id: String) -> void:
+static func delete(id: String)->void:
 	yield(_GotmUtility.get_tree(), "idle_frame")
 	var content = _LocalStore.fetch(id)
 	if !content:
 		return
 		
-	_GotmBlobLocal.delete_sync(content.data)
+	_GotmBlobLocal.delete_sync(content.get("data"))
 	_GotmMarkLocal.delete_by_target_sync(id)
 	_LocalStore.delete(id)
-	var to_delete := []
+	var to_delete:Array = []
 	for child in _LocalStore.get_all("contents"):
 		var parents: Array = child.get("parents")
 		if !parents:
@@ -47,55 +47,73 @@ static func delete(id: String) -> void:
 	for child in to_delete:
 		delete(child.path)
 
-static func fetch(path: String, query: String = "", params: Dictionary = {}, authenticate: bool = false) -> Dictionary:
+static func fetch(
+				path: String, 
+				query: String = "", ##???
+				params: Dictionary = {}, ##???
+				authenticate: bool = false ##???
+			) -> Dictionary:
 	yield(_GotmUtility.get_tree(), "idle_frame")
 	return _format(_LocalStore.fetch(path))
 
-static func list(api: String, query: String, params: Dictionary = {}, authenticate: bool = false) -> Array:
+static func list(
+			api: String, 
+			query: String, 
+			params: Dictionary = {}, 
+			authenticate: bool = false
+		)->Array:
 	yield(_GotmUtility.get_tree(), "idle_frame")
 	if query == "byKey":
-		return get_by_key_sync(params.key)
+		return get_by_key_sync(params.get("key",""))
 	if query == "byContentSort":
 		return _get_by_content_sort(params)
 	return []
 
-static func clear_cache(path: String) -> void:
+static func clear_cache(path: String)->void:
 	pass
 
 
 const UNDEFINED = {}
 
 class ContentSearchPredicate:
-	var prop: String
-	func is_less_than(a, b) -> bool:
+	var prop: String setget prop_set, prop_get;
+	func prop_set(value:String)->void:
+		prop = value;
+	func prop_get()->String:
+		return prop;
+	func _init(propr:String)->void:
+		self.prop_set(propr);
+	func is_less_than(a:Dictionary, b:Dictionary) -> bool:
 		var a_value = a.value
 		var b_value = b.value
-		if _GotmUtility.is_strictly_equal(a_value, UNDEFINED) || _GotmUtility.is_strictly_equal(b_value, UNDEFINED):
+		if (_GotmUtility.is_strictly_equal(a_value, UNDEFINED) 
+			|| _GotmUtility.is_strictly_equal(b_value, UNDEFINED)):
 			return false
-		return _GotmUtility.is_less(a_value, b_value) || _GotmUtility.is_fuzzy_equal(a_value, b_value) && a.path < b.path
+		return (_GotmUtility.is_less(a_value, b_value) 
+				|| _GotmUtility.is_fuzzy_equal(a_value, b_value) && a.path < b.path)
 
-	func is_greater_than(a, b) -> bool:
+	func is_greater_than(a:Dictionary, b:Dictionary) -> bool:
 		var a_value = a.value
 		var b_value = b.value
-		if _GotmUtility.is_strictly_equal(a_value, UNDEFINED) || _GotmUtility.is_strictly_equal(b_value, UNDEFINED):
+		if (_GotmUtility.is_strictly_equal(a_value, UNDEFINED) 
+				|| _GotmUtility.is_strictly_equal(b_value, UNDEFINED)):
 			return false
-		return _GotmUtility.is_greater(a_value, b_value) || _GotmUtility.is_fuzzy_equal(a_value, b_value) && a.path > b.path
+		return (_GotmUtility.is_greater(a_value, b_value) 
+				|| _GotmUtility.is_fuzzy_equal(a_value, b_value) && a.path > b.path)
 
 
-static func _get_content_value(prop: String, content, undefined_value = null):
+static func _get_content_value(prop:String, content, undefined_value = null):
 	match prop:
 		"key", "name", "author", "data", "private", "updated", "created":
 			return content[prop]
 		"directory":
-			var key: String = content.key
-			var parts = key.split("/", false)
+			var parts = content.get('key','').split("/", false)
 			if !parts:
 				return ""
 			parts.resize(parts.size() - 1)
 			return _GotmUtility.join(parts, "/")
 		"extension":
-			var key: String = content.key
-			var parts = key.split("/", false)
+			var parts = content.get('key','').split("/", false)
 			if !parts:
 				return ""
 			var dot_split: Array = parts[parts.size() - 1].split(".", false)
@@ -103,8 +121,6 @@ static func _get_content_value(prop: String, content, undefined_value = null):
 				return ""
 			dot_split.remove(0)
 			return _GotmUtility.join(dot_split, ".")
-			
-			
 		"size":
 			var blob = _LocalStore.fetch(content.data)
 			return blob.size if blob else 0
@@ -122,9 +138,9 @@ static func _get_content_value(prop: String, content, undefined_value = null):
 		return _GotmUtility.get_nested_value(prop, content, undefined_value)
 	return undefined_value
 
-static func _match_content(content, params) -> bool:
-	var sorts = params.get("sorts") if params.has("sorts") else []
-	var filters = params.get("filters") if params.has("filters") else []
+static func _match_content(content, params:Dictionary)->bool:
+	var sorts:Array = params.get("sorts",[]);
+	var filters:Array = params.get("filters",[]);
 	
 	for sort in sorts:
 		var value = _get_content_value(sort.prop, content, UNDEFINED)
@@ -175,53 +191,61 @@ static func _match_content(content, params) -> bool:
 					return false
 	return true
 
-static func _get_by_content_sort(params: Dictionary) -> Array:
-	var matches := []
+static func _get_by_content_sort(params:Dictionary)->Array:
+	var matches:Array= [];
 	params = params.duplicate()
-	var sort = _GotmUtility.get_last_element(params.sorts) if params.get("sorts") else {"prop": "created", "descending": true}
+	var sort = _GotmUtility.get_last_element(params.get("sorts", 
+													{
+														"prop": "created", 
+														"descending": true
+													}
+												)
+											); 
 	params.sorts = [sort]
 	var is_private = null
-	var filters = params.filters if params.has("filters") else []
+	var filters:Array = params.get('filters',[]);
 	for filter in filters:
 		if filter.prop == "private":
-			is_private = !!filter.get("value")
+			is_private = filter.get("value", false);
 	if is_private == null:
-		filters = filters.duplicate()
 		filters.append({"prop": "private", "value": false})
-		params.filters = filters
+		params['filters'] = filters;
 	for content in _LocalStore.get_all("contents"):
 		if _match_content(content, params):
 			matches.append(content)
-	var descending = !!sort.get("descending")
-	var predicate := ContentSearchPredicate.new()
-	predicate.prop = sort.prop
+	var descending:bool = sort.get("descending", false)
+	var predicate:ContentSearchPredicate = ContentSearchPredicate.new(sort.prop)
 	for m in matches:
-		m.value = _get_content_value(sort.prop, m, UNDEFINED)
+		m.value = _get_content_value(sort.prop, m, UNDEFINED);
 	matches.sort_custom(predicate, "is_greater_than" if descending else "is_less_than")
 	if params.get("after"):
 		var cursor = _decode_cursor(params.after)
-		var cursor_content = {"value": cursor[0], "path": cursor[1]}
-		var after_matches := []
+		var cursor_content = {
+								"value": cursor[0],
+								"path": cursor[1]
+							}
+		var after_matches:Array= []
 		for i in range(0, matches.size()):
-			var m = matches[i]
-			m = {"value": m.value, "path": m.path}
+			var m:Dictionary = matches[i]
+			m = {
+					"value": m['value'],
+					"path": m['path']
+				}
 			if cursor_content.path == m.path && cursor_content.value == m.value:
 				continue
-			if descending && predicate.is_greater_than(cursor_content, m) || !descending && predicate.is_less_than(cursor_content, m):
+			if (!descending && predicate.is_less_than(cursor_content, m)) or predicate.is_greater_than(cursor_content, m):
 				after_matches.append(matches[i])
 		matches = after_matches
-	if params.get("limit"):
-		while matches.size() > params.limit:
-			matches.pop_back()
-
+	matches.resize(params.get("limit",matches.size()));
+	
 	for i in range(0, matches.size()):
 		matches[i] = _format(matches[i])
 	return matches
 
 
-static func _decode_cursor(cursor: String) -> Array:
-	var decoded := _GotmUtility.decode_cursor(cursor)
-	var target: String = decoded[1]
+static func _decode_cursor(cursor: String)->Array:
+	var decoded:Array = _GotmUtility.decode_cursor(cursor);
+	var target:String = decoded[1];
 	if target:
 		decoded[1] = target.substr(0, target.length() - 1).replace("-", "/")
 	return decoded
@@ -232,10 +256,10 @@ static func get_by_key_sync(key: String):
 			return [_format(content)]
 	return []
 
-static func _format(data):
+static func _format(data)->Dictionary:
 	if !data:
-		return
-	data = _GotmUtility.copy(data, {})
+		return {}
+	data  = _GotmUtility.copy(data, {})
 	if !data.has("parents"):
 		data.parents = []
 	data.updated = _GotmUtility.get_unix_time_from_iso(data.updated)

@@ -2,8 +2,6 @@ class_name _GotmMark
 #warnings-disable
 
 
-
-
 static func get_implementation(id = null):
 	var config := _Gotm.get_config()
 	if !_Gotm.is_global_api("marks") || _LocalStore.fetch(id):
@@ -19,7 +17,7 @@ static func get_auth_implementation():
 const ALLOWED_NAMES = ["upvote", "downvote"]
 const ALLOWED_TARGET_APIS = ["contents"]
 
-static func _is_mark_allowed(target_id, name) -> bool:
+static func _is_mark_allowed(target_id:String, name:String) -> bool:
 	if !target_id || !name || !ALLOWED_NAMES.has(name):
 		return false
 	return ALLOWED_TARGET_APIS.has(target_id.split("/")[0])

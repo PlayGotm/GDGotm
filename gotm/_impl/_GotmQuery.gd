@@ -52,7 +52,7 @@ static func _format_filter(filter):
 		return
 	return formatted
 
-static func get_formatted(query):
+static func get_formatted(query): ##GotmQuery
 	query = copy(query)
 	var filters: Array = []
 	var sorts: Array = []

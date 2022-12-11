@@ -27,7 +27,7 @@ var address: String = ""
 ## Fetch registered user by id.
 ## A registered user is someone who has signed up on Gotm.
 ## Returns null if there is no registered user with that id.
-static func fetch(id: String) -> GotmUser:
+static func fetch(id: String)->GotmUser:
 	return yield(_GotmUser.fetch(id), "completed")
 
 ##############################################################

@@ -30,6 +30,6 @@ var is_registered: bool
 ## Get the currently active authentication.
 ## If the user is not signed in, the returned GotmAuth
 ## will represent an unregistered anonymous user (a guest).
-static func fetch() -> GotmAuth:
+static func fetch()->GotmAuth:
 	return yield(_GotmAuth.fetch(), "completed")
 

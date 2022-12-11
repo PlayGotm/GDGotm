@@ -91,14 +91,16 @@ static func get_by_key(key: String) -> GotmContent:
 
 ## Update existing content by key.
 static func update_by_key(key: String, data = null, new_key = null, properties = null, name = null) -> GotmContent:
-	return yield(_GotmContent.update_by_key(key, data, properties, new_key, name), "completed")
+	var content = yield(_GotmContent.get_by_key(key), "completed")
+	return yield(_GotmContent.update(content, data, properties, new_key, name), "completed")
 
 ## Delete existing content by key.
-static func delete_by_key(key: String) -> void:
-	return yield(_GotmContent.delete_by_key(key), "completed")
+static func delete_by_key(key: String)->void:
+	var content = yield(_GotmContent.get_by_key(key), "completed")
+	return yield(_GotmContent.delete(content), "completed")
 
 ## Get existing content's data as bytes.
-static func get_data(content_or_id) -> PoolByteArray:
+static func get_data(content_or_id)->PoolByteArray:
 	return yield(_GotmContent.fetch(content_or_id, "data"), "completed")
 
 ## Get existing content's data as an instanced Node.

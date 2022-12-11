@@ -11,13 +11,16 @@ class __GotmGlobalData:
 
 const _version = "0.0.1"
 const _global = {"value": null}
-static func get_global() -> __GotmGlobalData:
+static func get_global()->__GotmGlobalData:
 	return _global.value
 
-static func create_instance(name: String):
+static func create_instance(name:String):
 	return get_global().classes[name].new()
 
-static func initialize(config: GotmConfig, classes: Dictionary) -> void:
+static func initialize(
+					config:GotmConfig, 
+					classes: Dictionary
+					) -> void:
 	_global.value = __GotmGlobalData.new()
 	var global := get_global()
 	global.config = _GotmUtility.copy(config, GotmConfig.new())
@@ -28,38 +31,51 @@ static func initialize(config: GotmConfig, classes: Dictionary) -> void:
 static func is_live() -> bool:
 	return !!get_singleton()
 
-static func is_global_feature(forceLocal: bool = false, forceGlobal: bool = false) -> bool:
+static func is_global_feature(
+							forceLocal: bool = false, 
+							forceGlobal: bool = false
+							) -> bool:
 	return !forceLocal && (is_live() || forceGlobal) && get_project_key()
 
-static func get_project_key() -> String:
+static func get_project_key()->String:
 	return get_global().config.project_key
 
-static func get_local_path(path: String = "") -> String:
-	return get_path("local/" + path)
+static func get_local_path(path:String = "")->String:
+	return get_path("local/%s"%[path])
 
-static func get_path(path: String = "") -> String:
-	return "user://gotm/" + path
+static func get_path(path:String = "")->String:
+	return "user://gotm/%s"%[path] 
 
-static func get_config() -> GotmConfig:
+static func get_config()->GotmConfig:
 	return get_global().config
 	
-static func get_singleton():
+static func get_singleton()->Object:
 	if !Engine.has_singleton("Gotm"):
-		return
+		return null;
 	return Engine.get_singleton("Gotm")
 
-static func is_global_api(api: String) -> bool:
+static func is_global_api(api:String)->bool:
 	var config := get_config()
 	match api:
 		"scores":
-			return is_global_feature(config.force_local_scores, config.beta_unsafe_force_global_scores)
+			return is_global_feature(
+						config.force_local_scores, 
+						config.beta_unsafe_force_global_scores
+					)
 		"contents":
-			return is_global_feature(config.force_local_contents, config.beta_unsafe_force_global_contents)
+			return is_global_feature(
+						config.force_local_contents, 
+						config.beta_unsafe_force_global_contents
+					)
 		"marks":
-			return is_global_feature(config.force_local_marks, config.beta_unsafe_force_global_marks)
-		_:
-			return false
+			return is_global_feature(
+						config.force_local_marks, 
+						config.beta_unsafe_force_global_marks
+					)
+	return false
 
 
-static func has_global_api() -> bool:
-	return is_global_api("scores") || is_global_api("contents") || is_global_api("marks")
+static func has_global_api()->bool:
+	return (is_global_api("scores") 
+			|| is_global_api("contents") 
+			|| is_global_api("marks"))

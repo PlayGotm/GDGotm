@@ -26,19 +26,24 @@ static func delete(id: String) -> void:
 	yield(_GotmUtility.get_tree(), "idle_frame")
 	_LocalStore.delete(id)
 
-static func fetch(path: String, query: String = "", params: Dictionary = {}, authenticate: bool = false) -> Dictionary:
+static func fetch(
+				path:String, 
+				query: String = "", 
+				params: Dictionary = {}, 
+				authenticate: bool = false
+			) -> Dictionary:
 	yield(_GotmUtility.get_tree(), "idle_frame")
 	var path_parts = path.split("/")
-	var api = path_parts[0]
-	var id = path_parts[1]
+	var api:String = path_parts[0]
+	var id:String = path_parts[1]
 	if api == "stats" && id == "sum" && query == "received":
 		return {"path": _GotmStore.create_request_path(path, query, params), "value": _fetch_count(params)}
 	return _format(_LocalStore.fetch(path))
 
 
-static func _fetch_count(params: Dictionary) -> int:
+static func _fetch_count(params:Dictionary) -> int:
 	var count := 0
-	var name_parts = params.name.split("/")
+	var name_parts = params.get('name','').split("/")
 	if name_parts.size() != 2 || name_parts[0] != "marks":
 		return count
 	var mark_name = name_parts[1]

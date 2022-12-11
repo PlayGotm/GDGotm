@@ -22,9 +22,9 @@ var is_local: bool
 ##############################################################
 
 ## Get an existing blob.
-static func fetch(blob_or_id) -> GotmBlob:
+static func fetch(blob_or_id)->GotmBlob:
 	return yield(_GotmBlob.fetch(blob_or_id), "completed")
 
 ## Get the blob's data as a PoolByteArray.
-static func get_data(blob_or_id) -> PoolByteArray:
+static func get_data(blob_or_id)->PoolByteArray:
 	return yield(_GotmBlob.get_data(blob_or_id), "completed")

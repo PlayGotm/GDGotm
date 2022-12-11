@@ -1,11 +1,11 @@
 class_name _GotmDebugImpl
 #warnings-disable
 
-static func _login() -> void:
+static func _login()->void:
 	var g = _GotmImpl._get_gotm()
 	if g.is_live():
-		return
-		
+		return;
+	
 	_logout()
 	
 	g.user_id = _GotmImpl._generate_id()

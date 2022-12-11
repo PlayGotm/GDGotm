@@ -1,7 +1,12 @@
 class_name _GotmAuth
 #warnings-disable
 
-const _global := {"auth": null, "queue": null, "has_read_from_file": false, "gotm_auth": null}
+const _global := {
+		"auth": null, 
+		"queue": null, 
+		"has_read_from_file": false, 
+		"gotm_auth": null
+	}
 
 class _GotmAuthData:
 	var data: Dictionary
@@ -14,20 +19,20 @@ class _GotmAuthData:
 	var project: String
 	var project_key: String
 
-static func fetch():
+static func fetch():##->GotmAuth
 	var auth = yield(get_auth_async(), "completed")
 	if !auth:
 		auth = _global.gotm_auth
 	if !auth:
 		auth = _GotmAuthLocal.get_auth()
 	if !auth:
-		return
+		return null
 	var instance = _Gotm.create_instance("GotmAuth")
 	instance.user_id = auth.owner
 	instance.is_registered = !auth.is_guest
 	return instance
 
-static func get_auth():
+static func get_auth()->_GotmAuthData:
 	var auth = _global.auth
 	if !auth && !_global.has_read_from_file:
 		_global.has_read_from_file = true
@@ -36,10 +41,10 @@ static func get_auth():
 			_global.auth = auth
 	# Only return valid project auths
 	if !_is_auth_valid(auth) || !auth.project || !auth.project_key:
-		return
+		return null;
 	return auth
 
-static func get_auth_async():
+static func get_auth_async()->_GotmAuthData:
 	var auth = get_auth()
 	if auth:
 		yield(_GotmUtility.get_tree(), "idle_frame")
@@ -66,32 +71,38 @@ static func get_auth_async():
 	return get_auth()
 
 
-static func _get_project_from_token(token: String) -> String:
+static func _get_project_from_token(token:String)->String:
 	if !token:
 		return ""
 	var parts = token.split(".")
 	if parts.size() != 3:
 		return ""
 	
-	var data = parse_json(Marshalls.base64_to_utf8(parts[1] + "=="))
+	var data = parse_json(Marshalls.base64_to_utf8("%s=="%[parts[1]]))
 	if !data || !data.get("project"):
 		return ""
 		
 	return data.project
 
-static func _refresh_auth(auth: _GotmAuthData) -> _GotmAuthData:
-	var refreshed: _GotmAuthData = yield(_create_authentication({"refreshToken": auth.refresh_token}), "completed")
+static func _refresh_auth(auth:_GotmAuthData)->_GotmAuthData:
+	var refreshed:_GotmAuthData = yield(
+									_create_authentication(
+											{
+												"refreshToken": auth.refresh_token
+											}
+										),
+									 "completed")
 	if !refreshed:
 		return
 	refreshed.project_key = auth.project_key
 	return refreshed
 
-static func _get_refreshed_project_auth(auth: _GotmAuthData):
+static func _get_refreshed_project_auth(auth:_GotmAuthData)->_GotmAuthData:
 	var project_key = _Gotm.get_project_key()
 	if !project_key:
 		yield(_GotmUtility.get_tree(), "idle_frame")
-		return
-	if auth && auth.refresh_token && auth.project && auth.project_key && auth.project_key == project_key:
+		return null;
+	if auth && auth.refresh_token && auth.project && auth.project_key == project_key:
 		var data = yield(_refresh_auth(auth), "completed")
 		if data:
 			return data
@@ -117,13 +128,20 @@ static func _get_refreshed_project_auth(auth: _GotmAuthData):
 	_write_auth(user_auth)
 
 	if !user_auth:
-		return
-	var project_auth: _GotmAuthData = yield(_create_authentication({"project": project_key}, ["authorization: Bearer " + user_auth.token]), "completed")
+		return null;
+	var project_auth:_GotmAuthData = yield(
+										_create_authentication(
+												{
+													"project": project_key
+												}, 
+												["authorization: Bearer %s"%[user_auth.token]]
+											), 
+										"completed")
 	project_auth.project_key = project_key
 	return project_auth
 
-static func _is_auth_valid(auth: _GotmAuthData) -> bool:
-	if !auth || !auth.token || !(auth.expired / 1000 > OS.get_unix_time() + 60):
+static func _is_auth_valid(auth:_GotmAuthData)->bool:
+	if !auth || !auth.token || !(auth.expired/1000>OS.get_unix_time()+60):
 		return false
 	if auth.project && auth.project_key != _Gotm.get_project_key():
 		return false
@@ -135,7 +153,7 @@ static func _is_auth_valid(auth: _GotmAuthData) -> bool:
 
 
 
-static func _format_auth_data(data) -> _GotmAuthData:
+static func _format_auth_data(data)->_GotmAuthData:
 	if !data:
 		return null
 	var auth := _GotmAuthData.new()
@@ -152,16 +170,16 @@ const PROJECT_AUTH_NAME := "project_auth.json"
 const GUEST_AUTH_NAME := "guest_auth.json"
 
 
-static func _read_auth(name: String):
+static func _read_auth(name:String)->_GotmAuthData:
 	var content = _GotmUtility.read_file(_Gotm.get_path(name))
 	if !content:
-		return
+		return null;
 	var parsed = parse_json(content)
 	var auth = _format_auth_data(parsed.data)
 	auth.project_key = parsed.project_key
 	return auth
 
-static func _write_auth(auth: _GotmAuthData):
+static func _write_auth(auth:_GotmAuthData):
 	if !auth:
 		return
 	var name := ""
@@ -171,20 +189,46 @@ static func _write_auth(auth: _GotmAuthData):
 		name = GUEST_AUTH_NAME
 	else:
 		return
-	_GotmUtility.write_file(_Gotm.get_path(name), to_json({"data": auth.data, "project_key": auth.project_key}))
+	_GotmUtility.write_file(
+						_Gotm.get_path(name), 
+						to_json(
+							{
+								"data": auth.data, 
+								"project_key": auth.project_key
+							}
+						)
+	)
 
-static func _create_authentication(body: Dictionary = {}, headers: PoolStringArray = []) -> Dictionary:
-	var result = yield(_GotmUtility.fetch_json(_Gotm.get_global().apiOrigin + "/authentications", HTTPClient.METHOD_POST, body, headers), "completed")
+static func _create_authentication(
+						body: Dictionary = {}, 
+						headers: PoolStringArray = []
+					)->Dictionary:
+	var result = yield(
+					_GotmUtility.fetch_json(
+							"%s/authentications"%[_Gotm.get_global().apiOrigin], 
+							HTTPClient.METHOD_POST, 
+							body, 
+							headers
+							), 
+					"completed")
 	if !result.ok:
 		return
 	return _format_auth_data(result.data)
 
-static func _create_development_user_authentication() -> Dictionary:
+
+const AUTH_EMAIL_PATH:String = "%s/authentications/email?query=withCallbackUrl&callbackUrl=https://website.com&email=%s";
+static func _create_development_user_authentication()->Dictionary:
 	var email = "gdgotm@mail.com"
-	var result = yield(_GotmUtility.fetch_json(_Gotm.get_global().apiOrigin + "/authentications/email?query=withCallbackUrl&callbackUrl=https://website.com&email=" + email), "completed")
+	var result = yield(
+					_GotmUtility.fetch_json(AUTH_EMAIL_PATH%[_Gotm.get_global().apiOrigin,email]),
+					 "completed"
+				)
 	if !result.ok || !(result.data.token is String):
-		return
-	var sign_in_url = result.data.token
-	sign_in_url += "&email=" + email
+		return {};
 	
-	return yield(_create_authentication({"signInUrl": sign_in_url}), "completed")
+	return yield(_create_authentication(
+						{
+							"signInUrl": "%s&email=%s"%[result.data.token,email]
+						}
+					),
+				 "completed")

@@ -18,9 +18,9 @@ static func _fuzzy_compare(a, b, compare_less: bool) -> bool:
 	return a < b if compare_less else a > b
 
 
-static func is_less(a, b) -> bool:
+static func is_less(a, b)->bool:
 	return _fuzzy_compare(a, b, true)
 
 
-static func is_greater(a, b) -> bool:
+static func is_greater(a, b)->bool:
 	return _fuzzy_compare(a, b, false)
