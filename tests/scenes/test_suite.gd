@@ -16,7 +16,7 @@ func switch_test_scenes() -> void:
 		Test.FUNCTIONAL:
 			get_tree().change_scene_to_file("res://tests/functional_testing/gotm_score.tscn")
 		Test.UNIT:
-			get_tree().change_scene_to_file("res://tests/scenes/test_suite.tscn")
+			get_tree().change_scene_to_file("res://tests/unit_testing/temp.tscn")
 
 
 func _on_gotm_init_pressed() -> void:
