@@ -11,7 +11,7 @@ func temp() -> void:
 
 func _ready() -> void:
 	print("NOTE: If ran in the editor, there will be errors in the Debugger/Error tab. Please ignore.")
-	temp()
+#	temp()
 	test_all()
 
 
@@ -23,7 +23,6 @@ func test(object: Object) -> void:
 	for method in methods:
 		if method.name.begins_with("test"):
 			unit_tests.append(method.name)
-		else: break
 	unit_tests.reverse()
 
 	# run unit tests
@@ -41,10 +40,16 @@ func test(object: Object) -> void:
 
 func test_all() -> void:
 	print("Running all unit tests...")
+	await test_content()
 	await test_score()
 	await test_leaderboard()
 	await test_utility()
 	print("Unit testing completed.")
+
+
+func test_content() -> void:
+	print("GotmContent unit test running...")
+	await test(GotmUnitTest_Content.new())
 
 
 func test_leaderboard() -> void:
