@@ -1,6 +1,6 @@
 [gd_scene load_steps=2 format=3 uid="uid://dv4ativ254x8k"]
 
-[ext_resource type="Script" path="res://scenes/test_suite.gd" id="1_2jyn8"]
+[ext_resource type="Script" path="res://tests/scenes/test_suite.gd" id="1_2jyn8"]
 
 [node name="TestSuite" type="Node"]
 script = ExtResource("1_2jyn8")

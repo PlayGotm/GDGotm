@@ -112,7 +112,7 @@ static func _request(path: String, method: int, body = null, authenticate: bool 
 		await _GotmUtility.get_tree().process_frame
 
 	var result: _GotmUtility.FetchDataResult
-	if path.begins_with(_Gotm.get_global().storageApiEndpoint):
+	if path.begins_with(_Gotm.storage_api_endpoint):
 		result = await _GotmUtility.fetch_data(path, method, body)
 	elif path.begins_with("blobs/upload") && body.get("data") is PackedByteArray:
 		body = body.duplicate()
@@ -122,9 +122,9 @@ static func _request(path: String, method: int, body = null, authenticate: bool 
 		bytes += (JSON.stringify(body)).to_utf8_buffer()
 		bytes.append(0)
 		bytes += data
-		result = await _GotmUtility.fetch_json(_Gotm.get_global().apiWorkerOrigin + "/" + path, method, bytes)
+		result = await _GotmUtility.fetch_json(_Gotm.api_worker_origin + "/" + path, method, bytes)
 	else:
-		result = await _GotmUtility.fetch_json(_Gotm.get_global().apiOrigin + "/" + path, method, body)
+		result = await _GotmUtility.fetch_json(_Gotm.api_origin + "/" + path, method, body)
 	return result
 
 

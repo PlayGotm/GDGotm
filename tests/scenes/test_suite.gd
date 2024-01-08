@@ -10,23 +10,22 @@ func _enter_tree() -> void:
 	get_tree().root.gui_embed_subwindows = true
 
 
+
 func switch_test_scenes() -> void:
 	match test:
 		Test.FUNCTIONAL:
-			get_tree().change_scene_to_file("res://functional_testing/gotm_score.tscn")
+			get_tree().change_scene_to_file("res://tests/functional_testing/gotm_score.tscn")
 		Test.UNIT:
-			get_tree().change_scene_to_file("res://scenes/test_suite.tscn")
+			get_tree().change_scene_to_file("res://tests/scenes/test_suite.tscn")
 
 
 func _on_gotm_init_pressed() -> void:
-	var config := GotmConfig.new()
-	config.project_key = $UI/FunctionalMenu/ProjectKey.text
+	Gotm.project_key = $UI/FunctionalMenu/ProjectKey.text
+	Gotm.force_local_contents = force_offline
+	Gotm.force_local_marks = force_offline
+	Gotm.force_local_scores = force_offline
 	if force_offline:
-		config.force_local_contents = true
-		config.force_local_marks = true
-		config.force_local_scores = true
 		print("Forcing offline...")
-	Gotm.initialize(config)
 	switch_test_scenes()
 
 

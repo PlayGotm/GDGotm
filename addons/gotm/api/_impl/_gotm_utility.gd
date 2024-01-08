@@ -42,10 +42,9 @@ static func copy(from, to):
 
 
 static func create_id() -> String:
-	var global := _get_global()
 	var id: String = ""
 	for i in range(20):
-		id += global.id_chars[global.rng.randi() % global.id_chars.length()]
+		id += _global.id_chars[_global.rng.randi() % _global.id_chars.length()]
 	return id
 
 
@@ -115,8 +114,7 @@ static func _encode_search_string(s: String) -> String:
 	if s.is_empty():
 		return s
 	s = s.to_lower()
-	var encoders: Array = _get_global().search_string_encoders
-	for encoder in encoders:
+	for encoder in _global.search_string_encoders:
 		s = encoder[0].sub(s, encoder[1], true)
 	return s
 
@@ -139,10 +137,10 @@ static func fetch_data(url: String, method: int = HTTPClient.METHOD_GET, body = 
 	var port = parsed_url.port
 	var path = parsed_url.path
 
-	var free_clients = _get_global().free_http_clients.get(origin)
+	var free_clients = _global.free_http_clients.get(origin)
 	if !(free_clients is Array):
 		free_clients = []
-		_get_global().free_http_clients[origin] = free_clients
+		_global.free_http_clients[origin] = free_clients
 
 	var client: HTTPClient = free_clients.pop_back() if free_clients else HTTPClient.new()
 	if client.get_status() != HTTPClient.STATUS_CONNECTED:
@@ -229,16 +227,7 @@ static func _fuzzy_compare(a, b, compare_less: bool) -> bool:
 
 
 static func get_engine_unix_time() -> int:
-	var global := _get_global()
-	return global.start_unix_time + Time.get_ticks_msec() - global.start_ticks
-
-
-static func _get_global() -> GlobalData:
-	var _global = get_static_variable(_GotmUtility, "_global", null)
-	if !_global:
-		_global = GlobalData.new()
-		set_static_variable(_GotmUtility, "_global", _global)
-	return _global
+	return _global.start_unix_time + Time.get_ticks_msec() - _global.start_ticks
 
 
 # Converts UNIX epoch time in milliseconds to a date ISO 8601 string.
@@ -489,6 +478,11 @@ class GlobalData:
 			regex.compile(encoder[0])
 			encoder[0] = regex
 		return encoders
+
+static var _global := GlobalData.new()
+
+
+
 
 # TODO: See if needed after testing GotmAuth
 #class QueueSignal:

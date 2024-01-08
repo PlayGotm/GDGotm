@@ -3,9 +3,10 @@ extends Node
 
 
 func temp() -> void:
-	var config := GotmConfig.new()
-	config.project_key = "authenticators/ccG2PZyIak36FjT2COCE"
-	Gotm.initialize(config)
+	Gotm.project_key = "authenticators/ccG2PZyIak36FjT2COCE"
+	Gotm.force_local_contents = false
+	Gotm.force_local_marks = false
+	Gotm.force_local_scores = false
 
 
 func _ready() -> void:

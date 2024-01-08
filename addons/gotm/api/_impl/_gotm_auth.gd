@@ -6,7 +6,7 @@ const PROJECT_AUTH_NAME := "project_auth.json"
 
 
 static func _create_authentication(body: Dictionary = {}, headers: PackedStringArray = []) -> _GotmAuthData:
-	var result = await _GotmUtility.fetch_json(_Gotm.get_global().apiOrigin + "/authentications", HTTPClient.METHOD_POST, body, headers)
+	var result = await _GotmUtility.fetch_json(_Gotm.api_origin + "/authentications", HTTPClient.METHOD_POST, body, headers)
 	if !result.ok:
 		return null
 	return _format_auth_data(result.data)
@@ -96,7 +96,7 @@ static func _get_project_from_token(token: String) -> String:
 
 
 static func _get_refreshed_project_auth(auth: _GotmAuthData) -> _GotmAuthData:
-	var project_key := _Gotm.get_project_key()
+	var project_key := Gotm.project_key
 	if project_key.is_empty():
 		await _GotmUtility.get_tree().process_frame
 		return null
@@ -115,7 +115,7 @@ static func _get_refreshed_project_auth(auth: _GotmAuthData) -> _GotmAuthData:
 
 	# We manage user auths ourselves.
 	var user_auth: _GotmAuthData
-#	if _Gotm.get_global().apiOrigin.begins_with("http://localhost"):
+#	if _Gotm.api_origin.begins_with("http://localhost"):
 #		user_auth = await _create_development_user_authentication()
 	if !user_auth:
 		user_auth = _read_auth(GUEST_AUTH_NAME)
@@ -138,7 +138,7 @@ static func _get_refreshed_project_auth(auth: _GotmAuthData) -> _GotmAuthData:
 static func _is_auth_valid(auth: _GotmAuthData) -> bool:
 	if !auth || auth.token.is_empty() || !(auth.expired > Time.get_unix_time_from_system() + 60):
 		return false
-	if !auth.project.is_empty() && auth.project_key != _Gotm.get_project_key():
+	if !auth.project.is_empty() && auth.project_key != Gotm.project_key:
 		return false
 	if _Gotm.get_singleton():
 		var _global: _GotmAuthGlobalData = _GotmUtility.get_static_variable(_GotmAuth, "_global", _GotmAuthGlobalData.new())
@@ -199,7 +199,7 @@ class _GotmAuthGlobalData:
 
 #static func _create_development_user_authentication() -> _GotmAuthData:
 #	var email = "gdgotm@mail.com"
-#	var result = await _GotmUtility.fetch_json(_Gotm.get_global().apiOrigin + "/authentications/email?query=withCallbackUrl&callbackUrl=https://website.com&email=" + email)
+#	var result = await _GotmUtility.fetch_json(_Gotm.api_origin + "/authentications/email?query=withCallbackUrl&callbackUrl=https://website.com&email=" + email)
 #	if !result.ok || !(result.data.token is String):
 #		return null
 #	var sign_in_url = result.data.token

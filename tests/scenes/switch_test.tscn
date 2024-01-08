@@ -1,6 +1,6 @@
 [gd_scene load_steps=2 format=3 uid="uid://d1ym2m3ne2msh"]
 
-[ext_resource type="Script" path="res://scenes/switch_test.gd" id="1_ieq74"]
+[ext_resource type="Script" path="res://tests/scenes/switch_test.gd" id="1_ieq74"]
 
 [node name="SwitchTest" type="OptionButton"]
 offset_right = 143.0

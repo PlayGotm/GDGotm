@@ -1,7 +1,7 @@
 [gd_scene load_steps=4 format=3 uid="uid://xtnuwxa2651d"]
 
-[ext_resource type="Script" path="res://functional_testing/scripts/gotm_score.gd" id="1_p0fsb"]
-[ext_resource type="PackedScene" uid="uid://d1ym2m3ne2msh" path="res://scenes/switch_test.tscn" id="2_rowm4"]
+[ext_resource type="Script" path="res://tests/functional_testing/scripts/gotm_score.gd" id="1_p0fsb"]
+[ext_resource type="PackedScene" uid="uid://d1ym2m3ne2msh" path="res://tests/scenes/switch_test.tscn" id="2_rowm4"]
 
 [sub_resource type="GDScript" id="GDScript_7a03l"]
 script/source = "extends LineEdit
