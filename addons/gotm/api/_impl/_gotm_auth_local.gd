@@ -11,8 +11,6 @@ static func get_auth_async() -> _GotmAuthLocalCache:
 
 
 static func _get_cache() -> _GotmAuthLocalCache:
-	var _cache: _GotmAuthLocalCache = _GotmUtility.get_static_variable(_GotmAuthLocal, "_cache", _GotmAuthLocalCache.new())
-
 	if _cache.token:
 		return _cache
 
@@ -48,3 +46,6 @@ class _GotmAuthLocalCache:
 
 	func to_dict() -> Dictionary:
 		return {"token": token, "project": project, "owner": owner, "is_guest": is_guest}
+
+
+static var _cache := _GotmAuthLocalCache.new()

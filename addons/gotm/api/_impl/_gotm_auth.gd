@@ -15,7 +15,6 @@ static func _create_authentication(body: Dictionary = {}, headers: PackedStringA
 static func fetch() -> GotmAuth:
 	var auth = await get_auth_async()
 	if !auth:
-		var _global: _GotmAuthGlobalData = _GotmUtility.get_static_variable(_GotmAuth, "_global", _GotmAuthGlobalData.new())
 		auth = _global.gotm_auth
 	if !auth:
 		auth = _GotmAuthLocal.get_auth()
@@ -42,7 +41,6 @@ static func _format_auth_data(data: Dictionary) -> _GotmAuthData:
 
 
 static func get_auth() -> _GotmAuthData:
-	var _global: _GotmAuthGlobalData = _GotmUtility.get_static_variable(_GotmAuth, "_global", _GotmAuthGlobalData.new())
 	var auth = _global.auth
 	if !auth && !_global.has_read_from_file:
 		_global.has_read_from_file = true
@@ -61,7 +59,6 @@ static func get_auth_async() -> _GotmAuthData:
 		await _GotmUtility.get_tree().process_frame
 		return auth
 
-	var _global: _GotmAuthGlobalData = _GotmUtility.get_static_variable(_GotmAuth, "_global", _GotmAuthGlobalData.new())
 #	if _global.queue:
 #		_global.queue.add()
 #		return get_auth()
@@ -141,7 +138,6 @@ static func _is_auth_valid(auth: _GotmAuthData) -> bool:
 	if !auth.project.is_empty() && auth.project_key != Gotm.project_key:
 		return false
 	if _Gotm.get_singleton():
-		var _global: _GotmAuthGlobalData = _GotmUtility.get_static_variable(_GotmAuth, "_global", _GotmAuthGlobalData.new())
 		if auth.owner.is_empty() || !_global.gotm_auth || auth.owner != _global.gotm_auth.owner:
 			return false
 	return true
@@ -195,6 +191,9 @@ class _GotmAuthGlobalData:
 #	var queue: _GotmUtility.QueueSignal
 	var has_read_from_file := false
 	var gotm_auth: _GotmAuthData
+
+static var _global := _GotmAuthGlobalData.new()
+
 
 
 #static func _create_development_user_authentication() -> _GotmAuthData:

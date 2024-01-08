@@ -9,7 +9,6 @@ static func _cached_get_request(path: String, authenticate: bool = false):
 		await _GotmUtility.get_tree().process_frame
 		return {}
 
-	var _cache: Dictionary = _GotmUtility.get_static_variable(_GotmStore, "_cache", {})
 	if path in _cache:
 		var value = _cache[path]
 		await _GotmUtility.get_tree().process_frame
@@ -26,7 +25,6 @@ static func _cached_get_request(path: String, authenticate: bool = false):
 
 
 static func clear_cache(path: String) -> void:
-	var _cache: Dictionary = _GotmUtility.get_static_variable(_GotmStore, "_cache", {})
 	for key in _cache.keys():
 		if key == path || key.begins_with(path):
 			_cache.erase(key)
@@ -55,7 +53,6 @@ static func delete(path) -> bool:
 	var result := await _request(path, HTTPClient.METHOD_DELETE, null, true)
 	if !result || !result.ok:
 		return false
-	var _cache: Dictionary = _GotmUtility.get_static_variable(_GotmStore, "_cache", {})
 	_cache.erase(path)
 	return true
 
@@ -136,19 +133,16 @@ static func _request_data(path: String, method: int, body = null, authenticate: 
 
 
 static func _set_cache(path: String, data):
-	var _eviction_timers: Dictionary = _GotmUtility.get_static_variable(_GotmStore, "_eviction_timers", {})
 	var existing_timer = _eviction_timers.get(path)
 	_eviction_timers.erase(path)
 
 	var eviction_timer_on_timeout = func(path: String) -> void:
-		var _cache: Dictionary = _GotmUtility.get_static_variable(_GotmStore, "_cache", {})
 		_cache.erase(path)
 
 	if existing_timer is SceneTreeTimer:
 		if (existing_timer as SceneTreeTimer).timeout.is_connected(Callable(eviction_timer_on_timeout)):
 			(existing_timer as SceneTreeTimer).timeout.disconnect(Callable(eviction_timer_on_timeout))
 
-	var _cache: Dictionary = _GotmUtility.get_static_variable(_GotmStore, "_cache", {})
 	if data == null:
 		_cache.erase(path)
 		return null
@@ -164,7 +158,6 @@ static func _set_cache(path: String, data):
 
 
 static func _take_rate_limiting_token() -> bool:
-	var _token_bucket: Dictionary = _GotmUtility.get_static_variable(_GotmStore, "_token_bucket", {})
 	if !_token_bucket.has("count"):
 		_token_bucket.capacity = 60
 		_token_bucket.count = _token_bucket.capacity
@@ -190,3 +183,8 @@ static func update(path: String, data: Dictionary, options: Dictionary = {}) -> 
 	if !updated.is_empty():
 		_set_cache(path, updated)
 	return updated
+
+
+static var _cache := {}
+static var _eviction_timers := {}
+static var _token_bucket := {}

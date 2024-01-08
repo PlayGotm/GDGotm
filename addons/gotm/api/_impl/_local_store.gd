@@ -34,7 +34,6 @@ static func _get_store(path_or_api: String) -> Dictionary:
 	if path_or_api.is_empty():
 		return {}
 	var api = path_or_api.split("/")[0]
-	var _global: Dictionary = _GotmUtility.get_static_variable(_LocalStore, "_global", {})
 	var existing = _global.get(api)
 	if existing is Dictionary:
 		return existing
@@ -62,3 +61,6 @@ static func update(path: String, data: Dictionary) -> Dictionary:
 static func _write_store(path_or_api: String) -> void:
 	var api := path_or_api.split("/")[0]
 	_GotmUtility.write_file(_Gotm.get_local_path(api + ".json"), JSON.stringify(_get_store(api)))
+
+
+static var _global := {}

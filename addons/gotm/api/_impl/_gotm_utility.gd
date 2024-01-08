@@ -277,15 +277,6 @@ static func get_nested_value(path_or_parts, object, undefined_value = null, path
 	return undefined_value
 
 
-static func get_static_variable(script: Script, name: String, default_value):
-	if script.has_meta(name):
-		return script.get_meta(name)
-	if default_value == null:
-		return null
-	script.set_meta(name, default_value)
-	return script.get_meta(name)
-
-
 static func get_tree() -> SceneTree:
 	return Engine.get_main_loop() as SceneTree
 
