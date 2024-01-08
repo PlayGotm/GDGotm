@@ -147,16 +147,12 @@ static func fetch_data(url: String, method: int = HTTPClient.METHOD_GET, body = 
 		client.connect_to_host(host, port) # TODO: function changed, is SSL/TSL ok like this (compared to prior)?
 		client.poll()
 
-	var has_yielded := false
 	while client.get_status() == HTTPClient.STATUS_CONNECTING || client.get_status() == HTTPClient.STATUS_RESOLVING:
 		client.poll()
-		has_yielded = true
 		await get_tree().process_frame
 
 	if client.get_status() != HTTPClient.STATUS_CONNECTED:
 		free_clients.append(client)
-		if !has_yielded:
-			await get_tree().process_frame
 		return
 
 	if body is Dictionary:
@@ -193,8 +189,6 @@ static func fetch_data(url: String, method: int = HTTPClient.METHOD_GET, body = 
 			response.data += chunk
 
 	free_clients.append(client)
-	if !has_yielded:
-		await get_tree().process_frame
 	if OS.get_name () != "HTML5" && response.headers.get("content-encoding") == "gzip":
 		response.data = decompress_gzip(response.data)
 	return response
