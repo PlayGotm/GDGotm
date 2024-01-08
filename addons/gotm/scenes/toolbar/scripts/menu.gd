@@ -44,4 +44,5 @@ func _on_index_pressed(index: int) -> void:
 
 
 func _on_gd_gotm_button_pressed() -> void:
+	show()
 	popup()
