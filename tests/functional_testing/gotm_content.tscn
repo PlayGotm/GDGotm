@@ -1,0 +1,911 @@
+[gd_scene load_steps=5 format=3 uid="uid://dl0o2uq0cq8nk"]
+
+[ext_resource type="Script" path="res://functional_testing/scripts/gotm_content.gd" id="1_8vc6n"]
+[ext_resource type="PackedScene" uid="uid://d1ym2m3ne2msh" path="res://scenes/switch_test.tscn" id="2_cc8gx"]
+
+[sub_resource type="GDScript" id="GDScript_exucl"]
+resource_name = "parameter_group"
+script/source = "extends OptionButton
+
+@onready var param_container = $\"../ParamsScrollContainer/Params\"
+
+
+func _on_item_selected(index: int) -> void:
+	_hide_all()
+	match index:
+		0: $\"../ParamsScrollContainer/Params/Create\".visible = true
+		1: $\"../ParamsScrollContainer/Params/Update\".visible = true
+		2: $\"../ParamsScrollContainer/Params/Delete\".visible = true
+		3: $\"../ParamsScrollContainer/Params/Fetch&GetByKey\".visible = true
+		4: $\"../ParamsScrollContainer/Params/GetData\".visible = true
+		5: $\"../ParamsScrollContainer/Params/GetNode\".visible = true
+		6: $\"../ParamsScrollContainer/Params/GetVariant\".visible = true
+		7: $\"../ParamsScrollContainer/Params/GetProperties\".visible = true
+		8: $\"../ParamsScrollContainer/Params/List\".visible = true
+
+
+func _hide_all() -> void:
+	for child in param_container.get_children():
+		child.visible = false
+"
+
+[sub_resource type="GDScript" id="GDScript_vgo4d"]
+resource_name = "data_option_button_script"
+script/source = "extends OptionButton
+
+
+func _on_item_selected(index: int) -> void:
+	if index == 0:
+		$\"../Data\".editable = false
+		$\"../Data\".text = \"\"
+	else:
+		$\"../Data\".editable = true
+"
+
+[node name="GotmContent" type="Node"]
+script = ExtResource("1_8vc6n")
+
+[node name="UI" type="Control" parent="."]
+layout_mode = 3
+anchor_left = 0.03
+anchor_top = 0.052
+anchor_right = 0.97
+anchor_bottom = 0.954
+offset_left = -0.560001
+offset_top = 0.304001
+offset_right = -0.440063
+offset_bottom = -0.192017
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 4
+
+[node name="SwitchTest" parent="UI" instance=ExtResource("2_cc8gx")]
+layout_mode = 1
+offset_right = 612.0
+offset_bottom = 96.0
+
+[node name="MenuScrollContainer" type="ScrollContainer" parent="UI"]
+layout_mode = 1
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_top = -455.0
+offset_right = 419.0
+grow_vertical = 0
+
+[node name="Menu" type="VBoxContainer" parent="UI/MenuScrollContainer"]
+layout_mode = 2
+
+[node name="ConsolePrint" type="CheckButton" parent="UI/MenuScrollContainer/Menu"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 32
+button_pressed = true
+text = "Print to Console?"
+
+[node name="Create" type="Button" parent="UI/MenuScrollContainer/Menu"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 32
+text = "Create
+"
+
+[node name="CreateLocal" type="Button" parent="UI/MenuScrollContainer/Menu"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 32
+text = "Create Local"
+
+[node name="Update" type="Button" parent="UI/MenuScrollContainer/Menu"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 32
+disabled = true
+text = "Update"
+
+[node name="UpdateByKey" type="Button" parent="UI/MenuScrollContainer/Menu"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 32
+disabled = true
+text = "Update By Key"
+
+[node name="Delete" type="Button" parent="UI/MenuScrollContainer/Menu"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 32
+disabled = true
+text = "Delete"
+
+[node name="DeleteByKey" type="Button" parent="UI/MenuScrollContainer/Menu"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 32
+disabled = true
+text = "Delete By Key"
+
+[node name="Fetch" type="Button" parent="UI/MenuScrollContainer/Menu"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 32
+disabled = true
+text = "Fetch"
+
+[node name="GetByKey" type="Button" parent="UI/MenuScrollContainer/Menu"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 32
+disabled = true
+text = "Get By Key"
+
+[node name="GetData" type="Button" parent="UI/MenuScrollContainer/Menu"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 32
+disabled = true
+text = "Get Data"
+
+[node name="GetDataByKey" type="Button" parent="UI/MenuScrollContainer/Menu"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 32
+disabled = true
+text = "Get Data By Key"
+
+[node name="GetNode" type="Button" parent="UI/MenuScrollContainer/Menu"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 32
+disabled = true
+text = "Get Node"
+
+[node name="GetNodeByKey" type="Button" parent="UI/MenuScrollContainer/Menu"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 32
+disabled = true
+text = "Get Node By Key"
+
+[node name="GetVariant" type="Button" parent="UI/MenuScrollContainer/Menu"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 32
+disabled = true
+text = "Get Variant"
+
+[node name="GetVariantByKey" type="Button" parent="UI/MenuScrollContainer/Menu"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 32
+disabled = true
+text = "Get Variant By Key"
+
+[node name="GetProperties" type="Button" parent="UI/MenuScrollContainer/Menu"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 32
+disabled = true
+text = "Get Properties"
+
+[node name="GetPropertiesByKey" type="Button" parent="UI/MenuScrollContainer/Menu"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 32
+disabled = true
+text = "Get Properties By Key"
+
+[node name="List" type="Button" parent="UI/MenuScrollContainer/Menu"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 32
+text = "List"
+
+[node name="ParameterGroup" type="OptionButton" parent="UI"]
+layout_mode = 2
+offset_left = 683.16
+offset_top = 95.256
+offset_right = 1223.16
+offset_bottom = 148.256
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 32
+alignment = 1
+item_count = 9
+selected = 0
+popup/item_0/text = "Create/Create Local"
+popup/item_0/id = 0
+popup/item_1/text = "Update/Update By Key"
+popup/item_1/id = 1
+popup/item_2/text = "Delete/Delete By Key"
+popup/item_2/id = 2
+popup/item_3/text = "Fetch/Get By Key"
+popup/item_3/id = 3
+popup/item_4/text = "Get Data/Get Data By Key"
+popup/item_4/id = 4
+popup/item_5/text = "Get Node/Get Node By Key"
+popup/item_5/id = 5
+popup/item_6/text = "Get Variant/Get Variant By Key"
+popup/item_6/id = 6
+popup/item_7/text = "Get Properties/Get Props By Key"
+popup/item_7/id = 7
+popup/item_8/text = "List"
+popup/item_8/id = 8
+script = SubResource("GDScript_exucl")
+
+[node name="ParamsScrollContainer" type="ScrollContainer" parent="UI"]
+layout_mode = 0
+offset_left = 600.0
+offset_top = 163.0
+offset_right = 1221.0
+offset_bottom = 634.0
+
+[node name="Params" type="Control" parent="UI/ParamsScrollContainer"]
+layout_mode = 2
+
+[node name="Create" type="GridContainer" parent="UI/ParamsScrollContainer/Params"]
+layout_mode = 2
+offset_right = 621.0
+offset_bottom = 452.0
+size_flags_horizontal = 3
+columns = 2
+
+[node name="DataOptionButton" type="OptionButton" parent="UI/ParamsScrollContainer/Params/Create"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 32
+alignment = 1
+item_count = 4
+selected = 0
+popup/item_0/text = "Null:"
+popup/item_0/id = 0
+popup/item_1/text = "String:"
+popup/item_1/id = 1
+popup/item_2/text = "PackedByteArray:"
+popup/item_2/id = 2
+popup/item_3/text = "Node (Name):"
+popup/item_3/id = 3
+script = SubResource("GDScript_vgo4d")
+
+[node name="Data" type="LineEdit" parent="UI/ParamsScrollContainer/Params/Create"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 32
+placeholder_text = "Data as String"
+alignment = 1
+editable = false
+
+[node name="KeyLabel" type="Label" parent="UI/ParamsScrollContainer/Params/Create"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 32
+text = "Key: "
+horizontal_alignment = 2
+
+[node name="Key" type="LineEdit" parent="UI/ParamsScrollContainer/Params/Create"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 32
+alignment = 1
+
+[node name="NameLabel" type="Label" parent="UI/ParamsScrollContainer/Params/Create"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 32
+text = "Name: "
+horizontal_alignment = 2
+
+[node name="Name" type="LineEdit" parent="UI/ParamsScrollContainer/Params/Create"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 32
+alignment = 1
+
+[node name="PropLabel1" type="Label" parent="UI/ParamsScrollContainer/Params/Create"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 32
+text = "Property 1: "
+horizontal_alignment = 2
+
+[node name="Prop1" type="HBoxContainer" parent="UI/ParamsScrollContainer/Params/Create"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="PropName1" type="LineEdit" parent="UI/ParamsScrollContainer/Params/Create/Prop1"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 32
+alignment = 1
+
+[node name="PropValue1" type="LineEdit" parent="UI/ParamsScrollContainer/Params/Create/Prop1"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 32
+alignment = 1
+
+[node name="PropLabel2" type="Label" parent="UI/ParamsScrollContainer/Params/Create"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 32
+text = "Property 2: "
+horizontal_alignment = 2
+
+[node name="Prop2" type="HBoxContainer" parent="UI/ParamsScrollContainer/Params/Create"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="PropName2" type="LineEdit" parent="UI/ParamsScrollContainer/Params/Create/Prop2"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 32
+alignment = 1
+
+[node name="PropValue2" type="LineEdit" parent="UI/ParamsScrollContainer/Params/Create/Prop2"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 32
+alignment = 1
+
+[node name="PropLabel3" type="Label" parent="UI/ParamsScrollContainer/Params/Create"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 32
+text = "Property 3: "
+horizontal_alignment = 2
+
+[node name="Prop3" type="HBoxContainer" parent="UI/ParamsScrollContainer/Params/Create"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="PropName3" type="LineEdit" parent="UI/ParamsScrollContainer/Params/Create/Prop3"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 32
+alignment = 1
+
+[node name="PropValue3" type="LineEdit" parent="UI/ParamsScrollContainer/Params/Create/Prop3"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 32
+alignment = 1
+
+[node name="ParentIDLabel" type="Label" parent="UI/ParamsScrollContainer/Params/Create"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 32
+text = "Parent ID: "
+horizontal_alignment = 2
+
+[node name="ParentID" type="LineEdit" parent="UI/ParamsScrollContainer/Params/Create"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 32
+alignment = 1
+
+[node name="Private" type="CheckButton" parent="UI/ParamsScrollContainer/Params/Create"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 32
+text = "Is Private? "
+alignment = 2
+
+[node name="Update" type="GridContainer" parent="UI/ParamsScrollContainer/Params"]
+visible = false
+layout_mode = 2
+offset_right = 621.0
+offset_bottom = 452.0
+size_flags_horizontal = 3
+columns = 2
+
+[node name="IDLabel" type="Label" parent="UI/ParamsScrollContainer/Params/Update"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 32
+text = "ID: "
+horizontal_alignment = 2
+
+[node name="ID" type="LineEdit" parent="UI/ParamsScrollContainer/Params/Update"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 32
+alignment = 1
+
+[node name="KeyLabel" type="Label" parent="UI/ParamsScrollContainer/Params/Update"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 32
+text = "Key: "
+horizontal_alignment = 2
+
+[node name="Key" type="LineEdit" parent="UI/ParamsScrollContainer/Params/Update"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 32
+alignment = 1
+
+[node name="HSeparator" type="HSeparator" parent="UI/ParamsScrollContainer/Params/Update"]
+layout_mode = 2
+
+[node name="HSeparator2" type="HSeparator" parent="UI/ParamsScrollContainer/Params/Update"]
+layout_mode = 2
+
+[node name="DataOptionButton" type="OptionButton" parent="UI/ParamsScrollContainer/Params/Update"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 32
+alignment = 1
+item_count = 4
+selected = 0
+popup/item_0/text = "Null:"
+popup/item_0/id = 0
+popup/item_1/text = "String:"
+popup/item_1/id = 1
+popup/item_2/text = "PackedByteArray:"
+popup/item_2/id = 2
+popup/item_3/text = "Node (Name):"
+popup/item_3/id = 3
+script = SubResource("GDScript_vgo4d")
+
+[node name="Data" type="LineEdit" parent="UI/ParamsScrollContainer/Params/Update"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 32
+placeholder_text = "New Data String"
+alignment = 1
+editable = false
+
+[node name="NameLabel" type="Label" parent="UI/ParamsScrollContainer/Params/Update"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 32
+text = "New Name: "
+horizontal_alignment = 2
+
+[node name="Name" type="LineEdit" parent="UI/ParamsScrollContainer/Params/Update"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 32
+alignment = 1
+
+[node name="NewKeyLabel" type="Label" parent="UI/ParamsScrollContainer/Params/Update"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 32
+text = "New Key: "
+horizontal_alignment = 2
+
+[node name="NewKey" type="LineEdit" parent="UI/ParamsScrollContainer/Params/Update"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 32
+alignment = 1
+
+[node name="PropLabel1" type="Label" parent="UI/ParamsScrollContainer/Params/Update"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 32
+text = "New Property 1: "
+horizontal_alignment = 2
+
+[node name="Prop1" type="HBoxContainer" parent="UI/ParamsScrollContainer/Params/Update"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="PropName1" type="LineEdit" parent="UI/ParamsScrollContainer/Params/Update/Prop1"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 32
+alignment = 1
+
+[node name="PropValue1" type="LineEdit" parent="UI/ParamsScrollContainer/Params/Update/Prop1"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 32
+alignment = 1
+
+[node name="PropLabel2" type="Label" parent="UI/ParamsScrollContainer/Params/Update"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 32
+text = "New Property 2: "
+horizontal_alignment = 2
+
+[node name="Prop2" type="HBoxContainer" parent="UI/ParamsScrollContainer/Params/Update"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="PropName2" type="LineEdit" parent="UI/ParamsScrollContainer/Params/Update/Prop2"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 32
+alignment = 1
+
+[node name="PropValue2" type="LineEdit" parent="UI/ParamsScrollContainer/Params/Update/Prop2"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 32
+alignment = 1
+
+[node name="PropLabel3" type="Label" parent="UI/ParamsScrollContainer/Params/Update"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 32
+text = "New Property 3: "
+horizontal_alignment = 2
+
+[node name="Prop3" type="HBoxContainer" parent="UI/ParamsScrollContainer/Params/Update"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="PropName3" type="LineEdit" parent="UI/ParamsScrollContainer/Params/Update/Prop3"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 32
+alignment = 1
+
+[node name="PropValue3" type="LineEdit" parent="UI/ParamsScrollContainer/Params/Update/Prop3"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 32
+alignment = 1
+
+[node name="Delete" type="GridContainer" parent="UI/ParamsScrollContainer/Params"]
+visible = false
+layout_mode = 2
+offset_right = 621.0
+offset_bottom = 452.0
+size_flags_horizontal = 3
+columns = 2
+
+[node name="IDLabel" type="Label" parent="UI/ParamsScrollContainer/Params/Delete"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 32
+text = "ID: "
+horizontal_alignment = 2
+
+[node name="ID" type="LineEdit" parent="UI/ParamsScrollContainer/Params/Delete"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 32
+alignment = 1
+
+[node name="KeyLabel" type="Label" parent="UI/ParamsScrollContainer/Params/Delete"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 32
+text = "Key: "
+horizontal_alignment = 2
+
+[node name="Key" type="LineEdit" parent="UI/ParamsScrollContainer/Params/Delete"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 32
+alignment = 1
+
+[node name="Fetch&GetByKey" type="GridContainer" parent="UI/ParamsScrollContainer/Params"]
+visible = false
+layout_mode = 2
+offset_right = 621.0
+offset_bottom = 452.0
+size_flags_horizontal = 3
+columns = 2
+
+[node name="IDLabel" type="Label" parent="UI/ParamsScrollContainer/Params/Fetch&GetByKey"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 32
+text = "ID: "
+horizontal_alignment = 2
+
+[node name="ID" type="LineEdit" parent="UI/ParamsScrollContainer/Params/Fetch&GetByKey"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 32
+alignment = 1
+
+[node name="KeyLabel" type="Label" parent="UI/ParamsScrollContainer/Params/Fetch&GetByKey"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 32
+text = "Key: "
+horizontal_alignment = 2
+
+[node name="Key" type="LineEdit" parent="UI/ParamsScrollContainer/Params/Fetch&GetByKey"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 32
+alignment = 1
+
+[node name="GetData" type="GridContainer" parent="UI/ParamsScrollContainer/Params"]
+visible = false
+layout_mode = 2
+offset_right = 621.0
+offset_bottom = 452.0
+size_flags_horizontal = 3
+columns = 2
+
+[node name="IDLabel" type="Label" parent="UI/ParamsScrollContainer/Params/GetData"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 32
+text = "ID: "
+horizontal_alignment = 2
+
+[node name="ID" type="LineEdit" parent="UI/ParamsScrollContainer/Params/GetData"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 32
+alignment = 1
+
+[node name="KeyLabel" type="Label" parent="UI/ParamsScrollContainer/Params/GetData"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 32
+text = "Key: "
+horizontal_alignment = 2
+
+[node name="Key" type="LineEdit" parent="UI/ParamsScrollContainer/Params/GetData"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 32
+alignment = 1
+
+[node name="GetNode" type="GridContainer" parent="UI/ParamsScrollContainer/Params"]
+visible = false
+layout_mode = 2
+offset_right = 621.0
+offset_bottom = 452.0
+size_flags_horizontal = 3
+columns = 2
+
+[node name="IDLabel" type="Label" parent="UI/ParamsScrollContainer/Params/GetNode"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 32
+text = "ID: "
+horizontal_alignment = 2
+
+[node name="ID" type="LineEdit" parent="UI/ParamsScrollContainer/Params/GetNode"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 32
+alignment = 1
+
+[node name="KeyLabel" type="Label" parent="UI/ParamsScrollContainer/Params/GetNode"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 32
+text = "Key: "
+horizontal_alignment = 2
+
+[node name="Key" type="LineEdit" parent="UI/ParamsScrollContainer/Params/GetNode"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 32
+alignment = 1
+
+[node name="GetVariant" type="GridContainer" parent="UI/ParamsScrollContainer/Params"]
+visible = false
+layout_mode = 2
+offset_right = 621.0
+offset_bottom = 452.0
+size_flags_horizontal = 3
+columns = 2
+
+[node name="IDLabel" type="Label" parent="UI/ParamsScrollContainer/Params/GetVariant"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 32
+text = "ID: "
+horizontal_alignment = 2
+
+[node name="ID" type="LineEdit" parent="UI/ParamsScrollContainer/Params/GetVariant"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 32
+alignment = 1
+
+[node name="KeyLabel" type="Label" parent="UI/ParamsScrollContainer/Params/GetVariant"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 32
+text = "Key: "
+horizontal_alignment = 2
+
+[node name="Key" type="LineEdit" parent="UI/ParamsScrollContainer/Params/GetVariant"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 32
+alignment = 1
+
+[node name="GetProperties" type="GridContainer" parent="UI/ParamsScrollContainer/Params"]
+visible = false
+layout_mode = 2
+offset_right = 621.0
+offset_bottom = 452.0
+size_flags_horizontal = 3
+columns = 2
+
+[node name="IDLabel" type="Label" parent="UI/ParamsScrollContainer/Params/GetProperties"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 32
+text = "ID: "
+horizontal_alignment = 2
+
+[node name="ID" type="LineEdit" parent="UI/ParamsScrollContainer/Params/GetProperties"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 32
+alignment = 1
+
+[node name="KeyLabel" type="Label" parent="UI/ParamsScrollContainer/Params/GetProperties"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 32
+text = "Key: "
+horizontal_alignment = 2
+
+[node name="Key" type="LineEdit" parent="UI/ParamsScrollContainer/Params/GetProperties"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 32
+alignment = 1
+
+[node name="List" type="GridContainer" parent="UI/ParamsScrollContainer/Params"]
+visible = false
+layout_mode = 2
+offset_right = 621.0
+offset_bottom = 452.0
+size_flags_horizontal = 3
+columns = 2
+
+[node name="GotmQueryLabel" type="Label" parent="UI/ParamsScrollContainer/Params/List"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 32
+text = "GotmQuery"
+
+[node name="Blank" type="Control" parent="UI/ParamsScrollContainer/Params/List"]
+layout_mode = 2
+
+[node name="HSeparator1" type="HSeparator" parent="UI/ParamsScrollContainer/Params/List"]
+layout_mode = 2
+
+[node name="HSeparator2" type="HSeparator" parent="UI/ParamsScrollContainer/Params/List"]
+layout_mode = 2
+
+[node name="Query1" type="Label" parent="UI/ParamsScrollContainer/Params/List"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 32
+text = "1st Query:"
+horizontal_alignment = 1
+
+[node name="QueryButton1" type="OptionButton" parent="UI/ParamsScrollContainer/Params/List"]
+layout_mode = 2
+alignment = 1
+item_count = 4
+selected = 0
+popup/item_0/text = "NONE"
+popup/item_0/id = 0
+popup/item_1/text = "FILTER"
+popup/item_1/id = 1
+popup/item_2/text = "FILTER MIN"
+popup/item_2/id = 2
+popup/item_3/text = "FILTER MAX"
+popup/item_3/id = 3
+
+[node name="Path1" type="LineEdit" parent="UI/ParamsScrollContainer/Params/List"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 32
+placeholder_text = "filter path"
+alignment = 1
+
+[node name="Value1" type="LineEdit" parent="UI/ParamsScrollContainer/Params/List"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 32
+placeholder_text = "value"
+alignment = 1
+
+[node name="HSeparator3" type="HSeparator" parent="UI/ParamsScrollContainer/Params/List"]
+layout_mode = 2
+
+[node name="HSeparator4" type="HSeparator" parent="UI/ParamsScrollContainer/Params/List"]
+layout_mode = 2
+
+[node name="Query2" type="Label" parent="UI/ParamsScrollContainer/Params/List"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 32
+text = "2nd Query:"
+horizontal_alignment = 1
+
+[node name="QueryButton2" type="OptionButton" parent="UI/ParamsScrollContainer/Params/List"]
+layout_mode = 2
+alignment = 1
+item_count = 4
+selected = 0
+popup/item_0/text = "NONE"
+popup/item_0/id = 0
+popup/item_1/text = "FILTER"
+popup/item_1/id = 1
+popup/item_2/text = "FILTER MIN"
+popup/item_2/id = 2
+popup/item_3/text = "FILTER MAX"
+popup/item_3/id = 3
+
+[node name="Path2" type="LineEdit" parent="UI/ParamsScrollContainer/Params/List"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 32
+placeholder_text = "filter path"
+alignment = 1
+
+[node name="Value2" type="LineEdit" parent="UI/ParamsScrollContainer/Params/List"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 32
+placeholder_text = "value"
+alignment = 1
+
+[node name="HSeparator5" type="HSeparator" parent="UI/ParamsScrollContainer/Params/List"]
+layout_mode = 2
+
+[node name="HSeparator6" type="HSeparator" parent="UI/ParamsScrollContainer/Params/List"]
+layout_mode = 2
+
+[node name="Query3" type="Label" parent="UI/ParamsScrollContainer/Params/List"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 32
+text = "3rd Query:"
+horizontal_alignment = 1
+
+[node name="QueryButton3" type="OptionButton" parent="UI/ParamsScrollContainer/Params/List"]
+layout_mode = 2
+alignment = 1
+item_count = 4
+selected = 0
+popup/item_0/text = "NONE"
+popup/item_0/id = 0
+popup/item_1/text = "FILTER"
+popup/item_1/id = 1
+popup/item_2/text = "FILTER MIN"
+popup/item_2/id = 2
+popup/item_3/text = "FILTER MAX"
+popup/item_3/id = 3
+
+[node name="Path3" type="LineEdit" parent="UI/ParamsScrollContainer/Params/List"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 32
+placeholder_text = "filter path"
+alignment = 1
+
+[node name="Value3" type="LineEdit" parent="UI/ParamsScrollContainer/Params/List"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 32
+placeholder_text = "value"
+alignment = 1
+
+[node name="HSeparator7" type="HSeparator" parent="UI/ParamsScrollContainer/Params/List"]
+layout_mode = 2
+
+[node name="HSeparator8" type="HSeparator" parent="UI/ParamsScrollContainer/Params/List"]
+layout_mode = 2
+
+[node name="Sort" type="HBoxContainer" parent="UI/ParamsScrollContainer/Params/List"]
+layout_mode = 2
+
+[node name="Path" type="LineEdit" parent="UI/ParamsScrollContainer/Params/List/Sort"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 32
+placeholder_text = "sort path"
+alignment = 1
+
+[node name="Value" type="CheckButton" parent="UI/ParamsScrollContainer/Params/List/Sort"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 32
+text = "ASC "
+alignment = 1
+
+[node name="AfterID" type="LineEdit" parent="UI/ParamsScrollContainer/Params/List"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 32
+placeholder_text = "after_id"
+alignment = 1
+
+[connection signal="toggled" from="UI/MenuScrollContainer/Menu/ConsolePrint" to="." method="_on_console_print_toggled"]
+[connection signal="pressed" from="UI/MenuScrollContainer/Menu/Create" to="." method="create"]
+[connection signal="pressed" from="UI/MenuScrollContainer/Menu/CreateLocal" to="." method="create_local"]
+[connection signal="pressed" from="UI/MenuScrollContainer/Menu/Update" to="." method="update"]
+[connection signal="pressed" from="UI/MenuScrollContainer/Menu/UpdateByKey" to="." method="update_by_key"]
+[connection signal="pressed" from="UI/MenuScrollContainer/Menu/Delete" to="." method="delete"]
+[connection signal="pressed" from="UI/MenuScrollContainer/Menu/DeleteByKey" to="." method="delete_by_key"]
+[connection signal="pressed" from="UI/MenuScrollContainer/Menu/Fetch" to="." method="fetch"]
+[connection signal="pressed" from="UI/MenuScrollContainer/Menu/GetByKey" to="." method="get_by_key"]
+[connection signal="pressed" from="UI/MenuScrollContainer/Menu/GetData" to="." method="get_data"]
+[connection signal="pressed" from="UI/MenuScrollContainer/Menu/GetDataByKey" to="." method="get_data_by_key"]
+[connection signal="pressed" from="UI/MenuScrollContainer/Menu/GetNode" to="." method="get_node_content"]
+[connection signal="pressed" from="UI/MenuScrollContainer/Menu/GetNodeByKey" to="." method="get_node_content_by_key"]
+[connection signal="pressed" from="UI/MenuScrollContainer/Menu/GetVariant" to="." method="get_variant"]
+[connection signal="pressed" from="UI/MenuScrollContainer/Menu/GetVariantByKey" to="." method="get_variant_by_key"]
+[connection signal="pressed" from="UI/MenuScrollContainer/Menu/GetProperties" to="." method="get_properties"]
+[connection signal="pressed" from="UI/MenuScrollContainer/Menu/GetPropertiesByKey" to="." method="get_properties_by_key"]
+[connection signal="pressed" from="UI/MenuScrollContainer/Menu/List" to="." method="list"]
+[connection signal="item_selected" from="UI/ParameterGroup" to="UI/ParameterGroup" method="_on_item_selected"]
+[connection signal="item_selected" from="UI/ParamsScrollContainer/Params/Create/DataOptionButton" to="UI/ParamsScrollContainer/Params/Create/DataOptionButton" method="_on_item_selected"]
+[connection signal="text_changed" from="UI/ParamsScrollContainer/Params/Update/ID" to="." method="_check_menu"]
+[connection signal="text_changed" from="UI/ParamsScrollContainer/Params/Update/Key" to="." method="_check_menu"]
+[connection signal="item_selected" from="UI/ParamsScrollContainer/Params/Update/DataOptionButton" to="UI/ParamsScrollContainer/Params/Update/DataOptionButton" method="_on_item_selected"]
+[connection signal="text_changed" from="UI/ParamsScrollContainer/Params/Delete/ID" to="." method="_check_menu"]
+[connection signal="text_changed" from="UI/ParamsScrollContainer/Params/Delete/Key" to="." method="_check_menu"]
+[connection signal="text_changed" from="UI/ParamsScrollContainer/Params/Fetch&GetByKey/ID" to="." method="_check_menu"]
+[connection signal="text_changed" from="UI/ParamsScrollContainer/Params/Fetch&GetByKey/Key" to="." method="_check_menu"]
+[connection signal="text_changed" from="UI/ParamsScrollContainer/Params/GetData/ID" to="." method="_check_menu"]
+[connection signal="text_changed" from="UI/ParamsScrollContainer/Params/GetData/Key" to="." method="_check_menu"]
+[connection signal="text_changed" from="UI/ParamsScrollContainer/Params/GetNode/ID" to="." method="_check_menu"]
+[connection signal="text_changed" from="UI/ParamsScrollContainer/Params/GetNode/Key" to="." method="_check_menu"]
+[connection signal="text_changed" from="UI/ParamsScrollContainer/Params/GetVariant/ID" to="." method="_check_menu"]
+[connection signal="text_changed" from="UI/ParamsScrollContainer/Params/GetVariant/Key" to="." method="_check_menu"]
+[connection signal="text_changed" from="UI/ParamsScrollContainer/Params/GetProperties/ID" to="." method="_check_menu"]
+[connection signal="text_changed" from="UI/ParamsScrollContainer/Params/GetProperties/Key" to="." method="_check_menu"]

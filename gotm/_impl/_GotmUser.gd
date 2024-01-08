@@ -1,18 +1,26 @@
 class_name _GotmUser
-#warnings-disable
 
-static func get_implementation():
-	if !_Gotm.has_global_api():
-		return _GotmUserLocal
-	return _GotmStore
+enum Implementation { GOTM_STORE, GOTM_USER_LOCAL }
 
-static func fetch(id: String):
-	var data = yield(get_implementation().fetch(id), "completed")
-	return _format(data, _Gotm.create_instance("GotmUser"))
 
-static func _format(data, user):
-	if !data || !user:
-		return
+static func fetch(id: String) -> GotmUser:
+	if get_implementation() == Implementation.GOTM_USER_LOCAL:
+		await _GotmUtility.get_tree().process_frame
+		return null
+	else:
+		var data: Dictionary = await _GotmStore.fetch(id)
+		return _format(data, GotmUser.new())
+
+
+static func _format(data: Dictionary, user: GotmUser) -> GotmUser:
+	if data.is_empty() || !user:
+		return null
 	user.id = data.path
 	user.display_name = data.name
 	return user
+
+
+static func get_implementation() -> Implementation:
+	if !_Gotm.has_global_api():
+		return Implementation.GOTM_USER_LOCAL
+	return Implementation.GOTM_STORE

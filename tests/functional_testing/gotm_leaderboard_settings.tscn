@@ -1,0 +1,523 @@
+[gd_scene load_steps=3 format=3 uid="uid://vacpm7c47mt4"]
+
+[ext_resource type="Script" path="res://functional_testing/scripts/gotm_leaderboard_settings.gd" id="1_u7133"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_gnqmg"]
+content_margin_left = 50.0
+content_margin_top = 20.0
+content_margin_right = 50.0
+content_margin_bottom = 20.0
+bg_color = Color(0.180392, 0.180392, 0.180392, 1)
+
+[node name="LeaderboardSettings" type="Popup"]
+gui_embed_subwindows = true
+title = "Leaderboard Settings"
+position = Vector2i(21, 168)
+size = Vector2i(711, 354)
+visible = true
+borderless = false
+script = ExtResource("1_u7133")
+
+[node name="TabContainer" type="TabContainer" parent="."]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_font_sizes/font_size = 24
+theme_override_styles/panel = SubResource("StyleBoxFlat_gnqmg")
+
+[node name="Leaderboard 1" type="HBoxContainer" parent="TabContainer"]
+layout_mode = 2
+theme_override_constants/separation = 50
+
+[node name="CenterContainer1" type="CenterContainer" parent="TabContainer/Leaderboard 1"]
+layout_mode = 2
+
+[node name="Grid" type="GridContainer" parent="TabContainer/Leaderboard 1/CenterContainer1"]
+layout_mode = 2
+columns = 2
+
+[node name="NameLabel" type="Label" parent="TabContainer/Leaderboard 1/CenterContainer1/Grid"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 24
+text = "Name: "
+
+[node name="Name" type="LineEdit" parent="TabContainer/Leaderboard 1/CenterContainer1/Grid"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 24
+placeholder_text = "bananas"
+alignment = 2
+
+[node name="PeriodLabel" type="Label" parent="TabContainer/Leaderboard 1/CenterContainer1/Grid"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 24
+text = "Period: "
+
+[node name="Period" type="OptionButton" parent="TabContainer/Leaderboard 1/CenterContainer1/Grid"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 24
+alignment = 2
+
+[node name="UserIDLabel" type="Label" parent="TabContainer/Leaderboard 1/CenterContainer1/Grid"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 24
+text = "UserID:"
+
+[node name="UserID" type="LineEdit" parent="TabContainer/Leaderboard 1/CenterContainer1/Grid"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 24
+alignment = 2
+
+[node name="Property1Label" type="Label" parent="TabContainer/Leaderboard 1/CenterContainer1/Grid"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 24
+text = "Property 1: "
+
+[node name="Property1" type="HBoxContainer" parent="TabContainer/Leaderboard 1/CenterContainer1/Grid"]
+layout_mode = 2
+
+[node name="P1Name" type="LineEdit" parent="TabContainer/Leaderboard 1/CenterContainer1/Grid/Property1"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 24
+placeholder_text = "map"
+alignment = 2
+
+[node name="P1Value" type="LineEdit" parent="TabContainer/Leaderboard 1/CenterContainer1/Grid/Property1"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 24
+placeholder_text = "desert"
+alignment = 2
+
+[node name="Property2Label" type="Label" parent="TabContainer/Leaderboard 1/CenterContainer1/Grid"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 24
+text = "Property 2: "
+
+[node name="Property2" type="HBoxContainer" parent="TabContainer/Leaderboard 1/CenterContainer1/Grid"]
+layout_mode = 2
+
+[node name="P2Name" type="LineEdit" parent="TabContainer/Leaderboard 1/CenterContainer1/Grid/Property2"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 24
+placeholder_text = "level"
+alignment = 2
+
+[node name="P2Value" type="LineEdit" parent="TabContainer/Leaderboard 1/CenterContainer1/Grid/Property2"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 24
+placeholder_text = "3"
+alignment = 2
+
+[node name="Property3Label" type="Label" parent="TabContainer/Leaderboard 1/CenterContainer1/Grid"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 24
+text = "Property 3: "
+
+[node name="Property3" type="HBoxContainer" parent="TabContainer/Leaderboard 1/CenterContainer1/Grid"]
+layout_mode = 2
+
+[node name="P3Name" type="LineEdit" parent="TabContainer/Leaderboard 1/CenterContainer1/Grid/Property3"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 24
+placeholder_text = "diff"
+alignment = 2
+
+[node name="P3Value" type="LineEdit" parent="TabContainer/Leaderboard 1/CenterContainer1/Grid/Property3"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 24
+placeholder_text = "haard"
+alignment = 2
+
+[node name="CenterContainer2" type="CenterContainer" parent="TabContainer/Leaderboard 1"]
+layout_mode = 2
+
+[node name="Grid" type="GridContainer" parent="TabContainer/Leaderboard 1/CenterContainer2"]
+layout_mode = 2
+columns = 2
+
+[node name="UniqueLabel" type="Label" parent="TabContainer/Leaderboard 1/CenterContainer2/Grid"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 24
+text = "Unique? "
+
+[node name="Unique" type="CheckButton" parent="TabContainer/Leaderboard 1/CenterContainer2/Grid"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 24
+
+[node name="InvertedLabel" type="Label" parent="TabContainer/Leaderboard 1/CenterContainer2/Grid"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 24
+text = "Inverted? "
+
+[node name="Inverted" type="CheckButton" parent="TabContainer/Leaderboard 1/CenterContainer2/Grid"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 24
+
+[node name="OldestFirstLabel" type="Label" parent="TabContainer/Leaderboard 1/CenterContainer2/Grid"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 24
+text = "Oldest First? "
+
+[node name="OldestFirst" type="CheckButton" parent="TabContainer/Leaderboard 1/CenterContainer2/Grid"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 24
+
+[node name="LocalLabel" type="Label" parent="TabContainer/Leaderboard 1/CenterContainer2/Grid"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 24
+text = "Local? "
+
+[node name="Local" type="CheckButton" parent="TabContainer/Leaderboard 1/CenterContainer2/Grid"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 24
+
+[node name="Leaderboard 2" type="HBoxContainer" parent="TabContainer"]
+visible = false
+layout_mode = 2
+theme_override_constants/separation = 50
+
+[node name="CenterContainer1" type="CenterContainer" parent="TabContainer/Leaderboard 2"]
+layout_mode = 2
+
+[node name="Grid" type="GridContainer" parent="TabContainer/Leaderboard 2/CenterContainer1"]
+layout_mode = 2
+columns = 2
+
+[node name="NameLabel" type="Label" parent="TabContainer/Leaderboard 2/CenterContainer1/Grid"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 24
+text = "Name: "
+
+[node name="Name" type="LineEdit" parent="TabContainer/Leaderboard 2/CenterContainer1/Grid"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 24
+placeholder_text = "bananas"
+alignment = 2
+
+[node name="PeriodLabel" type="Label" parent="TabContainer/Leaderboard 2/CenterContainer1/Grid"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 24
+text = "Period: "
+
+[node name="Period" type="OptionButton" parent="TabContainer/Leaderboard 2/CenterContainer1/Grid"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 24
+alignment = 2
+
+[node name="UserIDLabel" type="Label" parent="TabContainer/Leaderboard 2/CenterContainer1/Grid"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 24
+text = "UserID:"
+
+[node name="UserID" type="LineEdit" parent="TabContainer/Leaderboard 2/CenterContainer1/Grid"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 24
+alignment = 2
+
+[node name="Property1Label" type="Label" parent="TabContainer/Leaderboard 2/CenterContainer1/Grid"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 24
+text = "Property 1: "
+
+[node name="Property1" type="HBoxContainer" parent="TabContainer/Leaderboard 2/CenterContainer1/Grid"]
+layout_mode = 2
+
+[node name="P1Name" type="LineEdit" parent="TabContainer/Leaderboard 2/CenterContainer1/Grid/Property1"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 24
+placeholder_text = "map"
+alignment = 2
+
+[node name="P1Value" type="LineEdit" parent="TabContainer/Leaderboard 2/CenterContainer1/Grid/Property1"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 24
+placeholder_text = "desert"
+alignment = 2
+
+[node name="Property2Label" type="Label" parent="TabContainer/Leaderboard 2/CenterContainer1/Grid"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 24
+text = "Property 2: "
+
+[node name="Property2" type="HBoxContainer" parent="TabContainer/Leaderboard 2/CenterContainer1/Grid"]
+layout_mode = 2
+
+[node name="P2Name" type="LineEdit" parent="TabContainer/Leaderboard 2/CenterContainer1/Grid/Property2"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 24
+placeholder_text = "level"
+alignment = 2
+
+[node name="P2Value" type="LineEdit" parent="TabContainer/Leaderboard 2/CenterContainer1/Grid/Property2"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 24
+placeholder_text = "3"
+alignment = 2
+
+[node name="Property3Label" type="Label" parent="TabContainer/Leaderboard 2/CenterContainer1/Grid"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 24
+text = "Property 3: "
+
+[node name="Property3" type="HBoxContainer" parent="TabContainer/Leaderboard 2/CenterContainer1/Grid"]
+layout_mode = 2
+
+[node name="P3Name" type="LineEdit" parent="TabContainer/Leaderboard 2/CenterContainer1/Grid/Property3"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 24
+placeholder_text = "diff"
+alignment = 2
+
+[node name="P3Value" type="LineEdit" parent="TabContainer/Leaderboard 2/CenterContainer1/Grid/Property3"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 24
+placeholder_text = "haard"
+alignment = 2
+
+[node name="CenterContainer2" type="CenterContainer" parent="TabContainer/Leaderboard 2"]
+layout_mode = 2
+
+[node name="Grid" type="GridContainer" parent="TabContainer/Leaderboard 2/CenterContainer2"]
+layout_mode = 2
+columns = 2
+
+[node name="UniqueLabel" type="Label" parent="TabContainer/Leaderboard 2/CenterContainer2/Grid"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 24
+text = "Unique? "
+
+[node name="Unique" type="CheckButton" parent="TabContainer/Leaderboard 2/CenterContainer2/Grid"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 24
+
+[node name="InvertedLabel" type="Label" parent="TabContainer/Leaderboard 2/CenterContainer2/Grid"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 24
+text = "Inverted? "
+
+[node name="Inverted" type="CheckButton" parent="TabContainer/Leaderboard 2/CenterContainer2/Grid"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 24
+
+[node name="OldestFirstLabel" type="Label" parent="TabContainer/Leaderboard 2/CenterContainer2/Grid"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 24
+text = "Oldest First? "
+
+[node name="OldestFirst" type="CheckButton" parent="TabContainer/Leaderboard 2/CenterContainer2/Grid"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 24
+
+[node name="LocalLabel" type="Label" parent="TabContainer/Leaderboard 2/CenterContainer2/Grid"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 24
+text = "Local? "
+
+[node name="Local" type="CheckButton" parent="TabContainer/Leaderboard 2/CenterContainer2/Grid"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 24
+
+[node name="Leaderboard 3" type="HBoxContainer" parent="TabContainer"]
+visible = false
+layout_mode = 2
+theme_override_constants/separation = 50
+
+[node name="CenterContainer1" type="CenterContainer" parent="TabContainer/Leaderboard 3"]
+layout_mode = 2
+
+[node name="Grid" type="GridContainer" parent="TabContainer/Leaderboard 3/CenterContainer1"]
+layout_mode = 2
+columns = 2
+
+[node name="NameLabel" type="Label" parent="TabContainer/Leaderboard 3/CenterContainer1/Grid"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 24
+text = "Name: "
+
+[node name="Name" type="LineEdit" parent="TabContainer/Leaderboard 3/CenterContainer1/Grid"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 24
+placeholder_text = "bananas"
+alignment = 2
+
+[node name="PeriodLabel" type="Label" parent="TabContainer/Leaderboard 3/CenterContainer1/Grid"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 24
+text = "Period: "
+
+[node name="Period" type="OptionButton" parent="TabContainer/Leaderboard 3/CenterContainer1/Grid"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 24
+alignment = 2
+
+[node name="UserIDLabel" type="Label" parent="TabContainer/Leaderboard 3/CenterContainer1/Grid"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 24
+text = "UserID:"
+
+[node name="UserID" type="LineEdit" parent="TabContainer/Leaderboard 3/CenterContainer1/Grid"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 24
+alignment = 2
+
+[node name="Property1Label" type="Label" parent="TabContainer/Leaderboard 3/CenterContainer1/Grid"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 24
+text = "Property 1: "
+
+[node name="Property1" type="HBoxContainer" parent="TabContainer/Leaderboard 3/CenterContainer1/Grid"]
+layout_mode = 2
+
+[node name="P1Name" type="LineEdit" parent="TabContainer/Leaderboard 3/CenterContainer1/Grid/Property1"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 24
+placeholder_text = "map"
+alignment = 2
+
+[node name="P1Value" type="LineEdit" parent="TabContainer/Leaderboard 3/CenterContainer1/Grid/Property1"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 24
+placeholder_text = "desert"
+alignment = 2
+
+[node name="Property2Label" type="Label" parent="TabContainer/Leaderboard 3/CenterContainer1/Grid"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 24
+text = "Property 2: "
+
+[node name="Property2" type="HBoxContainer" parent="TabContainer/Leaderboard 3/CenterContainer1/Grid"]
+layout_mode = 2
+
+[node name="P2Name" type="LineEdit" parent="TabContainer/Leaderboard 3/CenterContainer1/Grid/Property2"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 24
+placeholder_text = "level"
+alignment = 2
+
+[node name="P2Value" type="LineEdit" parent="TabContainer/Leaderboard 3/CenterContainer1/Grid/Property2"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 24
+placeholder_text = "3"
+alignment = 2
+
+[node name="Property3Label" type="Label" parent="TabContainer/Leaderboard 3/CenterContainer1/Grid"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 24
+text = "Property 3: "
+
+[node name="Property3" type="HBoxContainer" parent="TabContainer/Leaderboard 3/CenterContainer1/Grid"]
+layout_mode = 2
+
+[node name="P3Name" type="LineEdit" parent="TabContainer/Leaderboard 3/CenterContainer1/Grid/Property3"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 24
+placeholder_text = "diff"
+alignment = 2
+
+[node name="P3Value" type="LineEdit" parent="TabContainer/Leaderboard 3/CenterContainer1/Grid/Property3"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 24
+placeholder_text = "haard"
+alignment = 2
+
+[node name="CenterContainer2" type="CenterContainer" parent="TabContainer/Leaderboard 3"]
+layout_mode = 2
+
+[node name="Grid" type="GridContainer" parent="TabContainer/Leaderboard 3/CenterContainer2"]
+layout_mode = 2
+columns = 2
+
+[node name="UniqueLabel" type="Label" parent="TabContainer/Leaderboard 3/CenterContainer2/Grid"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 24
+text = "Unique? "
+
+[node name="Unique" type="CheckButton" parent="TabContainer/Leaderboard 3/CenterContainer2/Grid"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 24
+
+[node name="InvertedLabel" type="Label" parent="TabContainer/Leaderboard 3/CenterContainer2/Grid"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 24
+text = "Inverted? "
+
+[node name="Inverted" type="CheckButton" parent="TabContainer/Leaderboard 3/CenterContainer2/Grid"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 24
+
+[node name="OldestFirstLabel" type="Label" parent="TabContainer/Leaderboard 3/CenterContainer2/Grid"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 24
+text = "Oldest First? "
+
+[node name="OldestFirst" type="CheckButton" parent="TabContainer/Leaderboard 3/CenterContainer2/Grid"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 24
+
+[node name="LocalLabel" type="Label" parent="TabContainer/Leaderboard 3/CenterContainer2/Grid"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 24
+text = "Local? "
+
+[node name="Local" type="CheckButton" parent="TabContainer/Leaderboard 3/CenterContainer2/Grid"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 24
+
+[connection signal="text_changed" from="TabContainer/Leaderboard 1/CenterContainer1/Grid/Name" to="." method="_on_user_input"]
+[connection signal="item_selected" from="TabContainer/Leaderboard 1/CenterContainer1/Grid/Period" to="." method="_on_user_input"]
+[connection signal="text_changed" from="TabContainer/Leaderboard 1/CenterContainer1/Grid/UserID" to="." method="_on_user_input"]
+[connection signal="text_changed" from="TabContainer/Leaderboard 1/CenterContainer1/Grid/Property1/P1Name" to="." method="_on_user_input"]
+[connection signal="text_changed" from="TabContainer/Leaderboard 1/CenterContainer1/Grid/Property1/P1Value" to="." method="_on_user_input"]
+[connection signal="text_changed" from="TabContainer/Leaderboard 1/CenterContainer1/Grid/Property2/P2Name" to="." method="_on_user_input"]
+[connection signal="text_changed" from="TabContainer/Leaderboard 1/CenterContainer1/Grid/Property2/P2Value" to="." method="_on_user_input"]
+[connection signal="text_changed" from="TabContainer/Leaderboard 1/CenterContainer1/Grid/Property3/P3Name" to="." method="_on_user_input"]
+[connection signal="text_changed" from="TabContainer/Leaderboard 1/CenterContainer1/Grid/Property3/P3Value" to="." method="_on_user_input"]
+[connection signal="pressed" from="TabContainer/Leaderboard 1/CenterContainer2/Grid/Unique" to="." method="_on_user_input"]
+[connection signal="pressed" from="TabContainer/Leaderboard 1/CenterContainer2/Grid/Inverted" to="." method="_on_user_input"]
+[connection signal="pressed" from="TabContainer/Leaderboard 1/CenterContainer2/Grid/OldestFirst" to="." method="_on_user_input"]
+[connection signal="pressed" from="TabContainer/Leaderboard 1/CenterContainer2/Grid/Local" to="." method="_on_user_input"]
+[connection signal="text_changed" from="TabContainer/Leaderboard 2/CenterContainer1/Grid/Name" to="." method="_on_user_input"]
+[connection signal="item_selected" from="TabContainer/Leaderboard 2/CenterContainer1/Grid/Period" to="." method="_on_user_input"]
+[connection signal="text_changed" from="TabContainer/Leaderboard 2/CenterContainer1/Grid/UserID" to="." method="_on_user_input"]
+[connection signal="text_changed" from="TabContainer/Leaderboard 2/CenterContainer1/Grid/Property1/P1Name" to="." method="_on_user_input"]
+[connection signal="text_changed" from="TabContainer/Leaderboard 2/CenterContainer1/Grid/Property1/P1Value" to="." method="_on_user_input"]
+[connection signal="text_changed" from="TabContainer/Leaderboard 2/CenterContainer1/Grid/Property2/P2Name" to="." method="_on_user_input"]
+[connection signal="text_changed" from="TabContainer/Leaderboard 2/CenterContainer1/Grid/Property2/P2Value" to="." method="_on_user_input"]
+[connection signal="text_changed" from="TabContainer/Leaderboard 2/CenterContainer1/Grid/Property3/P3Name" to="." method="_on_user_input"]
+[connection signal="text_changed" from="TabContainer/Leaderboard 2/CenterContainer1/Grid/Property3/P3Value" to="." method="_on_user_input"]
+[connection signal="pressed" from="TabContainer/Leaderboard 2/CenterContainer2/Grid/Unique" to="." method="_on_user_input"]
+[connection signal="pressed" from="TabContainer/Leaderboard 2/CenterContainer2/Grid/Inverted" to="." method="_on_user_input"]
+[connection signal="pressed" from="TabContainer/Leaderboard 2/CenterContainer2/Grid/OldestFirst" to="." method="_on_user_input"]
+[connection signal="pressed" from="TabContainer/Leaderboard 2/CenterContainer2/Grid/Local" to="." method="_on_user_input"]
+[connection signal="text_changed" from="TabContainer/Leaderboard 3/CenterContainer1/Grid/Name" to="." method="_on_user_input"]
+[connection signal="item_selected" from="TabContainer/Leaderboard 3/CenterContainer1/Grid/Period" to="." method="_on_user_input"]
+[connection signal="text_changed" from="TabContainer/Leaderboard 3/CenterContainer1/Grid/UserID" to="." method="_on_user_input"]
+[connection signal="text_changed" from="TabContainer/Leaderboard 3/CenterContainer1/Grid/Property1/P1Name" to="." method="_on_user_input"]
+[connection signal="text_changed" from="TabContainer/Leaderboard 3/CenterContainer1/Grid/Property1/P1Value" to="." method="_on_user_input"]
+[connection signal="text_changed" from="TabContainer/Leaderboard 3/CenterContainer1/Grid/Property2/P2Name" to="." method="_on_user_input"]
+[connection signal="text_changed" from="TabContainer/Leaderboard 3/CenterContainer1/Grid/Property2/P2Value" to="." method="_on_user_input"]
+[connection signal="text_changed" from="TabContainer/Leaderboard 3/CenterContainer1/Grid/Property3/P3Name" to="." method="_on_user_input"]
+[connection signal="text_changed" from="TabContainer/Leaderboard 3/CenterContainer1/Grid/Property3/P3Value" to="." method="_on_user_input"]
+[connection signal="pressed" from="TabContainer/Leaderboard 3/CenterContainer2/Grid/Unique" to="." method="_on_user_input"]
+[connection signal="pressed" from="TabContainer/Leaderboard 3/CenterContainer2/Grid/Inverted" to="." method="_on_user_input"]
+[connection signal="pressed" from="TabContainer/Leaderboard 3/CenterContainer2/Grid/OldestFirst" to="." method="_on_user_input"]
+[connection signal="pressed" from="TabContainer/Leaderboard 3/CenterContainer2/Grid/Local" to="." method="_on_user_input"]

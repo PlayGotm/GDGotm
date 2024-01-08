@@ -1,0 +1,275 @@
+[gd_scene load_steps=4 format=3 uid="uid://b8kvhwedc26eu"]
+
+[ext_resource type="PackedScene" uid="uid://d1ym2m3ne2msh" path="res://scenes/switch_test.tscn" id="1_fhws6"]
+[ext_resource type="Script" path="res://functional_testing/scripts/gotm_leaderboard.gd" id="1_x8pkt"]
+[ext_resource type="PackedScene" uid="uid://vacpm7c47mt4" path="res://functional_testing/gotm_leaderboard_settings.tscn" id="3_332eu"]
+
+[node name="GotmLeaderboard" type="Node"]
+script = ExtResource("1_x8pkt")
+
+[node name="UI" type="Control" parent="."]
+layout_mode = 3
+anchor_left = 0.03
+anchor_top = 0.052
+anchor_right = 0.97
+anchor_bottom = 0.954
+offset_left = -0.560001
+offset_top = 0.304001
+offset_right = -0.440063
+offset_bottom = -0.192017
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 4
+
+[node name="SwitchTest" parent="UI" instance=ExtResource("1_fhws6")]
+layout_mode = 1
+offset_right = 612.0
+offset_bottom = 96.0
+
+[node name="ScrollContainer" type="ScrollContainer" parent="UI"]
+layout_mode = 1
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_top = -455.0
+offset_right = 419.0
+grow_vertical = 0
+
+[node name="Menu" type="VBoxContainer" parent="UI/ScrollContainer"]
+layout_mode = 2
+
+[node name="ConsolePrint" type="CheckButton" parent="UI/ScrollContainer/Menu"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 32
+button_pressed = true
+text = "Print to Console?"
+
+[node name="GetRank" type="Button" parent="UI/ScrollContainer/Menu"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 32
+disabled = true
+text = "Get Rank"
+
+[node name="GetScores" type="Button" parent="UI/ScrollContainer/Menu"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 32
+disabled = true
+text = "Get Scores"
+
+[node name="GetScoresByRank" type="Button" parent="UI/ScrollContainer/Menu"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 32
+disabled = true
+text = "Get Scores by Rank"
+
+[node name="GetSurrounding" type="Button" parent="UI/ScrollContainer/Menu"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 32
+disabled = true
+text = "Get Surrounding"
+
+[node name="GetSurroundingByRank" type="Button" parent="UI/ScrollContainer/Menu"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 32
+disabled = true
+text = "Get Surrounding by Rank"
+
+[node name="GetCount" type="Button" parent="UI/ScrollContainer/Menu"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 32
+disabled = true
+text = "Get Count"
+
+[node name="GetCounts" type="Button" parent="UI/ScrollContainer/Menu"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 32
+disabled = true
+text = "Get Counts"
+
+[node name="Parameters" type="VBoxContainer" parent="UI"]
+layout_mode = 1
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -492.0
+offset_top = -459.0
+grow_horizontal = 0
+grow_vertical = 0
+
+[node name="HBoxContainer" type="HBoxContainer" parent="UI/Parameters"]
+layout_mode = 2
+
+[node name="LeaderboardSettings" type="Button" parent="UI/Parameters/HBoxContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 32
+text = "⚙"
+
+[node name="Leaderboard" type="OptionButton" parent="UI/Parameters/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 32
+alignment = 1
+
+[node name="HSeparator2" type="HSeparator" parent="UI/Parameters"]
+layout_mode = 2
+
+[node name="LeaderboardParameters" type="GridContainer" parent="UI/Parameters"]
+layout_mode = 2
+size_flags_horizontal = 8
+columns = 2
+
+[node name="Label1" type="Label" parent="UI/Parameters/LeaderboardParameters"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 32
+text = "Rank"
+uppercase = true
+
+[node name="Blank1" type="Control" parent="UI/Parameters/LeaderboardParameters"]
+layout_mode = 2
+
+[node name="IDValueLabel" type="Label" parent="UI/Parameters/LeaderboardParameters"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 32
+text = "ID or Value: "
+horizontal_alignment = 2
+
+[node name="IDValue" type="LineEdit" parent="UI/Parameters/LeaderboardParameters"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 32
+alignment = 2
+
+[node name="HSeparator1" type="HSeparator" parent="UI/Parameters/LeaderboardParameters"]
+layout_mode = 2
+
+[node name="HSeparator2" type="HSeparator" parent="UI/Parameters/LeaderboardParameters"]
+layout_mode = 2
+
+[node name="Label2" type="Label" parent="UI/Parameters/LeaderboardParameters"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 32
+text = "Scores"
+uppercase = true
+
+[node name="Blank2" type="Control" parent="UI/Parameters/LeaderboardParameters"]
+layout_mode = 2
+
+[node name="AfterIDValueLabel" type="Label" parent="UI/Parameters/LeaderboardParameters"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 32
+text = "After ID or Value: "
+
+[node name="AfterIDValue" type="LineEdit" parent="UI/Parameters/LeaderboardParameters"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 32
+alignment = 2
+
+[node name="Ascending" type="CheckButton" parent="UI/Parameters/LeaderboardParameters"]
+layout_mode = 2
+size_flags_horizontal = 8
+theme_override_font_sizes/font_size = 32
+text = "Ascending? "
+
+[node name="Blank" type="Control" parent="UI/Parameters/LeaderboardParameters"]
+layout_mode = 2
+
+[node name="HSeparator3" type="HSeparator" parent="UI/Parameters/LeaderboardParameters"]
+layout_mode = 2
+
+[node name="HSeparator4" type="HSeparator" parent="UI/Parameters/LeaderboardParameters"]
+layout_mode = 2
+
+[node name="Label3" type="Label" parent="UI/Parameters/LeaderboardParameters"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 32
+text = "Surrounding"
+uppercase = true
+
+[node name="Blank3" type="Control" parent="UI/Parameters/LeaderboardParameters"]
+layout_mode = 2
+
+[node name="IDValueLabel2" type="Label" parent="UI/Parameters/LeaderboardParameters"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 32
+text = "ID or Value: "
+horizontal_alignment = 2
+
+[node name="IDValue2" type="LineEdit" parent="UI/Parameters/LeaderboardParameters"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 32
+alignment = 2
+
+[node name="HSeparator5" type="HSeparator" parent="UI/Parameters/LeaderboardParameters"]
+layout_mode = 2
+
+[node name="HSeparator6" type="HSeparator" parent="UI/Parameters/LeaderboardParameters"]
+layout_mode = 2
+
+[node name="Label4" type="Label" parent="UI/Parameters/LeaderboardParameters"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 32
+text = "Counts"
+uppercase = true
+
+[node name="Blank4" type="Control" parent="UI/Parameters/LeaderboardParameters"]
+layout_mode = 2
+
+[node name="HBoxContainer1" type="HBoxContainer" parent="UI/Parameters/LeaderboardParameters"]
+layout_mode = 2
+size_flags_horizontal = 4
+
+[node name="MinLabel" type="Label" parent="UI/Parameters/LeaderboardParameters/HBoxContainer1"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 32
+text = "Min: "
+horizontal_alignment = 2
+
+[node name="Min" type="LineEdit" parent="UI/Parameters/LeaderboardParameters/HBoxContainer1"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 32
+alignment = 2
+
+[node name="HBoxContainer2" type="HBoxContainer" parent="UI/Parameters/LeaderboardParameters"]
+layout_mode = 2
+size_flags_horizontal = 8
+
+[node name="MaxLabel" type="Label" parent="UI/Parameters/LeaderboardParameters/HBoxContainer2"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 32
+text = "Max: "
+horizontal_alignment = 2
+
+[node name="Max" type="LineEdit" parent="UI/Parameters/LeaderboardParameters/HBoxContainer2"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 32
+alignment = 2
+
+[node name="SegmentsLabel" type="Label" parent="UI/Parameters/LeaderboardParameters"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 32
+text = "Segments: "
+horizontal_alignment = 2
+
+[node name="Segments" type="LineEdit" parent="UI/Parameters/LeaderboardParameters"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 32
+placeholder_text = "20"
+alignment = 2
+
+[node name="LeaderboardSettings" parent="UI" instance=ExtResource("3_332eu")]
+visible = false
+
+[connection signal="toggled" from="UI/ScrollContainer/Menu/ConsolePrint" to="." method="_on_console_print_toggled"]
+[connection signal="pressed" from="UI/ScrollContainer/Menu/GetRank" to="." method="get_rank"]
+[connection signal="pressed" from="UI/ScrollContainer/Menu/GetScores" to="." method="get_scores"]
+[connection signal="pressed" from="UI/ScrollContainer/Menu/GetScoresByRank" to="." method="get_scores_by_rank"]
+[connection signal="pressed" from="UI/ScrollContainer/Menu/GetSurrounding" to="." method="get_surrounding"]
+[connection signal="pressed" from="UI/ScrollContainer/Menu/GetSurroundingByRank" to="." method="get_surrounding_by_rank"]
+[connection signal="pressed" from="UI/ScrollContainer/Menu/GetCount" to="." method="get_count"]
+[connection signal="pressed" from="UI/ScrollContainer/Menu/GetCounts" to="." method="get_counts"]
+[connection signal="pressed" from="UI/Parameters/HBoxContainer/LeaderboardSettings" to="UI/LeaderboardSettings" method="_on_leaderboard_settings_pressed"]
+[connection signal="item_selected" from="UI/Parameters/HBoxContainer/Leaderboard" to="." method="_update_current_leaderboard"]
+[connection signal="text_changed" from="UI/Parameters/LeaderboardParameters/IDValue" to="." method="_update_buttons"]
+[connection signal="text_changed" from="UI/Parameters/LeaderboardParameters/IDValue2" to="." method="_update_buttons"]
+[connection signal="user_updated" from="UI/LeaderboardSettings" to="." method="_update_current_leaderboard"]

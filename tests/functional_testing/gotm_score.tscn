@@ -1,0 +1,258 @@
+[gd_scene load_steps=4 format=3 uid="uid://xtnuwxa2651d"]
+
+[ext_resource type="Script" path="res://functional_testing/scripts/gotm_score.gd" id="1_p0fsb"]
+[ext_resource type="PackedScene" uid="uid://d1ym2m3ne2msh" path="res://scenes/switch_test.tscn" id="2_rowm4"]
+
+[sub_resource type="GDScript" id="GDScript_7a03l"]
+script/source = "extends LineEdit
+
+var valid_text: String
+
+
+func _ready() -> void:
+	virtual_keyboard_type = LineEdit.KEYBOARD_TYPE_NUMBER_DECIMAL
+
+
+func _on_text_changed(new_text: String) -> void:
+	if new_text.is_valid_float() || new_text.is_empty():
+		valid_text = new_text
+		return
+	text = valid_text
+	emit_signal(\"text_changed\", text)
+"
+
+[node name="GotmScore" type="Node"]
+script = ExtResource("1_p0fsb")
+
+[node name="UI" type="Control" parent="."]
+layout_mode = 3
+anchor_left = 0.03
+anchor_top = 0.052
+anchor_right = 0.97
+anchor_bottom = 0.954
+offset_left = -0.560001
+offset_top = 0.304001
+offset_right = -0.440063
+offset_bottom = -0.192017
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 4
+
+[node name="SwitchTest" parent="UI" instance=ExtResource("2_rowm4")]
+layout_mode = 1
+offset_right = 612.0
+offset_bottom = 96.0
+
+[node name="Menu" type="VBoxContainer" parent="UI"]
+layout_mode = 1
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_top = -468.944
+offset_right = 389.0
+offset_bottom = -73.9436
+grow_vertical = 0
+
+[node name="CopyID" type="CheckButton" parent="UI/Menu"]
+layout_mode = 2
+tooltip_text = "Copy the GotmScore.id when create, create local, update, or fetch is pressed."
+theme_override_font_sizes/font_size = 32
+button_pressed = true
+text = "Copy ID to Clipboard? "
+
+[node name="ConsolePrint" type="CheckButton" parent="UI/Menu"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 32
+button_pressed = true
+text = "Print to Console?"
+
+[node name="CreateScore" type="Button" parent="UI/Menu"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 32
+disabled = true
+text = "Create  Score"
+
+[node name="CreateLocalScore" type="Button" parent="UI/Menu"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 32
+disabled = true
+text = "Create  Local"
+
+[node name="UpdateScore" type="Button" parent="UI/Menu"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 32
+disabled = true
+text = "Update  Score"
+
+[node name="FetchScore" type="Button" parent="UI/Menu"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 32
+disabled = true
+text = "Fetch  Score"
+
+[node name="DeleteScore" type="Button" parent="UI/Menu"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 32
+disabled = true
+text = "Delete  Score"
+
+[node name="Parameters" type="VBoxContainer" parent="UI"]
+layout_mode = 1
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -507.0
+offset_top = -509.737
+offset_bottom = -59.7366
+grow_horizontal = 0
+grow_vertical = 0
+
+[node name="Label" type="Label" parent="UI/Parameters"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 32
+text = "Create/Update"
+horizontal_alignment = 2
+uppercase = true
+
+[node name="ScoreParameters" type="GridContainer" parent="UI/Parameters"]
+layout_mode = 2
+size_flags_horizontal = 8
+columns = 2
+
+[node name="NameLabel" type="Label" parent="UI/Parameters/ScoreParameters"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 32
+text = "Name: "
+
+[node name="Name" type="LineEdit" parent="UI/Parameters/ScoreParameters"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 32
+placeholder_text = "bananas"
+alignment = 2
+expand_to_text_length = true
+
+[node name="ValueLabel" type="Label" parent="UI/Parameters/ScoreParameters"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 32
+text = "Value: "
+
+[node name="Value" type="LineEdit" parent="UI/Parameters/ScoreParameters"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 32
+placeholder_text = "10"
+alignment = 2
+expand_to_text_length = true
+script = SubResource("GDScript_7a03l")
+
+[node name="Property1Label" type="Label" parent="UI/Parameters/ScoreParameters"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 32
+text = "Property 1: "
+
+[node name="Property1" type="HBoxContainer" parent="UI/Parameters/ScoreParameters"]
+layout_mode = 2
+
+[node name="Property1Name" type="LineEdit" parent="UI/Parameters/ScoreParameters/Property1"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 32
+placeholder_text = "map"
+alignment = 2
+expand_to_text_length = true
+
+[node name="Property1Value" type="LineEdit" parent="UI/Parameters/ScoreParameters/Property1"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 32
+placeholder_text = "desert"
+alignment = 2
+expand_to_text_length = true
+
+[node name="Property2Label" type="Label" parent="UI/Parameters/ScoreParameters"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 32
+text = "Property 2: "
+
+[node name="Property2" type="HBoxContainer" parent="UI/Parameters/ScoreParameters"]
+layout_mode = 2
+
+[node name="Property2Name" type="LineEdit" parent="UI/Parameters/ScoreParameters/Property2"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 32
+placeholder_text = "level"
+alignment = 2
+expand_to_text_length = true
+
+[node name="Property2Value" type="LineEdit" parent="UI/Parameters/ScoreParameters/Property2"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 32
+placeholder_text = "3"
+alignment = 2
+expand_to_text_length = true
+
+[node name="Property3Label" type="Label" parent="UI/Parameters/ScoreParameters"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 32
+text = "Property 3: "
+
+[node name="Property3" type="HBoxContainer" parent="UI/Parameters/ScoreParameters"]
+layout_mode = 2
+
+[node name="Property3Name" type="LineEdit" parent="UI/Parameters/ScoreParameters/Property3"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 32
+placeholder_text = "diff"
+alignment = 2
+expand_to_text_length = true
+
+[node name="Property3Value" type="LineEdit" parent="UI/Parameters/ScoreParameters/Property3"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 32
+placeholder_text = "hard"
+alignment = 2
+expand_to_text_length = true
+
+[node name="HSeparator" type="HSeparator" parent="UI/Parameters"]
+layout_mode = 2
+
+[node name="Label2" type="Label" parent="UI/Parameters"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 32
+text = "Delete/Update"
+horizontal_alignment = 2
+uppercase = true
+
+[node name="ID Parameter" type="GridContainer" parent="UI/Parameters"]
+layout_mode = 2
+columns = 2
+
+[node name="ID Label" type="Label" parent="UI/Parameters/ID Parameter"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 32
+text = "ID: "
+
+[node name="ID" type="LineEdit" parent="UI/Parameters/ID Parameter"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 32
+placeholder_text = "GotmScore.id"
+alignment = 2
+expand_to_text_length = true
+
+[connection signal="toggled" from="UI/Menu/CopyID" to="." method="_on_copy_id_toggled"]
+[connection signal="toggled" from="UI/Menu/ConsolePrint" to="." method="_on_console_print_toggled"]
+[connection signal="pressed" from="UI/Menu/CreateScore" to="." method="create_score"]
+[connection signal="pressed" from="UI/Menu/CreateLocalScore" to="." method="create_local_score"]
+[connection signal="pressed" from="UI/Menu/UpdateScore" to="." method="update_score"]
+[connection signal="pressed" from="UI/Menu/FetchScore" to="." method="fetch_score"]
+[connection signal="pressed" from="UI/Menu/DeleteScore" to="." method="delete_score"]
+[connection signal="text_changed" from="UI/Parameters/ScoreParameters/Name" to="." method="_check_buttons"]
+[connection signal="text_changed" from="UI/Parameters/ScoreParameters/Value" to="." method="_check_buttons"]
+[connection signal="text_changed" from="UI/Parameters/ScoreParameters/Value" to="UI/Parameters/ScoreParameters/Value" method="_on_text_changed"]
+[connection signal="text_changed" from="UI/Parameters/ID Parameter/ID" to="." method="_check_buttons"]

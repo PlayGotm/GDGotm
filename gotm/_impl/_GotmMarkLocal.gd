@@ -1,18 +1,13 @@
 class_name _GotmMarkLocal
-#warnings-disable
 
 
-static func delete_by_target_sync(target):
-	var to_delete = []
-	for mark in _LocalStore.get_all("marks"):
-		if mark.target == target:
-			to_delete.append(mark)
-	for mark in to_delete:
-		_LocalStore.delete(mark.path)
+static func clear_cache(_path: String) -> void:
+	pass
 
-static func create(api: String, data: Dictionary):
-	yield(_GotmUtility.get_tree(), "idle_frame")
-	var score = {
+
+static func create(api: String, data: Dictionary) -> Dictionary:
+	await _GotmUtility.get_tree().process_frame
+	var score := {
 		"path": _GotmUtility.create_resource_path(api),
 		"target": data.target,
 		"owner": _GotmAuthLocal.get_user(),
@@ -22,13 +17,28 @@ static func create(api: String, data: Dictionary):
 	return _format(_LocalStore.create(score))
 
 
-static func delete(id: String) -> void:
-	yield(_GotmUtility.get_tree(), "idle_frame")
-	_LocalStore.delete(id)
+static func delete(id: String) -> bool:
+	await _GotmUtility.get_tree().process_frame
+	return _LocalStore.delete(id)
 
-static func fetch(path: String, query: String = "", params: Dictionary = {}, authenticate: bool = false) -> Dictionary:
-	yield(_GotmUtility.get_tree(), "idle_frame")
-	var path_parts = path.split("/")
+
+static func delete_by_target_sync(target: String) -> bool:
+	var result := false
+	var to_delete := []
+	for mark in _LocalStore.get_all("marks"):
+		if mark.target == target:
+			to_delete.append(mark)
+	if !to_delete.is_empty():
+		result = true
+	for mark in to_delete:
+		if _LocalStore.delete(mark.path) == false:
+			result = false
+	return result
+
+
+static func fetch(path: String, query: String = "", params: Dictionary = {}, _authenticate: bool = false) -> Dictionary:
+	await _GotmUtility.get_tree().process_frame
+	var path_parts := path.split("/")
 	var api = path_parts[0]
 	var id = path_parts[1]
 	if api == "stats" && id == "sum" && query == "received":
@@ -47,8 +57,17 @@ static func _fetch_count(params: Dictionary) -> int:
 			count += 1
 	return count
 
-static func list(api: String, query: String, params: Dictionary = {}, authenticate: bool = false) -> Array:
-	yield(_GotmUtility.get_tree(), "idle_frame")
+
+static func _format(data: Dictionary) -> Dictionary:
+	if data.is_empty():
+		return {}
+	data = _GotmUtility.copy(data, {})
+	data.created = _GotmUtility.get_unix_time_from_iso(data.created)
+	return data
+
+
+static func list(_api: String, query: String, params: Dictionary = {}, _authenticate: bool = false) -> Array:
+	await _GotmUtility.get_tree().process_frame
 	var marks := []
 	if query == "byTargetAndOwner":
 		for mark in _LocalStore.get_all("marks"):
@@ -59,13 +78,3 @@ static func list(api: String, query: String, params: Dictionary = {}, authentica
 			if mark.target == params.target && mark.owner == params.owner && mark.name == params.name:
 				marks.append(_format(mark))
 	return marks
-
-static func clear_cache(path: String) -> void:
-	pass
-
-static func _format(data):
-	if !data:
-		return
-	data = _GotmUtility.copy(data, {})
-	data.created = _GotmUtility.get_unix_time_from_iso(data.created)
-	return data

@@ -1,0 +1,106 @@
+[gd_scene load_steps=3 format=3 uid="uid://cixbxen11mpsd"]
+
+[ext_resource type="Script" path="res://functional_testing/scripts/gotm_user.gd" id="1_447a7"]
+[ext_resource type="PackedScene" uid="uid://d1ym2m3ne2msh" path="res://scenes/switch_test.tscn" id="2_e86eg"]
+
+[node name="GotmUser" type="Node"]
+script = ExtResource("1_447a7")
+
+[node name="UI" type="Control" parent="."]
+layout_mode = 3
+anchor_left = 0.03
+anchor_top = 0.052
+anchor_right = 0.97
+anchor_bottom = 0.954
+offset_left = -0.560001
+offset_top = 0.304001
+offset_right = -0.440063
+offset_bottom = -0.192017
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 4
+
+[node name="SwitchTest" parent="UI" instance=ExtResource("2_e86eg")]
+layout_mode = 1
+offset_right = 612.0
+offset_bottom = 96.0
+
+[node name="OnlineOnlyLabel" type="Label" parent="UI"]
+layout_mode = 0
+offset_left = -0.839996
+offset_top = 102.256
+offset_right = 272.16
+offset_bottom = 150.256
+theme_override_font_sizes/font_size = 32
+text = "Note: Online Only"
+
+[node name="Menu" type="VBoxContainer" parent="UI"]
+layout_mode = 1
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_top = -468.944
+offset_right = 389.0
+offset_bottom = -73.9436
+grow_vertical = 0
+
+[node name="CopyID" type="CheckButton" parent="UI/Menu"]
+layout_mode = 2
+tooltip_text = "Copy the GotmScore.id when create, create local, update, or fetch is pressed."
+theme_override_font_sizes/font_size = 32
+button_pressed = true
+text = "Copy ID to Clipboard? "
+
+[node name="ConsolePrint" type="CheckButton" parent="UI/Menu"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 32
+button_pressed = true
+text = "Print to Console?"
+
+[node name="FetchUser" type="Button" parent="UI/Menu"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 32
+disabled = true
+text = "Fetch  User"
+
+[node name="Parameters" type="VBoxContainer" parent="UI"]
+layout_mode = 1
+anchors_preset = 6
+anchor_left = 1.0
+anchor_top = 0.5
+anchor_right = 1.0
+anchor_bottom = 0.5
+offset_left = -502.26
+offset_top = -52.5
+offset_bottom = 52.5
+grow_horizontal = 0
+grow_vertical = 2
+
+[node name="Label" type="Label" parent="UI/Parameters"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 32
+text = "Fetch"
+horizontal_alignment = 2
+uppercase = true
+
+[node name="ID Parameter" type="GridContainer" parent="UI/Parameters"]
+layout_mode = 2
+columns = 2
+
+[node name="ID Label" type="Label" parent="UI/Parameters/ID Parameter"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 32
+text = "ID: "
+
+[node name="ID" type="LineEdit" parent="UI/Parameters/ID Parameter"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 32
+placeholder_text = "GotmUser.id"
+alignment = 2
+expand_to_text_length = true
+
+[connection signal="toggled" from="UI/Menu/CopyID" to="." method="_on_copy_id_toggled"]
+[connection signal="toggled" from="UI/Menu/ConsolePrint" to="." method="_on_console_print_toggled"]
+[connection signal="pressed" from="UI/Menu/FetchUser" to="." method="fetch"]
+[connection signal="text_changed" from="UI/Parameters/ID Parameter/ID" to="." method="_check_buttons"]

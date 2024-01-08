@@ -1,0 +1,23 @@
+[gd_scene load_steps=2 format=3 uid="uid://d1ym2m3ne2msh"]
+
+[ext_resource type="Script" path="res://scenes/switch_test.gd" id="1_ieq74"]
+
+[node name="SwitchTest" type="OptionButton"]
+offset_right = 143.0
+offset_bottom = 31.0
+theme_override_font_sizes/font_size = 64
+alignment = 1
+item_count = 5
+popup/item_0/text = "GotmScore"
+popup/item_0/id = 0
+popup/item_1/text = "GotmLeaderboard"
+popup/item_1/id = 1
+popup/item_2/text = "GotmUser"
+popup/item_2/id = 2
+popup/item_3/text = "GotmAuth"
+popup/item_3/id = 3
+popup/item_4/text = "GotmContent"
+popup/item_4/id = 4
+script = ExtResource("1_ieq74")
+
+[connection signal="item_selected" from="." to="." method="_on_item_selected"]

@@ -1,43 +1,56 @@
 class_name _GotmBlob
-#warnings-disable
+
+enum Implementation { GOTM_STORE, GOTM_BLOB_LOCAL }
 
 
-static func get_implementation(id = null):
-	var config := _Gotm.get_config()
-	if _LocalStore.fetch(id) || !_Gotm.has_global_api():
-		return _GotmBlobLocal
-	return _GotmStore
+static func _coerce_id(resource_or_id) -> String:
+	var id = _GotmUtility.coerce_resource_id(resource_or_id, "blobs")
+	if !(id is String):
+		return ""
+	return id
 
 
-static func fetch(blob_or_id):
-	var id = _coerce_id(blob_or_id)
-	var data = yield(get_implementation(id).fetch(id), "completed")
-	return _format(data, _Gotm.create_instance("GotmBlob"))
+static func get_size(blob_id: String) -> int:
+	var id := _coerce_id(blob_id)
+	if id.is_empty():
+		return 0
+	var data: Dictionary
+	if get_implementation(id) == Implementation.GOTM_BLOB_LOCAL:
+		data = await _GotmBlobLocal.fetch(id)
+	else:
+		data = await _GotmStore.fetch(id)
+	if !data.has("size"):
+		return 0
+	return int(data["size"])
 
-static func get_data(blob_or_id, type = ""):
-	var id = _coerce_id(blob_or_id)
-	if !id:
-		yield(_GotmUtility.get_tree(), "idle_frame")
-		return
-	var data = yield(get_implementation(id).fetch(_Gotm.get_global().storageApiEndpoint + "/" + id), "completed")
-	if !data || !type:
-		return data
-		
+
+# TODO: Validate changes from 3.X, old code didnt make sense to me since "data" is type Dictionary from fetch functions, but cannot be used in 'bytes_to_var_with_objects'
+static func get_data(id: String, type: String = "bytes"):
+	if id.is_empty() || type.is_empty():
+		await _GotmUtility.get_tree().process_frame
+		return null
+
+	var binary_data: PackedByteArray
+	if get_implementation(id) == Implementation.GOTM_BLOB_LOCAL:
+		binary_data = await _GotmBlobLocal.fetch_blob(id)
+	else:
+		binary_data = await _GotmStore.fetch_blob(_Gotm.get_global().storageApiEndpoint + "/" + id)
+	if binary_data.is_empty():
+		return null
+
 	match type:
 		"node":
-			return bytes2var(data, true).instance()			
+			var node = bytes_to_var_with_objects(binary_data)
+			if !(node is Object):
+				return null
+			return node.instantiate()
 		"variant":
-			return bytes2var(data, true)
+			return bytes_to_var_with_objects(binary_data)
 		_:
-			return data
+			return binary_data
 
-static func _coerce_id(resource_or_id):
-	return _GotmUtility.coerce_resource_id(resource_or_id, "blobs")
 
-static func _format(data, blob):
-	if !data || !blob:
-		return
-	blob.id = data.path
-	blob.size = int(data.size)
-	blob.is_local = !!_LocalStore.fetch(data.path)
-	return blob
+static func get_implementation(id = null) -> Implementation:
+	if !_LocalStore.fetch(id).is_empty() || !_Gotm.has_global_api():
+		return Implementation.GOTM_BLOB_LOCAL
+	return Implementation.GOTM_STORE

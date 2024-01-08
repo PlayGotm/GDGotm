@@ -1,0 +1,88 @@
+[gd_scene load_steps=2 format=3 uid="uid://dv4ativ254x8k"]
+
+[ext_resource type="Script" path="res://scenes/test_suite.gd" id="1_2jyn8"]
+
+[node name="TestSuite" type="Node"]
+script = ExtResource("1_2jyn8")
+
+[node name="UI" type="Control" parent="."]
+layout_mode = 3
+anchor_left = 0.03
+anchor_top = 0.051
+anchor_right = 0.97
+anchor_bottom = 0.952
+offset_left = -0.560001
+offset_top = 0.952
+offset_right = -0.440063
+offset_bottom = 1.104
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 4
+
+[node name="Title" type="Label" parent="UI"]
+layout_mode = 1
+offset_right = 700.0
+offset_bottom = 91.0
+theme_override_font_sizes/font_size = 64
+text = "Gotm Plugin Test Suite"
+
+[node name="Menu" type="VBoxContainer" parent="UI"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -95.5
+offset_top = -20.0
+offset_right = 95.5
+offset_bottom = 20.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="StartFunctional" type="Button" parent="UI/Menu"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 32
+text = "Start Functional Testing"
+
+[node name="StartUnit" type="Button" parent="UI/Menu"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 32
+text = "Start Unit Tests"
+
+[node name="FunctionalMenu" type="VBoxContainer" parent="UI"]
+visible = false
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -95.5
+offset_top = -20.0
+offset_right = 95.5
+offset_bottom = 20.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="ProjectKey" type="LineEdit" parent="UI/FunctionalMenu"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 32
+placeholder_text = "project key (optional)"
+alignment = 1
+expand_to_text_length = true
+
+[node name="Offline" type="CheckButton" parent="UI/FunctionalMenu"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 32
+text = "Force Offline?"
+
+[node name="GotmInit" type="Button" parent="UI/FunctionalMenu"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 32
+text = "Initialize Gotm"
+
+[connection signal="pressed" from="UI/Menu/StartFunctional" to="." method="_on_start_functional_pressed"]
+[connection signal="pressed" from="UI/Menu/StartUnit" to="." method="_on_start_unit_pressed"]
+[connection signal="toggled" from="UI/FunctionalMenu/Offline" to="." method="_on_offline_toggled"]
+[connection signal="pressed" from="UI/FunctionalMenu/GotmInit" to="." method="_on_gotm_init_pressed"]

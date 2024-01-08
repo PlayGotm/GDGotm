@@ -1,14 +1,13 @@
 class_name _GotmBlobLocal
-#warnings-disable
 
 
-static func create(api: String, body: Dictionary):
-	yield(_GotmUtility.get_tree(), "idle_frame")
+static func create(api: String, body: Dictionary) -> Dictionary:
+	await _GotmUtility.get_tree().process_frame
 	api = api.split("/")[0]
 	var data = body.data
-	if !(data is PoolByteArray):
-		return
-		
+	if !(data is PackedByteArray) || data == PackedByteArray():
+		return {}
+
 	var blob = {
 		"path": _GotmUtility.create_resource_path(api),
 		"author": _GotmAuthLocal.get_user(),
@@ -17,32 +16,36 @@ static func create(api: String, body: Dictionary):
 	}
 	_GotmUtility.write_file(_Gotm.get_local_path(blob.path), data)
 	return _format(_LocalStore.create(blob))
-#
 
-static func fetch(path: String, query: String = "", params: Dictionary = {}, authenticate: bool = false) -> Dictionary:
-	yield(_GotmUtility.get_tree(), "idle_frame")
-	var is_data = path.begins_with(_Gotm.get_global().storageApiEndpoint)
-	if is_data:
-		path = path.replace(_Gotm.get_global().storageApiEndpoint + "/", "")
-	
-	var blob = _LocalStore.fetch(path)
-	if !blob:
-		return
-	
-	if is_data:
-		return _GotmUtility.read_file(_Gotm.get_local_path(blob.path), true)
-	
+
+static func delete_sync(path: String) -> bool:
+	var blob := _LocalStore.fetch(path)
+	if blob.is_empty():
+		return false
+	var result := _LocalStore.delete(path)
+	_GotmUtility.write_file(_Gotm.get_local_path(blob.path), null)
+	return result
+
+
+# TODO: Validate changes from 3.X, old code didnt make sense to me since there was a non-dictionary return as PackedByteArray when returning the 'read_file' line
+static func fetch(path: String, _query: String = "", _params: Dictionary = {}, _authenticate: bool = false) -> Dictionary:
+	await _GotmUtility.get_tree().process_frame
+	var blob := _LocalStore.fetch(path)
+	if blob.is_empty():
+		return {}
 	return _format(blob)
 
-static func _format(data):
-	if !data:
-		return
+
+static func fetch_blob(path: String) -> PackedByteArray:
+	await _GotmUtility.get_tree().process_frame
+	var blob := _LocalStore.fetch(path)
+	if blob.is_empty():
+		return PackedByteArray()
+	return _GotmUtility.read_file_as_binary(_Gotm.get_local_path(blob.path))
+
+
+static func _format(data: Dictionary) -> Dictionary:
+	if data.is_empty():
+		return {}
 	data = _GotmUtility.copy(data, {})
 	return data
-
-static func delete_sync(path):
-	var blob = _LocalStore.fetch(path)
-	if !blob:
-		return
-	_LocalStore.delete(path)
-	_GotmUtility.write_file(_Gotm.get_local_path(blob.path), null)
