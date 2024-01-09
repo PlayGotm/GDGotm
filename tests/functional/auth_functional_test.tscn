@@ -1,6 +1,6 @@
 [gd_scene load_steps=3 format=3 uid="uid://d0h5c1b0ju4mx"]
 
-[ext_resource type="Script" path="res://tests/functional/gotm_auth.gd" id="1_iap81"]
+[ext_resource type="Script" path="res://tests/functional/auth_functional_test.gd" id="1_iap81"]
 [ext_resource type="PackedScene" uid="uid://d1ym2m3ne2msh" path="res://tests/functional/utility/dropdown.tscn" id="2_hdaku"]
 
 [node name="GotmUser" type="Node"]

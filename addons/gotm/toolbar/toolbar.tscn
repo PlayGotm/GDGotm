@@ -1,14 +1,14 @@
 [gd_scene load_steps=18 format=3 uid="uid://dcy3xjkgff4vs"]
 
-[ext_resource type="Script" path="res://addons/gotm/scenes/toolbar/toolbar.gd" id="1_rqhu4"]
-[ext_resource type="Script" path="res://addons/gotm/scenes/toolbar/scripts/background.gd" id="2_v2mhq"]
-[ext_resource type="Texture2D" uid="uid://di765x3yexr4s" path="res://addons/gotm/icons/gotm.svg" id="3_a72mm"]
-[ext_resource type="Texture2D" uid="uid://n7ix6ak67oin" path="res://addons/gotm/icons/upload.svg" id="4_s7j5g"]
-[ext_resource type="Texture2D" uid="uid://dmr4v6jfktg51" path="res://addons/gotm/icons/docs.svg" id="5_1l0nj"]
-[ext_resource type="Script" path="res://addons/gotm/scenes/toolbar/scripts/menu.gd" id="6_yhwo5"]
-[ext_resource type="Script" path="res://addons/gotm/scenes/toolbar/scripts/build.gd" id="7_xqtuw"]
-[ext_resource type="Script" path="res://addons/gotm/scenes/toolbar/scripts/deploy.gd" id="8_mdbhf"]
-[ext_resource type="Script" path="res://addons/gotm/scenes/toolbar/scripts/websocket_server.gd" id="9_gegu7"]
+[ext_resource type="Script" path="res://addons/gotm/toolbar/toolbar.gd" id="1_rqhu4"]
+[ext_resource type="Script" path="res://addons/gotm/toolbar/background.gd" id="2_v2mhq"]
+[ext_resource type="Texture2D" uid="uid://di765x3yexr4s" path="res://addons/gotm/toolbar/gotm.svg" id="3_a72mm"]
+[ext_resource type="Texture2D" uid="uid://n7ix6ak67oin" path="res://addons/gotm/toolbar/upload.svg" id="4_s7j5g"]
+[ext_resource type="Texture2D" uid="uid://dmr4v6jfktg51" path="res://addons/gotm/toolbar/docs.svg" id="5_1l0nj"]
+[ext_resource type="Script" path="res://addons/gotm/toolbar/menu.gd" id="6_yhwo5"]
+[ext_resource type="Script" path="res://addons/gotm/toolbar/build.gd" id="7_xqtuw"]
+[ext_resource type="Script" path="res://addons/gotm/toolbar/deploy.gd" id="8_mdbhf"]
+[ext_resource type="Script" path="res://addons/gotm/toolbar/websocket_server.gd" id="9_gegu7"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_kcd3u"]
 corner_radius_top_left = 22

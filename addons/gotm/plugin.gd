@@ -1,7 +1,7 @@
 @tool
 extends EditorPlugin
 
-var toolbar: Control = preload("res://addons/gotm/scenes/toolbar/toolbar.tscn").instantiate()
+var toolbar: Control = preload("res://addons/gotm/toolbar/toolbar.tscn").instantiate()
 
 
 func _enter_tree() -> void:

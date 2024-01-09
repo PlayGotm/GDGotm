@@ -1,11 +1,11 @@
 [gd_scene load_steps=4 format=3 uid="uid://b8kvhwedc26eu"]
 
+[ext_resource type="Script" path="res://tests/functional/leaderboard_functional_test.gd" id="1_ck5xg"]
 [ext_resource type="PackedScene" uid="uid://d1ym2m3ne2msh" path="res://tests/functional/utility/dropdown.tscn" id="1_fhws6"]
-[ext_resource type="Script" path="res://tests/functional/gotm_leaderboard.gd" id="1_x8pkt"]
-[ext_resource type="PackedScene" uid="uid://vacpm7c47mt4" path="res://tests/functional/gotm_leaderboard_settings.tscn" id="3_332eu"]
+[ext_resource type="PackedScene" uid="uid://vacpm7c47mt4" path="res://tests/functional/leaderboard_settings.tscn" id="3_332eu"]
 
 [node name="GotmLeaderboard" type="Node"]
-script = ExtResource("1_x8pkt")
+script = ExtResource("1_ck5xg")
 
 [node name="UI" type="Control" parent="."]
 layout_mode = 3

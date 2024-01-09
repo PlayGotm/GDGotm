@@ -1,6 +1,6 @@
 [gd_scene load_steps=3 format=3 uid="uid://cixbxen11mpsd"]
 
-[ext_resource type="Script" path="res://tests/functional/gotm_user.gd" id="1_447a7"]
+[ext_resource type="Script" path="res://tests/functional/user_functional_test.gd" id="1_447a7"]
 [ext_resource type="PackedScene" uid="uid://d1ym2m3ne2msh" path="res://tests/functional/utility/dropdown.tscn" id="2_e86eg"]
 
 [node name="GotmUser" type="Node"]
