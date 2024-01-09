@@ -6,7 +6,7 @@ const ALPHA_TWEEN_DURATION := 1
 @export var hovered_colors: PackedColorArray
 var alpha_tween: Tween
 var final_color: Color
-@onready var background_texture: NoiseTexture2D = preload("res://addons/gotm/scenes/toolbar/toolbar.tres")
+@onready var background_texture: NoiseTexture2D = preload("res://addons/gotm/toolbar/toolbar.tres")
 @onready var button: Button = $"../Button"
 
 

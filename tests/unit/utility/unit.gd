@@ -1,4 +1,3 @@
-class_name GotmUnitTest
 extends Node
 
 
@@ -23,7 +22,7 @@ func test(object: Object) -> void:
 		await get_tree().process_frame
 		@warning_ignore("redundant_await") # actually not redundant
 		var test_info = await Callable(object, unit_test).call()
-		if test_info is TestInfo && test_info.is_online:
+		if test_info is UnitTestInfo && test_info.is_online:
 			print("☑\t", count ,"/", unit_tests.size(), "... ", unit_test, " (online)")
 		else:
 			print("☑\t", count ,"/", unit_tests.size(), "... ", unit_test, " (offline)")
@@ -41,26 +40,22 @@ func test_all() -> void:
 
 func test_content() -> void:
 	print("GotmContent unit test running...")
-	await test(GotmUnitTest_Content.new())
+	await test(load("res://tests/unit/content_unit_test.gd").new())
 
 
 func test_leaderboard() -> void:
 	print("GotmLeaderboard unit test running...")
-	await test(GotmUnitTest_Leaderboard.new())
+	await test(load("res://tests/unit/leaderboard_unit_test.gd").new())
 
 
 func test_score() -> void:
 	print("GotmScore unit test running...")
-	await test(GotmUnitTest_Score.new())
+	await test(load("res://tests/unit/score_unit_test.gd").new())
 
 
 func test_utility() -> void:
-	print("_gotm_utility.gd unit test running...")
-	await test(GotmUnitTest_Utility.new())
+	print("_GotmUtility unit test running...")
+	await test(load("res://tests/unit/utility_unit_test.gd").new())
 
 
-class TestInfo:
-	var is_online := false
 
-	func _init(online: bool) -> void:
-		is_online = online

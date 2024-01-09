@@ -1,9 +1,10 @@
-class_name GotmLeaderboardTest
 extends Node
 
-@onready var settings: LeaderboardSettings = get_node("UI/LeaderboardSettings")
+@onready var settings: LeaderboardSettings = $UI/LeaderboardSettings
 var current_leaderboard: GotmLeaderboard
 var print_console := true
+
+const Utility := preload("res://tests/functional/utility/utility.gd")
 
 
 func get_rank() -> void:
@@ -39,7 +40,7 @@ func get_scores(by_rank := false) -> void:
 		print("\nGotmLeaderboard [" + current_leaderboard.name + "] get scores by rank called...")
 	if print_console:
 		for score in results:
-			print(GotmScoreTest.gotm_score_to_string(score))
+			print(Utility.score_to_string(score))
 
 
 func get_scores_by_rank() -> void:
@@ -65,12 +66,12 @@ func get_surrounding(by_rank := false) -> void:
 	if print_console && results.is_valid():
 		print("---BEFORE---")
 		for score in results.before:
-			print(GotmScoreTest.gotm_score_to_string(score))
+			print(Utility.score_to_string(score))
 		print("---SCORE---")
-		print(GotmScoreTest.gotm_score_to_string(results.score))
+		print(Utility.score_to_string(results.score))
 		print("---AFTER---")
 		for score in results.after:
-			print(GotmScoreTest.gotm_score_to_string(score))
+			print(Utility.score_to_string(score))
 
 
 func get_surrounding_by_rank() -> void:

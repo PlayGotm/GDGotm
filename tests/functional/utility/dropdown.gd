@@ -1,4 +1,3 @@
-class_name SwitchTest
 extends OptionButton
 
 const scenes := [
@@ -7,8 +6,10 @@ const scenes := [
 	"res://tests/functional/user_functional_test.tscn",
 	"res://tests/functional/auth_functional_test.tscn",
 	"res://tests/functional/content_functional_test.tscn"
-	]
+]
 
+static var scene_cache := {}
+static var current_scene_index := -1
 
 func _enter_tree() -> void:
 	update_selected()
@@ -17,13 +18,12 @@ func _enter_tree() -> void:
 func switch_scenes(index: int) -> void:
 	# get new scene
 	var new_scene_file_path: String = scenes[index]
-	var new_scene_node: Node
-	if (SwitchTest as Script).has_meta("sceneindex" + str(index)): # using like a static variable
-		new_scene_node = (SwitchTest as Script).get_meta("sceneindex" + str(index))
-	else:
+	var new_scene_node: Node = scene_cache.get(index)
+	if !new_scene_node:
 		new_scene_node = load(new_scene_file_path).instantiate()
-	# store new scene index as a static variable
-	(SwitchTest as Script).set_meta("current_scene_index", index)
+		scene_cache[index] = new_scene_node
+	
+	current_scene_index = index
 	# get old scene
 	var old_scene_node: Node = get_tree().root.get_child(0)
 	var old_scene_index: int = scenes.find(old_scene_node.scene_file_path)
@@ -31,14 +31,11 @@ func switch_scenes(index: int) -> void:
 	get_tree().root.add_child(new_scene_node)
 	get_tree().current_scene = new_scene_node
 	get_tree().root.remove_child(old_scene_node)
-	# store old scene for reuse
-	(SwitchTest as Script).set_meta("sceneindex" + str(old_scene_index), old_scene_node)
 
 
 func update_selected() -> void:
-	var current_index: int = (SwitchTest as Script).get_meta("current_scene_index", -1)
-	if current_index != -1:
-		selected = current_index
+	if current_scene_index != -1:
+		selected = current_scene_index
 		return
 	var current_path := get_tree().current_scene.scene_file_path
 	for n in scenes.size():

@@ -1,8 +1,9 @@
-class_name GotmAuthTest
 extends Node
 
 var copy_id_to_clipboard := true
 var print_console := true
+
+const Utility := preload("res://tests/functional/utility/utility.gd")
 
 
 func fetch() -> void:
@@ -15,14 +16,8 @@ func fetch() -> void:
 		DisplayServer.clipboard_set(auth.user_id)
 	if print_console:
 		print("GotmAuth fetched...")
-		print(GotmAuthTest.gotm_auth_to_string(auth))
+		print(Utility.auth_to_string(auth))
 
-
-static func gotm_auth_to_string(auth: GotmAuth) -> String:
-	var result := "\nGotmUser:\n"
-	result += "[user_id] " + auth.user_id + "\n"
-	result += "[is_registered] " + str(auth.is_registered) + "\n"
-	return result
 
 
 func _on_copy_id_toggled(button_pressed: bool):

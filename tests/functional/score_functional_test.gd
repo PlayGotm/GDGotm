@@ -1,8 +1,9 @@
-class_name GotmScoreTest
 extends Node
 
 var copy_id_to_clipboard := true
 var print_console := true
+
+const Utility := preload("res://tests/functional/utility/utility.gd")
 
 
 func create_score(is_local: bool = false) -> void:
@@ -21,7 +22,7 @@ func create_score(is_local: bool = false) -> void:
 		DisplayServer.clipboard_set(score.id)
 	if print_console:
 		print("GotmScore created...")
-		print(GotmScoreTest.gotm_score_to_string(score))
+		print(Utility.score_to_string(score))
 
 
 func create_local_score() -> void:
@@ -46,7 +47,7 @@ func update_score() -> void:
 		DisplayServer.clipboard_set(score.id)
 	if print_console:
 		print("GotmScore updated...")
-		print(GotmScoreTest.gotm_score_to_string(score))
+		print(Utility.score_to_string(score))
 
 
 func fetch_score() -> void:
@@ -60,7 +61,7 @@ func fetch_score() -> void:
 		DisplayServer.clipboard_set(score.id)
 	if print_console:
 		print("GotmScore fetched...")
-		print(GotmScoreTest.gotm_score_to_string(score))
+		print(Utility.score_to_string(score))
 
 
 func delete_score() -> void:
@@ -71,20 +72,6 @@ func delete_score() -> void:
 		return
 	if print_console:
 		print("GotmScore deleted (id: " + id + ") ...")
-
-
-static func gotm_score_to_string(score: GotmScore) -> String:
-	var result := "\nGotmScore:\n"
-	result += "[name] " + score.name + "\n"
-	result += "[value] " + str(score.value) + "\n"
-	result += "[id] " + score.id + "\n"
-	result += "[user_id] " + score.user_id + "\n"
-	@warning_ignore("integer_division")
-	var created := Time.get_datetime_string_from_unix_time(score.created)
-	result += "[created] " + created  + "\n"
-	result += "[is_local] " + str(score.is_local) + "\n"
-	result += "[properties] " + str(score.properties) + "\n"
-	return result
 
 
 func _get_properties() -> Dictionary:

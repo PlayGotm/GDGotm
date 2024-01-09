@@ -1,8 +1,9 @@
-class_name GotmUserTest
 extends Node
 
 var copy_id_to_clipboard := true
 var print_console := true
+
+const Utility := preload("res://tests/functional/utility/utility.gd")
 
 
 func fetch() -> void:
@@ -16,14 +17,8 @@ func fetch() -> void:
 		DisplayServer.clipboard_set(user.id)
 	if print_console:
 		print("GotmUser fetched...")
-		print(GotmUserTest.gotm_user_to_string(user))
+		print(Utility.user_to_string(user))
 
-
-static func gotm_user_to_string(user: GotmUser) -> String:
-	var result := "\nGotmUser:\n"
-	result += "[name] " + user.name + "\n"
-	result += "[id] " + user.id + "\n"
-	return result
 
 
 func _check_buttons(_param = null) -> void:

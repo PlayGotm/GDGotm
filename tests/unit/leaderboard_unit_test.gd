@@ -1,8 +1,4 @@
-class_name GotmUnitTest_Leaderboard
-extends Node
-
-
-func test_leaderboard_get_count() -> GotmUnitTest.TestInfo:
+func test_leaderboard_get_count() -> UnitTestInfo:
 	var rng_name: String = str(randi())
 	var score1 := await GotmScore.create("test_get_count_" + rng_name, 1, {"foo":"bar"})
 	assert(score1 != null)
@@ -31,11 +27,11 @@ func test_leaderboard_get_count() -> GotmUnitTest.TestInfo:
 	leaderboard.properties = {"foo1":"bar1"}
 	assert(await leaderboard.get_count() == 0)
 	if score1.is_local:
-		return GotmUnitTest.TestInfo.new(false)
-	return GotmUnitTest.TestInfo.new(true)
+		return UnitTestInfo.new(false)
+	return UnitTestInfo.new(true)
 
 
-func test_leaderboard_get_counts() -> GotmUnitTest.TestInfo:
+func test_leaderboard_get_counts() -> UnitTestInfo:
 	var rng_name: String = str(randi())
 	var score1 := await GotmScore.create("test_get_counts_" + rng_name, 1)
 	assert(score1 != null)
@@ -48,11 +44,11 @@ func test_leaderboard_get_counts() -> GotmUnitTest.TestInfo:
 	leaderboard.is_local = score1.is_local
 	assert(await leaderboard.get_counts(0, 4, 4) == [0, 1, 1, 1])
 	if score1.is_local:
-		return GotmUnitTest.TestInfo.new(false)
-	return GotmUnitTest.TestInfo.new(true)
+		return UnitTestInfo.new(false)
+	return UnitTestInfo.new(true)
 
 
-func test_leaderboard_get_rank() -> GotmUnitTest.TestInfo:
+func test_leaderboard_get_rank() -> UnitTestInfo:
 	var rng_name: String = str(randi())
 	var score1 := await GotmScore.create("test_get_rank_" + rng_name, 1)
 	assert(score1 != null)
@@ -67,11 +63,11 @@ func test_leaderboard_get_rank() -> GotmUnitTest.TestInfo:
 	assert(await leaderboard.get_rank(score2) == 2)
 	assert(await leaderboard.get_rank(score1) == 3)
 	if score1.is_local:
-		return GotmUnitTest.TestInfo.new(false)
-	return GotmUnitTest.TestInfo.new(true)
+		return UnitTestInfo.new(false)
+	return UnitTestInfo.new(true)
 
 
-func test_leaderboard_get_scores() -> GotmUnitTest.TestInfo:
+func test_leaderboard_get_scores() -> UnitTestInfo:
 	var rng_name: String = str(randi())
 	var score1 := await GotmScore.create("test_get_scores_" + rng_name, 1)
 	assert(score1 != null)
@@ -97,11 +93,11 @@ func test_leaderboard_get_scores() -> GotmUnitTest.TestInfo:
 	scores = await leaderboard.get_scores(score1)
 	assert(scores.is_empty())
 	if score1.is_local:
-		return GotmUnitTest.TestInfo.new(false)
-	return GotmUnitTest.TestInfo.new(true)
+		return UnitTestInfo.new(false)
+	return UnitTestInfo.new(true)
 
 
-func test_leaderboard_get_scores_by_rank() -> GotmUnitTest.TestInfo:
+func test_leaderboard_get_scores_by_rank() -> UnitTestInfo:
 	var rng_name: String = str(randi())
 	var score1 := await GotmScore.create("test_get_scores_by_rank_" + rng_name, 1)
 	assert(score1 != null)
@@ -128,11 +124,11 @@ func test_leaderboard_get_scores_by_rank() -> GotmUnitTest.TestInfo:
 	assert((scores[0] as GotmScore).id == score2.id)
 	assert((scores[1] as GotmScore).id == score1.id)
 	if score1.is_local:
-		return GotmUnitTest.TestInfo.new(false)
-	return GotmUnitTest.TestInfo.new(true)
+		return UnitTestInfo.new(false)
+	return UnitTestInfo.new(true)
 
 
-func test_leaderboard_get_surrounding_scores() -> GotmUnitTest.TestInfo:
+func test_leaderboard_get_surrounding_scores() -> UnitTestInfo:
 	var rng_name: String = str(randi())
 	var score1 := await GotmScore.create("test_get_surrounding_scores_" + rng_name, 1)
 	assert(score1 != null)
@@ -152,11 +148,11 @@ func test_leaderboard_get_surrounding_scores() -> GotmUnitTest.TestInfo:
 	assert((scores.before[0] as GotmScore).id == score3.id)
 	assert((scores.after[0] as GotmScore).id == score1.id)
 	if score1.is_local:
-		return GotmUnitTest.TestInfo.new(false)
-	return GotmUnitTest.TestInfo.new(true)
+		return UnitTestInfo.new(false)
+	return UnitTestInfo.new(true)
 
 
-func test_leaderboard_get_surrounding_scores_by_rank() -> GotmUnitTest.TestInfo:
+func test_leaderboard_get_surrounding_scores_by_rank() -> UnitTestInfo:
 	var rng_name: String = str(randi())
 	var score1 := await GotmScore.create("test_get_surrounding_scores_by_rank_" + rng_name, 1)
 	assert(score1 != null)
@@ -172,18 +168,18 @@ func test_leaderboard_get_surrounding_scores_by_rank() -> GotmUnitTest.TestInfo:
 	assert((scores.before[0] as GotmScore).id == score3.id)
 	assert((scores.after[0] as GotmScore).id == score1.id)
 	if score1.is_local:
-		return GotmUnitTest.TestInfo.new(false)
-	return GotmUnitTest.TestInfo.new(true)
+		return UnitTestInfo.new(false)
+	return UnitTestInfo.new(true)
 
 
 const TestUtility := preload("res://tests/unit/utility/utility.gd")
-func test_all() -> GotmUnitTest.TestInfo:
+func test_all() -> UnitTestInfo:
 	# Give our scores a descriptive name.
 	# We need this later when fetching scores.
 	var score_name := "bananas_collected"
 
 	# Clear existing scores so the test runs the same every time.
-	await GotmUnitTest_Leaderboard._clear_scores(score_name)
+	await _clear_scores(score_name)
 
 	# Create scores
 	var score1: GotmScore = await GotmScore.create(score_name, 1)
@@ -344,10 +340,10 @@ func test_all() -> GotmUnitTest.TestInfo:
 		# User is not registered and has no display name.
 		pass 
 
-	return GotmUnitTest.TestInfo.new(!Gotm.project_key)
+	return UnitTestInfo.new(!Gotm.project_key)
 
 
-static func _clear_scores(score_name: String):
+func _clear_scores(score_name: String):
 	var existing_leaderboard = GotmLeaderboard.new()
 	existing_leaderboard.name = score_name
 	var existing_scores = await existing_leaderboard.get_scores()

@@ -1,7 +1,8 @@
-class_name GotmContentTest
 extends Node
 
 var print_console := true
+
+const Utility := preload("res://tests/functional/utility/utility.gd")
 
 
 func create(is_local: bool = false) -> void:
@@ -42,7 +43,7 @@ func create(is_local: bool = false) -> void:
 		return
 	if print_console:
 		print("GotmContent created...")
-		print(GotmContentTest.gotm_content_to_string(content))
+		print(Utility.content_to_string(content))
 
 
 func create_local() -> void:
@@ -89,7 +90,7 @@ func update(by_key: bool = false) -> void:
 		return
 	if print_console:
 		print("GotmContent updated...")
-		print(GotmContentTest.gotm_content_to_string(content))
+		print(Utility.content_to_string(content))
 
 
 func update_by_key() -> void:
@@ -125,7 +126,7 @@ func fetch() -> void:
 		return
 	if print_console:
 		print("GotmContent fetched...")
-		print(GotmContentTest.gotm_content_to_string(content))
+		print(Utility.content_to_string(content))
 
 
 func get_by_key() -> void:
@@ -137,7 +138,7 @@ func get_by_key() -> void:
 		return
 	if print_console:
 		print("GotmContent got content by key...")
-		print(GotmContentTest.gotm_content_to_string(content))
+		print(Utility.content_to_string(content))
 
 
 func get_data(by_key: bool = false) -> void:
@@ -298,20 +299,7 @@ func list() -> void:
 		print(result_ids, "\n")
 
 
-static func gotm_content_to_string(content: GotmContent) -> String:
-	var result := "\nGotmContent:\n"
-	result += "[id] %s\n" % content.id
-	result += "[user_id] %s\n" % content.user_id
-	result += "[created] %s\n" % Time.get_datetime_string_from_unix_time(content.created)
-	result += "[is_local] %s\n" % str(content.is_local)
-	result += "[is_private] %s\n" % str(content.is_private)
-	result += "[key] %s\n" % content.key
-	result += "[name] %s\n" % content.name
-	result += "[parent_ids] %s\n" % str(content.parent_ids)
-	result += "[properties] %s\n" % content.properties
-	result += "[size] %d\n" % content.size
-	result += "[updated] %s\n" % Time.get_datetime_string_from_unix_time(content.updated)
-	return result
+
 
 
 func _check_menu(_param = null) -> void:

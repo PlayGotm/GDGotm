@@ -1,6 +1,3 @@
-class_name GotmUnitTest_Utility
-extends Node
-
 var test_script := preload("res://tests/unit/utility_script.gd")
 
 
