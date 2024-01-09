@@ -2,16 +2,8 @@ class_name GotmUnitTest
 extends Node
 
 
-func temp() -> void:
-	Gotm.project_key = "authenticators/ccG2PZyIak36FjT2COCE"
-	Gotm.force_local_contents = false
-	Gotm.force_local_marks = false
-	Gotm.force_local_scores = false
-
-
 func _ready() -> void:
 	print("NOTE: If ran in the editor, there will be errors in the Debugger/Error tab. Please ignore.")
-#	temp()
 	test_all()
 
 
