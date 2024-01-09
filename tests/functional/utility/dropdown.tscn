@@ -1,6 +1,6 @@
 [gd_scene load_steps=2 format=3 uid="uid://d1ym2m3ne2msh"]
 
-[ext_resource type="Script" path="res://tests/scenes/switch_test.gd" id="1_ieq74"]
+[ext_resource type="Script" path="res://tests/functional/utility/dropdown.gd" id="1_uwiy8"]
 
 [node name="SwitchTest" type="OptionButton"]
 offset_right = 143.0
@@ -18,6 +18,6 @@ popup/item_3/text = "GotmAuth"
 popup/item_3/id = 3
 popup/item_4/text = "GotmContent"
 popup/item_4/id = 4
-script = ExtResource("1_ieq74")
+script = ExtResource("1_uwiy8")
 
 [connection signal="item_selected" from="." to="." method="_on_item_selected"]

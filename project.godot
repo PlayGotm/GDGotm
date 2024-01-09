@@ -11,8 +11,12 @@ config_version=5
 [application]
 
 config/name="GDGotm"
-run/main_scene="res://tests/scenes/test_suite.tscn"
+run/main_scene="res://tests/common/tests.tscn"
 config/features=PackedStringArray("4.1", "GL Compatibility")
+
+[editor_plugins]
+
+enabled=PackedStringArray("res://addons/gotm/plugin.cfg")
 
 [rendering]
 

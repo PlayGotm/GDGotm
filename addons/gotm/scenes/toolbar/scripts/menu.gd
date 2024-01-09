@@ -43,6 +43,6 @@ func _on_index_pressed(index: int) -> void:
 		2: OS.shell_open(GOTM)
 
 
-func _on_gd_gotm_button_pressed() -> void:
+func _on_button_pressed() -> void:
 	show()
 	popup()

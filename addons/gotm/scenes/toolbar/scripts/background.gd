@@ -6,8 +6,8 @@ const ALPHA_TWEEN_DURATION := 1
 @export var hovered_colors: PackedColorArray
 var alpha_tween: Tween
 var final_color: Color
-@onready var background_texture: NoiseTexture2D = preload("res://addons/gotm/scenes/toolbar/gd_gotm_toolbar.tres")
-@onready var gotm_button: Button = $"../GDGotmButton"
+@onready var background_texture: NoiseTexture2D = preload("res://addons/gotm/scenes/toolbar/toolbar.tres")
+@onready var button: Button = $"../Button"
 
 
 func _ready() -> void:
@@ -27,7 +27,7 @@ func _process(_delta: float) -> void:
 
 
 func tween_alpha() -> void:
-	if gotm_button.is_hovered():
+	if button.is_hovered():
 		if modulate == Color.WHITE:
 			return
 		if !alpha_tween.is_running() || final_color == Color.TRANSPARENT:

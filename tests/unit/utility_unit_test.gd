@@ -1,7 +1,7 @@
 class_name GotmUnitTest_Utility
 extends Node
 
-var test_script := preload("res://tests/unit_testing/_gotm_utility_unit_test_1.gd")
+var test_script := preload("res://tests/unit/utility_script.gd")
 
 
 func test_copy() -> void:

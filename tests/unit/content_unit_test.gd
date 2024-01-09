@@ -1,6 +1,6 @@
 class_name GotmUnitTest_Content
 
-const TestUtility := preload("res://tests/unit_testing/test_utility.gd")
+const TestUtility := preload("res://tests/unit/utility/utility.gd")
 
 func test_all() -> GotmUnitTest.TestInfo:
 	# Clear existing contents so the test runs the same every time.

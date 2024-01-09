@@ -16,12 +16,6 @@ var tls_cert: X509Certificate
 var tls_key: CryptoKey
 
 
-func _ready() -> void:
-	var crypto = Crypto.new()
-	tls_key = crypto.generate_rsa(4096)
-	tls_cert = crypto.generate_self_signed_certificate(tls_key, "CN=gdgotmplugin,O=Gotm,C=SE")
-
-
 func _process(_delta: float) -> void:
 	_poll()
 
@@ -136,6 +130,10 @@ func _is_connection_pending(peer: PendingPeer) -> bool:
 	# tsl (secure)
 	if peer.connection == peer.tcp:
 		var tls = StreamPeerTLS.new()
+		if !tls_key:
+			var crypto = Crypto.new()
+			tls_key = crypto.generate_rsa(4096)
+			tls_cert = crypto.generate_self_signed_certificate(tls_key, "CN=gdgotmplugin,O=Gotm,C=SE")
 		var tls_options := TLSOptions.server(tls_key,tls_cert)
 		if tls.accept_stream(peer.tcp, tls_options) != OK:
 			return false # failed to accept stream

@@ -14,9 +14,9 @@ func _enter_tree() -> void:
 func switch_test_scenes() -> void:
 	match test:
 		Test.FUNCTIONAL:
-			get_tree().change_scene_to_file("res://tests/functional_testing/gotm_score.tscn")
+			get_tree().change_scene_to_file("res://tests/functional/gotm_score.tscn")
 		Test.UNIT:
-			get_tree().change_scene_to_file("res://tests/unit_testing/temp.tscn")
+			get_tree().change_scene_to_file("res://tests/unit/utility/unit.tscn")
 
 
 func _on_gotm_init_pressed() -> void:

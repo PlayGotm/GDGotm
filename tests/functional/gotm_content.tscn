@@ -1,7 +1,7 @@
 [gd_scene load_steps=5 format=3 uid="uid://dl0o2uq0cq8nk"]
 
-[ext_resource type="Script" path="res://tests/functional_testing/scripts/gotm_content.gd" id="1_8vc6n"]
-[ext_resource type="PackedScene" uid="uid://d1ym2m3ne2msh" path="res://tests/scenes/switch_test.tscn" id="2_cc8gx"]
+[ext_resource type="Script" path="res://tests/functional/gotm_content.gd" id="1_8vc6n"]
+[ext_resource type="PackedScene" uid="uid://d1ym2m3ne2msh" path="res://tests/functional/utility/dropdown.tscn" id="2_cc8gx"]
 
 [sub_resource type="GDScript" id="GDScript_exucl"]
 resource_name = "parameter_group"

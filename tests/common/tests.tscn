@@ -1,9 +1,9 @@
-[gd_scene load_steps=2 format=3 uid="uid://dv4ativ254x8k"]
+[gd_scene load_steps=2 format=3 uid="uid://b207yyp87iar0"]
 
-[ext_resource type="Script" path="res://tests/scenes/test_suite.gd" id="1_2jyn8"]
+[ext_resource type="Script" path="res://tests/common/tests.gd" id="1_44m7f"]
 
 [node name="TestSuite" type="Node"]
-script = ExtResource("1_2jyn8")
+script = ExtResource("1_44m7f")
 
 [node name="UI" type="Control" parent="."]
 layout_mode = 3

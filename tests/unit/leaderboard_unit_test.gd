@@ -176,7 +176,7 @@ func test_leaderboard_get_surrounding_scores_by_rank() -> GotmUnitTest.TestInfo:
 	return GotmUnitTest.TestInfo.new(true)
 
 
-const TestUtility := preload("res://tests/unit_testing/test_utility.gd")
+const TestUtility := preload("res://tests/unit/utility/utility.gd")
 func test_all() -> GotmUnitTest.TestInfo:
 	# Give our scores a descriptive name.
 	# We need this later when fetching scores.
