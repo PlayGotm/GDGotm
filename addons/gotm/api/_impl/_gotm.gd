@@ -12,12 +12,6 @@ static func get_user_path(path: String = "") -> String:
 	return "user://gotm/" + path
 
 
-static func get_singleton():
-	if !Engine.has_singleton("Gotm"):
-		return
-	return Engine.get_singleton("Gotm")
-
-
 static func has_global_api() -> bool:
 	return is_global_api("scores") || is_global_api("contents") || is_global_api("marks")
 

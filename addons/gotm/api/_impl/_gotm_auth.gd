@@ -15,8 +15,6 @@ static func _create_authentication(body: Dictionary = {}, headers: PackedStringA
 static func fetch() -> GotmAuth:
 	var auth = await get_auth_async()
 	if !auth:
-		auth = _global.gotm_auth
-	if !auth:
 		auth = _GotmAuthLocal.get_auth()
 	if !auth:
 		return null
@@ -66,11 +64,6 @@ static func get_auth_async() -> _GotmAuthData:
 #	var queue := _GotmUtility.QueueSignal.new()
 #	_global.queue = queue
 
-	var gotm = _Gotm.get_singleton()
-	if gotm && !_global.gotm_auth:
-		_global.gotm_auth = _format_auth_data(await(gotm.get_auth()))
-		auth = get_auth()
-		_global.auth = auth
 	if !auth:
 		auth = await _get_refreshed_project_auth(_global.auth)
 		_write_auth(auth)
@@ -102,14 +95,6 @@ static func _get_refreshed_project_auth(auth: _GotmAuthData) -> _GotmAuthData:
 		if data:
 			return data
 
-	# Gotm manages user auths for us.
-	var gotm = _Gotm.get_singleton()
-	if gotm:
-		var data = await gotm.create_project_authentication(project_key)
-		var formatted = _format_auth_data(data)
-		formatted.project_key = project_key
-		return formatted
-
 	# We manage user auths ourselves.
 	var user_auth: _GotmAuthData
 #	if _Gotm.api_origin.begins_with("http://localhost"):
@@ -137,9 +122,6 @@ static func _is_auth_valid(auth: _GotmAuthData) -> bool:
 		return false
 	if !auth.project.is_empty() && auth.project_key != Gotm.project_key:
 		return false
-	if _Gotm.get_singleton():
-		if auth.owner.is_empty() || !_global.gotm_auth || auth.owner != _global.gotm_auth.owner:
-			return false
 	return true
 
 
@@ -190,7 +172,6 @@ class _GotmAuthGlobalData:
 	var auth: _GotmAuthData
 #	var queue: _GotmUtility.QueueSignal
 	var has_read_from_file := false
-	var gotm_auth: _GotmAuthData
 
 static var _global := _GotmAuthGlobalData.new()
 
