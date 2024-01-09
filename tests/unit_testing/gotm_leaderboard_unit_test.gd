@@ -183,7 +183,7 @@ func test_all() -> GotmUnitTest.TestInfo:
 	var score_name := "bananas_collected"
 
 	# Clear existing scores so the test runs the same every time.
-	await _clear_scores(score_name)
+	await GotmUnitTest_Leaderboard._clear_scores(score_name)
 
 	# Create scores
 	var score1: GotmScore = await GotmScore.create(score_name, 1)

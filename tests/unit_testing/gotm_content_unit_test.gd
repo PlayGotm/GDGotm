@@ -4,7 +4,7 @@ const TestUtility := preload("res://tests/unit_testing/test_utility.gd")
 
 func test_all() -> GotmUnitTest.TestInfo:
 	# Clear existing contents so the test runs the same every time.
-	await _clear_contents()
+	await GotmUnitTest_Content._clear_contents()
 	
 	# Test serialization for variants
 	for value in ["herpderp", {"herp": "derp"}, ["herp", "derp"]]:
