@@ -10,13 +10,11 @@ static func _coerce_id(resource_or_id) -> String:
 
 static func _get_surrounding_scores(leaderboard: GotmLeaderboard, center) -> GotmLeaderboard.SurroundingScores:
 	if !is_valid(leaderboard):
-		await _GotmUtility.get_tree().process_frame
 		return null
 
 	if center is GotmScore || center is String:
 		var id := _coerce_id(center)
 		if id.is_empty():
-			await _GotmUtility.get_tree().process_frame
 			return null
 
 		var score := await GotmScore.fetch(id)
@@ -76,12 +74,10 @@ static func _get_surrounding_scores(leaderboard: GotmLeaderboard, center) -> Got
 
 static func get_surrounding_scores(leaderboard: GotmLeaderboard, center) -> GotmLeaderboard.SurroundingScores:
 	if !(center is int || center is float || center is String || center is GotmScore):
-		await _GotmUtility.get_tree().process_frame
 		push_error("GotmLeaderboard: Expected an int, float, GotmScore or GotmScore.id string.")
 		return null
 
 	if !is_valid(leaderboard):
-		await _GotmUtility.get_tree().process_frame
 		return null
 
 	if center is int:
@@ -91,12 +87,10 @@ static func get_surrounding_scores(leaderboard: GotmLeaderboard, center) -> Gotm
 
 static func get_surrounding_scores_by_rank(leaderboard: GotmLeaderboard, center) -> GotmLeaderboard.SurroundingScores:
 	if !(center is int || center is float || center is String || center is GotmScore):
-		await _GotmUtility.get_tree().process_frame
 		push_error("GotmLeaderboard: Expected an int, float, GotmScore or GotmScore.id string.")
 		return null
 
 	if !is_valid(leaderboard):
-		await _GotmUtility.get_tree().process_frame
 		return null
 
 	if center is float:

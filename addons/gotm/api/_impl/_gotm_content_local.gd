@@ -4,7 +4,6 @@ const UNDEFINED := {}
 
 
 static func create(api: String, data: Dictionary) -> Dictionary:
-	await _GotmUtility.get_tree().process_frame
 	if data.key && !get_by_key_sync(data.key).is_empty():
 		return {}
 	var created = _GotmUtility.get_iso_from_unix_time()
@@ -51,7 +50,6 @@ static func delete(id: String) -> bool:
 
 
 static func delete_blob(content_id: String) -> bool:
-	await _GotmUtility.get_tree().process_frame
 	var content := _LocalStore.fetch(content_id)
 	if content.is_empty():
 		return false
@@ -59,7 +57,6 @@ static func delete_blob(content_id: String) -> bool:
 
 
 static func fetch(path: String) -> Dictionary:
-	await _GotmUtility.get_tree().process_frame
 	return _format(_LocalStore.fetch(path))
 
 
@@ -170,7 +167,6 @@ static func _get_content_value(prop: String, content: Dictionary, undefined_valu
 
 
 static func list(query: String, params: Dictionary = {}) -> Array:
-	await _GotmUtility.get_tree().process_frame
 	if query == "byKey":
 		return get_by_key_sync(params.key)
 	if query == "byContentSort":
@@ -233,7 +229,6 @@ static func _match_content(content: Dictionary, params: Dictionary) -> bool:
 
 
 static func update(id: String, data: Dictionary) -> Dictionary:
-	await _GotmUtility.get_tree().process_frame
 	return _format(_LocalStore.update(id, data))
 
 

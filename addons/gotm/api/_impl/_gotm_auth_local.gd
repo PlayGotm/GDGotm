@@ -6,7 +6,6 @@ static func get_auth() -> _GotmAuthLocalCache:
 
 
 static func get_auth_async() -> _GotmAuthLocalCache:
-	await _GotmUtility.get_tree().process_frame
 	return get_auth()
 
 

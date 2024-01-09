@@ -28,13 +28,11 @@ static func _coerce_id(resource_or_id) -> String:
 
 static func create(target_or_id, type: GotmMark.Types, is_local: bool = false) -> GotmMark:
 	if !(target_or_id is String || ALLOWED_TARGET_APIS.values().has(target_or_id.get("_CLASS_NAME"))):
-		await _GotmUtility.get_tree().process_frame
 		push_error("Expected a GotmContent or GotmContent.id string.")
 		return null
 
 	var target_id: String = _GotmUtility.coerce_resource_id(target_or_id)
 	if !_is_mark_allowed(target_id, type):
-		await _GotmUtility.get_tree().process_frame
 		return null
 
 	var data: Dictionary
@@ -49,7 +47,6 @@ static func create(target_or_id, type: GotmMark.Types, is_local: bool = false) -
 
 static func delete(mark_or_id) -> bool:
 	if !(mark_or_id is GotmMark || mark_or_id is String):
-		await _GotmUtility.get_tree().process_frame
 		push_error("Expected a GotmMark or GotmMark.id string.")
 		return false
 
@@ -65,7 +62,6 @@ static func delete(mark_or_id) -> bool:
 
 static func fetch(mark_or_id) -> GotmMark:
 	if !(mark_or_id is GotmMark || mark_or_id is String):
-		await _GotmUtility.get_tree().process_frame
 		push_error("Expected a GotmMark or GotmMark.id string.")
 		return null
 
@@ -98,7 +94,6 @@ static func get_auth_implementation() -> AuthImplementation:
 
 static func get_count(target_or_id, type: String = "") -> int:
 	if !(target_or_id is String || ALLOWED_TARGET_APIS.values().has(target_or_id.get("_CLASS_NAME"))):
-		await _GotmUtility.get_tree().process_frame
 		push_error("Expected a GotmContent or GotmContent.id string.")
 		return 0
 
@@ -109,7 +104,6 @@ static func get_count(target_or_id, type: String = "") -> int:
 	else:
 		is_allowed = _is_mark_allowed(target_id, ALLOWED_TYPES.find_key(type))
 	if !is_allowed:
-		await _GotmUtility.get_tree().process_frame
 		return 0
 
 	var params = {
@@ -152,7 +146,6 @@ static func _is_mark_allowed(target_id: String, type: GotmMark.Types) -> bool:
 
 static func list_by_target(target_or_id, type: String = "") -> Array:
 	if !(target_or_id is String || ALLOWED_TARGET_APIS.values().has(target_or_id.get("_CLASS_NAME"))):
-		await _GotmUtility.get_tree().process_frame
 		push_error("Expected a GotmContent or GotmContent.id string.")
 		return []
 
@@ -171,7 +164,6 @@ static func list_by_target(target_or_id, type: String = "") -> Array:
 	else:
 		is_allowed = _is_mark_allowed(target_id, ALLOWED_TYPES.find_key(type))
 	if !is_allowed:
-		await _GotmUtility.get_tree().process_frame
 		return []
 
 	var params = _GotmUtility.delete_empty({

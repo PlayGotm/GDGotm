@@ -2,7 +2,6 @@ class_name _GotmBlobLocal
 
 
 static func create(api: String, body: Dictionary) -> Dictionary:
-	await _GotmUtility.get_tree().process_frame
 	api = api.split("/")[0]
 	var data = body.data
 	if !(data is PackedByteArray) || data == PackedByteArray():
@@ -29,7 +28,6 @@ static func delete_sync(path: String) -> bool:
 
 # TODO: Validate changes from 3.X, old code didnt make sense to me since there was a non-dictionary return as PackedByteArray when returning the 'read_file' line
 static func fetch(path: String, _query: String = "", _params: Dictionary = {}, _authenticate: bool = false) -> Dictionary:
-	await _GotmUtility.get_tree().process_frame
 	var blob := _LocalStore.fetch(path)
 	if blob.is_empty():
 		return {}
@@ -37,7 +35,6 @@ static func fetch(path: String, _query: String = "", _params: Dictionary = {}, _
 
 
 static func fetch_blob(path: String) -> PackedByteArray:
-	await _GotmUtility.get_tree().process_frame
 	var blob := _LocalStore.fetch(path)
 	if blob.is_empty():
 		return PackedByteArray()

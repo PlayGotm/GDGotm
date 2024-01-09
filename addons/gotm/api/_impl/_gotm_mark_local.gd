@@ -6,7 +6,6 @@ static func clear_cache(_path: String) -> void:
 
 
 static func create(api: String, data: Dictionary) -> Dictionary:
-	await _GotmUtility.get_tree().process_frame
 	var score := {
 		"path": _GotmUtility.create_resource_path(api),
 		"target": data.target,
@@ -18,7 +17,6 @@ static func create(api: String, data: Dictionary) -> Dictionary:
 
 
 static func delete(id: String) -> bool:
-	await _GotmUtility.get_tree().process_frame
 	return _LocalStore.delete(id)
 
 
@@ -37,7 +35,6 @@ static func delete_by_target_sync(target: String) -> bool:
 
 
 static func fetch(path: String, query: String = "", params: Dictionary = {}, _authenticate: bool = false) -> Dictionary:
-	await _GotmUtility.get_tree().process_frame
 	var path_parts := path.split("/")
 	var api = path_parts[0]
 	var id = path_parts[1]
@@ -67,7 +64,6 @@ static func _format(data: Dictionary) -> Dictionary:
 
 
 static func list(_api: String, query: String, params: Dictionary = {}, _authenticate: bool = false) -> Array:
-	await _GotmUtility.get_tree().process_frame
 	var marks := []
 	if query == "byTargetAndOwner":
 		for mark in _LocalStore.get_all("marks"):

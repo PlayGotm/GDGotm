@@ -35,7 +35,6 @@ static func create(name: String, value: float, properties: Dictionary = {}, is_l
 
 static func delete(score_or_id) -> bool:
 	if !(score_or_id is GotmScore || score_or_id is String):
-		await _GotmUtility.get_tree().process_frame
 		push_error("[GotmScore] Expected a GotmScore or GotmScore.id string.")
 		return false
 
@@ -57,7 +56,6 @@ static func encode_cursor(score_id_or_value, ascending: bool) -> String:
 			return ""
 		return _GotmUtility.encode_cursor([[score.value, score.created], score.id.replace("/", "-") + "~"])
 	elif score_id_or_value is float || score_id_or_value is int:
-		await _GotmUtility.get_tree().process_frame
 		var created = 253402300799000 if ascending else 0
 		return _GotmUtility.encode_cursor([[float(score_id_or_value), created], "~"])
 	return ""
@@ -65,7 +63,6 @@ static func encode_cursor(score_id_or_value, ascending: bool) -> String:
 
 static func fetch(score_or_id) -> GotmScore:
 	if !(score_or_id is GotmScore || score_or_id is String):
-		await _GotmUtility.get_tree().process_frame
 		push_error("[GotmScore] Expected a GotmScore or GotmScore.id string.")
 		return null
 
@@ -103,7 +100,6 @@ static func get_auth_implementation() -> AuthImplementation:
 
 static func get_counts(leaderboard: GotmLeaderboard, minimum_value: float, maximum_value: float, segment_count: int) -> Array:
 	if !_GotmLeaderboard.is_valid(leaderboard):
-		await _GotmUtility.get_tree().process_frame
 		return []
 
 	minimum_value = _GotmUtility.clean_for_json(minimum_value)
@@ -175,12 +171,10 @@ static func _get_project() -> String:
 static func get_rank(leaderboard: GotmLeaderboard, score_id_or_value) -> int:
 	if !(score_id_or_value is GotmScore || score_id_or_value is String
 			|| score_id_or_value is int || score_id_or_value is float):
-		await _GotmUtility.get_tree().process_frame
 		push_error("[GotmScore] Expected a GotmScore, GotmScore.id string, int, or float.")
 		return 0
 
 	if !_GotmLeaderboard.is_valid(leaderboard):
-		await _GotmUtility.get_tree().process_frame
 		return 0
 
 	if score_id_or_value is float || score_id_or_value is int:
@@ -220,12 +214,10 @@ static func get_rank(leaderboard: GotmLeaderboard, score_id_or_value) -> int:
 
 static func _list(leaderboard: GotmLeaderboard, after, ascending: bool, limit: int = 20) -> Array:
 	if !(after is GotmScore || after is String || after is int || after is float || after == null):
-		await _GotmUtility.get_tree().process_frame
 		push_error("[GotmScore] Expected a GotmScore, GotmScore.id string, int, or float.")
 		return []
 
 	if !_GotmLeaderboard.is_valid(leaderboard):
-		await _GotmUtility.get_tree().process_frame
 		return []
 
 	if after is int || after is float:
@@ -288,7 +280,6 @@ static func list_by_rank(leaderboard: GotmLeaderboard, after, ascending: bool) -
 
 static func update(score_or_id, value = null, properties = null) -> GotmScore:
 	if !(score_or_id is GotmScore || score_or_id is String):
-		await _GotmUtility.get_tree().process_frame
 		push_error("[GotmScore] Expected a GotmScore or GotmScore.id string.")
 		return null
 

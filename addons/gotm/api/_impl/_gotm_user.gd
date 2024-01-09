@@ -5,7 +5,6 @@ enum Implementation { GOTM_STORE, GOTM_USER_LOCAL }
 
 static func fetch(id: String) -> GotmUser:
 	if get_implementation() == Implementation.GOTM_USER_LOCAL:
-		await _GotmUtility.get_tree().process_frame
 		return null
 	else:
 		var data: Dictionary = await _GotmStore.fetch(id)

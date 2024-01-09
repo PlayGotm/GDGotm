@@ -6,7 +6,6 @@ static func clear_cache(_path: String) -> void:
 
 
 static func create(api: String, data: Dictionary) -> Dictionary:
-	await _GotmUtility.get_tree().process_frame
 	var score = {
 		"path": _GotmUtility.create_resource_path(api),
 		"author": _GotmAuthLocal.get_user(),
@@ -28,12 +27,10 @@ static func _decode_cursor(cursor: String) -> Array:
 
 
 static func delete(id: String) -> bool:
-	await _GotmUtility.get_tree().process_frame
 	return _LocalStore.delete(id)
 
 
 static func fetch(path: String, query: String = "", params: Dictionary = {}, _authenticate: bool = false) -> Dictionary:
-	await _GotmUtility.get_tree().process_frame
 	var path_parts = path.split("/")
 	var api = path_parts[0]
 	var id = path_parts[1]
@@ -189,7 +186,6 @@ static func _get_range_from_period(period: String) -> Array:
 
 
 static func list(api: String, query: String, params: Dictionary = {}, _authenticate: bool = false) -> Array:
-	await _GotmUtility.get_tree().process_frame
 	if api == "scores" && query == "byScoreSort":
 		return _fetch_by_score_sort(params)
 	if api == "stats" && query == "countByScoreSort":
@@ -238,7 +234,6 @@ static func _match_score(score: Dictionary, params: Dictionary) -> bool:
 
 
 static func update(id: String, data: Dictionary) -> Dictionary:
-	await _GotmUtility.get_tree().process_frame
 	return _format(_LocalStore.update(id, data))
 
 

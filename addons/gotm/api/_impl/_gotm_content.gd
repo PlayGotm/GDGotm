@@ -60,7 +60,6 @@ static func create(data = PackedByteArray(), properties: Dictionary = {},
 
 static func delete(content_or_id) -> bool:
 	if !(content_or_id is GotmContent || content_or_id is String):
-		await _GotmUtility.get_tree().process_frame
 		push_error("[GotmContent] Expected a GotmContent or GotmContent.id string.")
 		return false
 
@@ -84,12 +83,10 @@ static func delete_by_key(key: String) -> bool:
 
 static func fetch(content_or_id, type: String = ""):
 	if !(content_or_id is GotmContent || content_or_id is String):
-		await _GotmUtility.get_tree().process_frame
 		push_error("[GotmContent] Expected a GotmContent or GotmContent.id string.")
 		return null
 
 	if type == "properties" && content_or_id is Object && content_or_id.has("properties"):
-		await _GotmUtility.get_tree().process_frame
 		return content_or_id.properties
 
 	var id := _coerce_id(content_or_id)
@@ -308,7 +305,6 @@ static func list(query: GotmQuery, after_content_or_id = null) -> Array:
 
 static func update(content_or_id, data = null, properties = null, key = null, name = null) -> GotmContent:
 	if !(content_or_id is GotmContent || content_or_id is String):
-		await _GotmUtility.get_tree().process_frame
 		push_error("[GotmContent] Expected a GotmContent or GotmContent.id string.")
 		return null
 

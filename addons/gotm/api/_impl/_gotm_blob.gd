@@ -27,7 +27,6 @@ static func get_size(blob_id: String) -> int:
 # TODO: Validate changes from 3.X, old code didnt make sense to me since "data" is type Dictionary from fetch functions, but cannot be used in 'bytes_to_var_with_objects'
 static func get_data(id: String, type: String = "bytes"):
 	if id.is_empty() || type.is_empty():
-		await _GotmUtility.get_tree().process_frame
 		return null
 
 	var binary_data: PackedByteArray

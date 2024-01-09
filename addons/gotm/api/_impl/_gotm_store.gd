@@ -6,12 +6,10 @@ const _EVICTION_TIMEOUT_SECONDS = 5
 
 static func _cached_get_request(path: String, authenticate: bool = false):
 	if path.is_empty():
-		await _GotmUtility.get_tree().process_frame
 		return {}
 
 	if path in _cache:
 		var value = _cache[path]
-		await _GotmUtility.get_tree().process_frame
 		return value
 
 	var value = await _request_data(path, HTTPClient.METHOD_GET, null, authenticate)
@@ -74,7 +72,6 @@ static func list(api: String, query: String, params: Dictionary = {}, authentica
 
 static func _request(path: String, method: int, body = null, authenticate: bool = false) -> _GotmUtility.FetchDataResult:
 	if path.is_empty():
-		await _GotmUtility.get_tree().process_frame
 		return null
 	var headers := {}
 	if authenticate:

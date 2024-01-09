@@ -54,7 +54,6 @@ static func get_auth() -> _GotmAuthData:
 static func get_auth_async() -> _GotmAuthData:
 	var auth = get_auth()
 	if auth:
-		await _GotmUtility.get_tree().process_frame
 		return auth
 
 #	if _global.queue:
@@ -88,7 +87,6 @@ static func _get_project_from_token(token: String) -> String:
 static func _get_refreshed_project_auth(auth: _GotmAuthData) -> _GotmAuthData:
 	var project_key := Gotm.project_key
 	if project_key.is_empty():
-		await _GotmUtility.get_tree().process_frame
 		return null
 	if auth && !auth.refresh_token.is_empty() && !auth.project.is_empty() && !auth.project_key.is_empty() && auth.project_key == project_key:
 		var data = await _refresh_auth(auth)
