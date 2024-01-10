@@ -2,7 +2,8 @@ class_name _Gotm
 
 static var api_origin: String = "https://api.gotm.io"
 static var api_worker_origin: String = "https://worker.gotm.io"
-static var storage_api_endpoint: String = "https://storage.gotm.io"
+static var api_storage_origin: String = "https://storage.gotm.io"
+static var api_listen_origin: String = "https://listen.gotm.io"
 
 static func get_local_path(path: String = "") -> String:
 	return get_user_path("local/" + path)

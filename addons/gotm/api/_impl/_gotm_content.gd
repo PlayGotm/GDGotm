@@ -10,7 +10,7 @@ static func _clear_cache() -> void:
 		_GotmStore.clear_cache("contents")
 		_GotmStore.clear_cache("blobs")
 		_GotmStore.clear_cache("marks")
-		_GotmStore.clear_cache(_Gotm.storage_api_endpoint)
+		_GotmStore.clear_cache(_Gotm.api_storage_origin)
 
 
 static func _coerce_id(resource_or_id) -> String:

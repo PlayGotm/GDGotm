@@ -106,7 +106,7 @@ static func _request(path: String, method: int, body = null, authenticate: bool 
 		await _GotmUtility.get_tree().process_frame
 
 	var result: _GotmUtility.FetchDataResult
-	if path.begins_with(_Gotm.storage_api_endpoint):
+	if path.begins_with(_Gotm.api_storage_origin):
 		result = await _GotmUtility.fetch_data(path, method, body)
 	elif path.begins_with("blobs/upload") && body.get("data") is PackedByteArray:
 		body = body.duplicate()

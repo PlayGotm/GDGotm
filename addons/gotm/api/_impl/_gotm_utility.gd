@@ -130,6 +130,64 @@ static func encode_url_component(string: String) -> String:
 	return encoded
 
 
+static func fetch_event_stream(url: String, on_event: Callable) -> Callable:
+	var parsed_url := parse_url(url)
+	var origin = parsed_url.origin
+	var host = parsed_url.host
+	var port = parsed_url.port
+	var path = parsed_url.path
+
+	var client := HTTPClient.new()
+	var is_disposed := false
+	var dispose := func():
+		if is_disposed:
+			return
+		is_disposed = true
+		client.close()
+
+	var poll := func():
+		while !is_disposed:
+			client.connect_to_host(host, port)
+			client.poll()
+			while client.get_status() == HTTPClient.STATUS_CONNECTING || client.get_status() == HTTPClient.STATUS_RESOLVING:
+				client.poll()
+				await get_tree().process_frame
+
+			if client.get_status() != HTTPClient.STATUS_CONNECTED:
+				if !is_disposed:
+					push_error("Failed to connect to " + origin)
+				return
+
+			
+			client.request(HTTPClient.METHOD_GET, path, ["accept: text/event-stream"])
+			client.poll()
+			while client.get_status() == HTTPClient.STATUS_REQUESTING:
+				await get_tree().process_frame
+				client.poll()
+
+			var status := client.get_response_code()
+			if status != 200:
+				dispose.call()
+				on_event.call({})
+				return
+
+			while client.get_status() == HTTPClient.STATUS_BODY:
+				client.poll()
+				var message := client.read_response_body_chunk().get_string_from_utf8()
+				if !message:
+					await get_tree().process_frame
+					continue
+				message = message.replace("\n", "")
+				if !message.begins_with("data: "):
+					continue
+				var data = JSON.parse_string(message.substr("data: ".length()))
+				on_event.call({} if !data else data as Dictionary)
+
+
+	poll.call()
+	return dispose
+
+
 static func fetch_data(url: String, method: int = HTTPClient.METHOD_GET, body = null, headers: PackedStringArray = []) -> FetchDataResult:
 	var parsed_url := parse_url(url)
 	var origin = parsed_url.origin

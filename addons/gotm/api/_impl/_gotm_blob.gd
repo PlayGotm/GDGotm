@@ -33,7 +33,7 @@ static func get_data(id: String, type: String = "bytes"):
 	if get_implementation(id) == Implementation.GOTM_BLOB_LOCAL:
 		binary_data = await _GotmBlobLocal.fetch_blob(id)
 	else:
-		binary_data = await _GotmStore.fetch_blob(_Gotm.storage_api_endpoint + "/" + id)
+		binary_data = await _GotmStore.fetch_blob(_Gotm.api_storage_origin + "/" + id)
 	if binary_data.is_empty():
 		return null
 
