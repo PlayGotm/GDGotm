@@ -33,7 +33,9 @@ static func _format_auth_data(data: Dictionary) -> _GotmAuthData:
 	auth.refresh_token = data.refreshToken
 	auth.owner = data.owner
 	auth.is_guest = data.isAnonymous
-	auth.project = _get_project_from_token(data.token)
+	var parsed_token := _parse_token(data.token)
+	auth.project = parsed_token.get("project", "")
+	auth.instance = parsed_token.get("instance", "")
 	auth.expired = _GotmUtility.get_unix_time_from_iso(data.expired)
 	return auth
 
@@ -51,37 +53,36 @@ static func get_auth() -> _GotmAuthData:
 	return auth
 
 
+static var _auth_promise
 static func get_auth_async() -> _GotmAuthData:
 	var auth = get_auth()
 	if auth:
 		return auth
+	if _auth_promise:
+		await _auth_promise
+		return get_auth()
 
-#	if _global.queue:
-#		_global.queue.add()
-#		return get_auth()
-
-#	var queue := _GotmUtility.QueueSignal.new()
-#	_global.queue = queue
-
-	if !auth:
-		auth = await _get_refreshed_project_auth(_global.auth)
+	var refresh := func():
+		_auth_promise = _get_refreshed_project_auth(_global.auth)
+		auth = await _auth_promise
 		_write_auth(auth)
-	_global.auth = auth
-#	_global.queue = null
-#	queue.trigger()
+		_global.auth = auth
+
+	_auth_promise = refresh.call()
+	await _auth_promise
+	_auth_promise = null
 	return get_auth()
 
 
-static func _get_project_from_token(token: String) -> String:
+
+static func _parse_token(token: String) -> Dictionary:
 	if token.is_empty():
 		return ""
 	var parts = token.split(".")
 	if parts.size() != 3:
 		return ""
 	var data: Dictionary = JSON.parse_string(Marshalls.base64_to_utf8(parts[1] + "=="))
-	if data.is_empty() || data.get("project", "").is_empty():
-		return ""
-	return data.project
+	return data if data else {}
 
 
 static func _get_refreshed_project_auth(auth: _GotmAuthData) -> _GotmAuthData:
@@ -93,7 +94,6 @@ static func _get_refreshed_project_auth(auth: _GotmAuthData) -> _GotmAuthData:
 		if data:
 			return data
 
-	# We manage user auths ourselves.
 	var user_auth: _GotmAuthData
 #	if _Gotm.api_origin.begins_with("http://localhost"):
 #		user_auth = await _create_development_user_authentication()
@@ -164,6 +164,7 @@ class _GotmAuthData:
 	var owner: String
 	var project: String
 	var project_key: String
+	var instance: String
 
 
 class _GotmAuthGlobalData:

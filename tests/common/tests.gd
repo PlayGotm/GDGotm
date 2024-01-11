@@ -55,8 +55,6 @@ class GotmHandshakeSignal:
 class PromiseStream:
 	var derp := 123
 
-func perform_handshake(is_initiator: bool, sig: GotmHandshakeSignal, incoming_signal_stream: PromiseStream) -> String:
-	return ""
 
 func format_signals(data: Dictionary) -> Array:
 	if data.is_empty():
@@ -112,13 +110,91 @@ func get_instance() -> String:
 	return _instance_id
 
 
+class ResolvablePromise:
+	signal _resolved
+	var _awaitable: Coroutine
+	var _timeouts := []
 
+	func _init() -> void:
+		var runner := func():
+			return await _resolved
+		_awaitable = runner.call()
+
+	func resolve(value) -> void:
+		_timeouts = []
+		_resolved.emit(value)
+	
+	func get_awaitable() -> Coroutine:
+		return _awaitable
+
+	func set_timeout(duration_milliseconds, value = null):
+		var handle := {}
+		_timeouts.push_back(handle)
+		await _GotmUtility.get_tree().create_timer(float(duration_milliseconds) / 1000.0)
+		if !(handle in _timeouts):
+			return
+		resolve(value)
+
+
+
+class Handshake:
+	var _peer: WebRTCPeerConnection
+	var _signals := []
+	var _handled_signals := []
+	var _signal_promise: ResolvablePromise
+
+	func _init(is_initiator: bool, config: Dictionary) -> void:
+		_reset_signal_promise()
+		_peer = WebRTCPeerConnection.new()
+		_peer.initialize(config)
+		_peer.session_description_created.connect(self._offer_created)
+		_peer.ice_candidate_created.connect(self._new_ice_candidate)
+		if is_initiator:
+			_peer.create_offer()
+		
+		func _new_ice_candidate(sdp_mid, sdp_m_line_index, candidate):
+			_add_signal({
+				"type": "candidate", 
+				"candidate": {
+					"candidate": candidate,
+					"sdpMLineIndex": sdp_m_line_index,
+					"sdpMid": sdp_mid
+				}
+			})
+		
+		func _offer_created(type, sdp):
+			_peer.set_local_description(type, sdp)
+			_add_signal({
+				"type": type, 
+				"sdp": sdp
+			})
+
+		func _add_signal(sig: Dictionary) -> void:
+			var signal_string := JSON.stringify(sig)
+			_signals.push_back(signal_string)
+			_handled_signals.push_back(signal_string)
+			_signal_promise.resolve(true)
+
+
+			this.#signals.push(signalString)
+			this.#handledSignals.add(signalString)
+			this.#signalPromise.resolve(true)
+
+		func _reset_signal_promise() -> void:
+			_signal_promise = ResolvablePromise.new()
+			_signal_promise.set_timeout(SIGNAL_TIMEOUT_MILLISECONDS, false)
+
+const SIGNAL_TIMEOUT_MILLISECONDS = 10000
+
+
+
+func perform_handshake(is_initiator: bool, start_signal: GotmHandshakeSignal, incoming_signal_stream: PromiseStream) -> String:
+	var handshake := Handshake.new(JSON.parse_string(start_signal.payload))
+
+	
 
 func create_host(on_connection: Callable) -> Callable:
-	var instance := await get_instance()
-	
-	var is_disposed := false
-	
+	var instance := (await _GotmAuth.get_auth_async()).instance
 	var incoming_signal_streams = {}
 	var on_signals := func(signals_list: Dictionary) -> void:
 		print("create_host signals: ", signals_list)
@@ -132,40 +208,18 @@ func create_host(on_connection: Callable) -> Callable:
 				var incoming_signal_stream := PromiseStream.new()
 				incoming_signal_streams[handshake_id] = incoming_signal_stream
 				var peer := await perform_handshake(false, sig, incoming_signal_stream)
+				incoming_signal_streams.erase(handshake_id)
 				if peer:
 					on_connection.call(peer)
 			elif type == GotmHandshakeSignal.Type.SIGNAL:
 				var incoming_signal_stream: PromiseStream = incoming_signal_streams.get(handshake_id)
 				if incoming_signal_stream:
 					incoming_signal_stream.add(payload)
-	var dispose_signal_listener
-	var on_instance_changed := func(new_instance: String):
-		if is_disposed:
-			return
-		if dispose_signal_listener:
-			push_error(
-				"We have been issued a new virtual IP address because we lost our " +
-			 	"connection to the IP service for too long. Peers that were " +
-				"connected to us need to connect to our new virtual IP address."
-			)
-			dispose_signal_listener.call()
-		incoming_signal_streams = {}
-		dispose_signal_listener = _GotmUtility.fetch_event_stream(_Gotm.api_listen_origin + "/handshakeSignals?query=byTarget&target=" + new_instance, on_signals)
-	on_instance_changed.call(instance)
-	_instance_changed_callbacks.push_back(on_instance_changed)
-
-	var dispose := func():
-		if is_disposed:
-			return
-		dispose_signal_listener.call()
-		_instance_changed_callbacks.erase(on_instance_changed)
-		is_disposed = true
-	
-	return dispose
+	return _GotmUtility.fetch_event_stream(_Gotm.api_listen_origin + "/handshakeSignals?query=byTarget&target=" + instance, on_signals)
 
 func connect_to_host(target: String):
-	var instance: String = (await _GotmStore.create("instances", {})).path
-	var start_signal := format_signal(await _GotmStore.create("handshakeSignals", {"owner": instance, "target": target, "type": "start"}))
+	var instance := (await _GotmAuth.get_auth_async()).instance
+	var start_signal := format_signal(await _GotmStore.create("handshakeSignals", {"target": target, "type": "start"}))
 	
 	var incoming_signal_stream := PromiseStream.new()
 	var on_signals := func(signals_list: Dictionary) -> void:
@@ -182,6 +236,11 @@ func connect_to_host(target: String):
 func stuff():
 	Gotm.project_key = "authenticators/ccG2PZyIak36FjT2COCE"
 	await create_host(func(): pass)
+
+
+	var p1 = WebRTCPeerConnection.new()
+	var ch1 = p1.create_data_channel("chat", {"id": 1, "negotiated": true})
+	p1.session_description_created.connect(p1.set_local_description)
 
 
 # Create the two peers.
