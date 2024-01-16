@@ -51,7 +51,22 @@ func _on_start_unit_pressed() -> void:
 func stuff():
 	Gotm.project_key = "authenticators/ccG2PZyIak36FjT2COCE"
 	var host := await GotmMultiplayer.create_server()
+	var client := await GotmMultiplayer.create_client(await GotmMultiplayer.get_address())
 
+	host.put_var("i am host")
+	client.put_var("i am client")
+	while true:
+		host.poll()
+		client.poll()
+
+		while host.get_available_packet_count():
+			print("host got: ", host.get_var())
+
+		while client.get_available_packet_count():
+			print("client got: ", client.get_var())
+	
+
+		await get_tree().process_frame
 
 # Create the two peers.
 var p1 = WebRTCPeerConnection.new()

@@ -53,7 +53,7 @@ static func get_auth() -> _GotmAuthData:
 	return auth
 
 
-static var _auth_promise
+static var _auth_promise: _GotmUtility.ResolvablePromise
 static func get_auth_async() -> _GotmAuthData:
 	var auth = get_auth()
 	if auth:
@@ -62,25 +62,24 @@ static func get_auth_async() -> _GotmAuthData:
 		await _auth_promise
 		return get_auth()
 
-	var refresh := func():
-		_auth_promise = _get_refreshed_project_auth(_global.auth)
-		auth = await _auth_promise
-		_write_auth(auth)
-		_global.auth = auth
+	var promise := _GotmUtility.ResolvablePromise.new()
+	_auth_promise = promise
+	auth = await _get_refreshed_project_auth(_global.auth)
+	_write_auth(auth)
+	_global.auth = auth
 
-	_auth_promise = refresh.call()
-	await _auth_promise
 	_auth_promise = null
+	promise.resolve()
 	return get_auth()
 
 
 
 static func _parse_token(token: String) -> Dictionary:
 	if token.is_empty():
-		return ""
+		return {}
 	var parts = token.split(".")
 	if parts.size() != 3:
-		return ""
+		return {}
 	var data: Dictionary = JSON.parse_string(Marshalls.base64_to_utf8(parts[1] + "=="))
 	return data if data else {}
 

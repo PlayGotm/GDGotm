@@ -138,23 +138,24 @@ static func fetch_event_stream(url: String, on_event: Callable) -> Callable:
 	var path = parsed_url.path
 
 	var client := HTTPClient.new()
-	var is_disposed := false
+	var state := {"is_disposed": false}
 	var dispose := func():
-		if is_disposed:
+		if state.is_disposed:
 			return
-		is_disposed = true
+		state.is_disposed = true
 		client.close()
 
 	var poll := func():
-		while !is_disposed:
-			client.connect_to_host(host, port)
+		while !state.is_disposed:
+			client.connect_to_host(origin, port)
 			client.poll()
 			while client.get_status() == HTTPClient.STATUS_CONNECTING || client.get_status() == HTTPClient.STATUS_RESOLVING:
 				client.poll()
 				await get_tree().process_frame
 
+			var le_status := client.get_status()
 			if client.get_status() != HTTPClient.STATUS_CONNECTED:
-				if !is_disposed:
+				if !state.is_disposed:
 					push_error("Failed to connect to " + origin)
 				return
 
@@ -181,6 +182,8 @@ static func fetch_event_stream(url: String, on_event: Callable) -> Callable:
 				if !message.begins_with("data: "):
 					continue
 				var data = JSON.parse_string(message.substr("data: ".length()))
+				if !data:
+					var flerp = 123
 				on_event.call({} if !data else data as Dictionary)
 
 
@@ -541,3 +544,32 @@ static var _global := GlobalData.new()
 #		_queue = []
 #		for sig in queue:
 #			sig.emit_signal("completed")
+
+
+class ResolvablePromise:
+	signal _resolved
+	var _timeouts := []
+	var _is_resolved := false
+	var _value
+
+	func resolve(value = null) -> void:
+		if _is_resolved:
+			return
+		_is_resolved = true
+		_timeouts = []
+		_resolved.emit(value)
+	
+	func await_result():
+		if _is_resolved:
+			return _value
+		return await _resolved
+
+	func set_timeout(duration_milliseconds, value = null):
+		if _is_resolved:
+			return
+		var handle := {}
+		_timeouts.push_back(handle)
+		await _GotmUtility.get_tree().create_timer(float(duration_milliseconds) / 1000.0).timeout
+		if !(handle in _timeouts):
+			return
+		resolve(value)
