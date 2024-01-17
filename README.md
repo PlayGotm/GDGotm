@@ -9,3 +9,11 @@
 </p>
 
 _Supports versions 4.1.0 and newer._
+
+Features:
+
+- Peer-to-peer connections without port-forwarding
+- Multiplayer lobbies
+- Leaderboards
+- User-generated content
+- Offline support
