@@ -69,11 +69,11 @@ static func create(data = null, key: String = "", properties: Dictionary = {}, n
 static func create_local(data = null, key: String = "", properties: Dictionary = {}, name: String = "", parent_ids: Array = [], is_private: bool = false)  -> GotmContent:
 	return await _GotmContent.create(data, properties, key, name, parent_ids, is_private, true)
 
-# Creates a local mark on the content
+## Creates a local mark on the content
 func create_local_mark(type: GotmMark.Types) -> GotmMark:
 	return await _GotmMark.create(self, type, true)
 
-# Creates a mark on the content
+## Creates a mark on the content
 func create_mark(type: GotmMark.Types) -> GotmMark:
 	return await _GotmMark.create(self, type)
 

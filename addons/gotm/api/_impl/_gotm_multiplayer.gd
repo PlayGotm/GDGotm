@@ -3,102 +3,30 @@ class_name _GotmMultiplayer
 static var _server_multiplayer_peer: WebRTCMultiplayerPeer
 static var _dispose_server_listener
 
-static var _id_chars := "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
 
-static func _get_instance_from_address(address: String) -> String:
-	if !address:
-		return ""
-	var packed_buffer := address.substr(2).to_lower().replace(":", "").hex_decode()
-	if packed_buffer.size() != (20 * 6) / 8:
-		return ""
-	
-	var instance := "instances/"
-	var packed_bit_index := 0
-	while packed_bit_index / 8 < packed_buffer.size():
-		var offset := packed_bit_index % 8
-		var packed_index = packed_bit_index / 8
-		var value := 0
-		if offset == 0:
-			value = packed_buffer[packed_index] >> 2
-		elif offset == 6:
-			value = packed_buffer[packed_index] << 4
-			value |= packed_buffer[packed_index + 1] >> 4
-		elif offset == 4:
-			value = packed_buffer[packed_index] << 2
-			value |= packed_buffer[packed_index + 1] >> 6
-		elif offset == 2:
-			value = packed_buffer[packed_index]
-		else:
-			push_error("Unexpected bit offset")
-			return ""
-		value &= 0x3f
-		instance += _id_chars[value]
-		packed_bit_index += 6
-	return instance
-	
-
-static func _get_address_from_instance(instance: String) -> String:
-	if !instance || !instance.begins_with("instances/"):
-		return ""
-		
-	var id := instance.substr("instances/".length())
-	if id.length() != 20:
-		return ""
-	var packed_buffer := PackedByteArray()
-	packed_buffer.resize((id.length() * 6) / 8)
-	packed_buffer.fill(0)
-	var packed_bit_index := 0
-	for character in id:
-		var value = _id_chars.find(character)
-		if value < 0:
-			return ""
-		var offset := packed_bit_index % 8
-		var packed_index = packed_bit_index / 8
-		if offset == 0:
-			packed_buffer[packed_index] = value << 2
-		elif offset == 6:
-			packed_buffer[packed_index] |= value >> 4
-			packed_buffer[packed_index + 1] = value << 4
-		elif offset == 4:
-			packed_buffer[packed_index] |= value >> 2		
-			packed_buffer[packed_index + 1] = value << 6
-		elif offset == 2:
-			packed_buffer[packed_index] |= value
-		else:
-			push_error("Unexpected bit offset")
-			return ""
-		packed_bit_index += 6
-	
-	var hex := packed_buffer.hex_encode()
-	var address := "fc" + hex.substr(0, 2)
-	var hex_index := 2
-	while hex_index < hex.length():
-		address += ":" + hex.substr(hex_index, 4)
-		hex_index += 4
-	return address
-	
 
 static func get_address() -> String:
 	var instance := (await _GotmAuth.get_auth_async()).instance
-	return _get_address_from_instance(instance)
+	return _GotmUtility.get_address_from_instance(instance)
+
 
 static func create_client(address: String) -> WebRTCMultiplayerPeer:
 	var multiplayer := WebRTCMultiplayerPeer.new()
+	multiplayer.create_client(_create_peer_id())
 	var instance := (await _GotmAuth.get_auth_async()).instance
-	var target := _get_instance_from_address(address)
+	var target := _GotmUtility.get_instance_from_address(address)
 	var start_signal := format_signal(await _GotmStore.create("handshakeSignals", {"target": target, "type": "start"}))
 	
 	var incoming_signal_stream := PromiseStream.new()
 	var on_signals := func(signals_list: Dictionary) -> void:
-		print("connect_to_host signals: ", signals_list)
 		for sig in format_signals(signals_list):
 			if sig.type == GotmHandshakeSignal.Type.SIGNAL:
-				incoming_signal_stream.add(sig)				
+				incoming_signal_stream.add(sig.payload)				
 	var dispose_signal_listener := _GotmUtility.fetch_event_stream(_Gotm.api_listen_origin + "/handshakeSignals?query=byInitiator&initiator=" + instance + "&handshakeId=" + start_signal.handshake_id, on_signals)
-	await _perform_handshake(multiplayer, true, start_signal, incoming_signal_stream)
+	var is_success := await _perform_handshake(multiplayer, true, start_signal, incoming_signal_stream)
 	dispose_signal_listener.call()
 
-	return multiplayer
+	return multiplayer if is_success else null
 
 
 static func create_server() -> WebRTCMultiplayerPeer:
@@ -106,23 +34,27 @@ static func create_server() -> WebRTCMultiplayerPeer:
 		return _server_multiplayer_peer
 
 	var multiplayer := WebRTCMultiplayerPeer.new()
+	multiplayer.create_server()
 	_server_multiplayer_peer = multiplayer
 	
 	var instance := (await _GotmAuth.get_auth_async()).instance
 	var incoming_signal_streams = {}
 	var on_signals := func(signals_list: Dictionary) -> void:
-		print("create_host signals: ", signals_list)
 		for sig in format_signals(signals_list):
 			var type = sig.type
 			var handshake_id = sig.handshake_id
 			var payload = sig.payload
 			if type == GotmHandshakeSignal.Type.START:
 				if handshake_id in incoming_signal_streams:
-					return
+					continue
 				var incoming_signal_stream := PromiseStream.new()
 				incoming_signal_streams[handshake_id] = incoming_signal_stream
-				var peer := await _perform_handshake(multiplayer, false, sig, incoming_signal_stream)
-				incoming_signal_streams.erase(handshake_id)
+				var runner := func():
+					await _perform_handshake(multiplayer, false, sig, incoming_signal_stream)
+					await _GotmStore.delete("handshakeSignals/" + handshake_id)
+					await _GotmUtility.get_tree().create_timer(10).timeout
+					incoming_signal_streams.erase(handshake_id)
+				runner.call()
 			elif type == GotmHandshakeSignal.Type.SIGNAL:
 				var incoming_signal_stream: PromiseStream = incoming_signal_streams.get(handshake_id)
 				if incoming_signal_stream:
@@ -132,14 +64,23 @@ static func create_server() -> WebRTCMultiplayerPeer:
 	return multiplayer
 
 
-static func _perform_handshake(multiplayer: WebRTCMultiplayerPeer, is_initiator: bool, start_signal: GotmHandshakeSignal, incoming_signal_stream: PromiseStream) -> String:
+static func _perform_handshake(multiplayer: WebRTCMultiplayerPeer, is_initiator: bool, start_signal: GotmHandshakeSignal, incoming_signal_stream: PromiseStream) -> bool:
 	var handshake := Handshake.new(multiplayer, is_initiator, JSON.parse_string(start_signal.payload))
-	await _promise_all([
+	var poll_state := {"is_done": false}
+	var poller := func():
+		while !poll_state.is_done:
+			handshake.poll()
+			await _GotmUtility.get_tree().process_frame
+	poller.call()
+	var errors := await _promise_all([
 		func(): return await push_signals(handshake, start_signal),
 		func(): return await pull_signals(handshake, incoming_signal_stream),
 	])
-	return ""
-
+	poll_state.is_done = true
+	for error in errors:
+		if error:
+			push_error(error)
+	return handshake.has_connected()
 
 static var _LAST_PEER_ID := 2
 static func _create_peer_id() -> int:
@@ -159,11 +100,13 @@ class Handshake:
 	var _candidates_to_handle := []
 	var _handled_signals := []
 	var _num_used_signals := 0
+	var _multiplayer: WebRTCMultiplayerPeer
 
 	func _init(multiplayer: WebRTCMultiplayerPeer, is_initiator: bool, config: Dictionary) -> void:
 		_connection_promise = _GotmUtility.ResolvablePromise.new()
 		_is_initiator = !!is_initiator
 		_peer = WebRTCPeerConnection.new()
+		_multiplayer = multiplayer
 		_reset_signal_promise()
 
 		var id := 1 if is_initiator else _GotmMultiplayer._create_peer_id()
@@ -207,7 +150,6 @@ class Handshake:
 		multiplayer.add_peer(_peer, id)
 		if is_initiator:
 			_peer.create_offer()
-		
 
 	func _reset_signal_promise() -> void:
 		_signal_promise = _GotmUtility.ResolvablePromise.new()
@@ -238,7 +180,8 @@ class Handshake:
 		if sig.type == "answer" || sig.type == "offer":
 			_peer.set_remote_description(sig.type, sig.sdp)
 		elif sig.type == "candidate":
-			_peer.add_ice_candidate(sig.sdpMid, sig.sdpMLineIndex, sig.candidate)
+			var candidate = sig.candidate
+			_peer.add_ice_candidate(candidate.sdpMid, candidate.sdpMLineIndex, candidate.candidate)
 		else:
 			push_error("Unknown signal type: " + JSON.stringify(sig))
 
@@ -265,7 +208,7 @@ class Handshake:
 				if is_connecting():
 					_num_used_signals += 1
 					_add_signal(candidate)
-					_GotmMultiplayer._log_verbose(get_name() + " handling signal: " + candidate)
+					_GotmMultiplayer._log_verbose(get_name() + " handling signal: " + JSON.stringify(candidate))
 			_candidates_to_handle = []
 		elif _has_handled_first_signal:
 			_num_used_signals += 1
@@ -274,9 +217,12 @@ class Handshake:
 		else:
 			_candidates_to_handle.push_back(sig)
 
+	func poll():
+		_peer.poll()
+		_multiplayer.poll()
 
 	func wait_for_signal():
-		if is_connecting():
+		if !is_connecting():
 			return false
 		
 		var result = await _signal_promise.await_result()
@@ -289,11 +235,7 @@ class Handshake:
 
 static func push_signals(handshake: Handshake, start_signal: GotmHandshakeSignal) -> String:
 	var num_pushed_signals = 0
-	var update_error
-	var catch_create_error := func(e):
-		update_error = e
-
-	while handshake.is_connecting() && !update_error && (await handshake.wait_for_signal()):
+	while handshake.is_connecting() && (await handshake.wait_for_signal()):
 		_GotmMultiplayer._log_verbose(handshake.get_name() + " UPDATE " + JSON.stringify(handshake.get_signals()))
 		var handshake_signals := handshake.get_signals()
 		var to_push = handshake_signals.slice(num_pushed_signals)
@@ -307,8 +249,7 @@ static func push_signals(handshake: Handshake, start_signal: GotmHandshakeSignal
 				await _GotmStore.create(
 					"handshakeSignals",
 					{
-						"handshake_id": handshake_id,
-						"owner": owner if handshake.is_initiator() else target,
+						"handshakeId": handshake_id,
 						"target": target if handshake.is_initiator() else owner,
 						"payload": sig,
 						"type": "signal",
@@ -318,39 +259,36 @@ static func push_signals(handshake: Handshake, start_signal: GotmHandshakeSignal
 		await _GotmMultiplayer._promise_all(runners)
 
 	if !handshake.has_connected():
-		if update_error:
-			return update_error
 		return handshake.get_name() + " is out of signals."
 	
 	return ""
 
-static func _promise_race(promises: Array):
-	if !promises:
+static func _promise_race(callables: Array):
+	if !callables:
 		return
 	var race_promise := _GotmUtility.ResolvablePromise.new()
-	for promise in promises:
+	for callable in callables:
 		var waiter := func():
-			var result = promise
-			race_promise.resolve(result)
+			race_promise.resolve(await callable.call())
 		waiter.call()
 	return await race_promise.await_result()
 
-static func _promise_all(callables: Array):
+static func _promise_all(callables: Array) -> Array:
 	var results := []
 	if !callables:
 		return results
 		
-	var num_resolved := 0
+	var state := {"num_resolved": 0}
 	results.resize(callables.size())
 	var all_promise := _GotmUtility.ResolvablePromise.new()
 	for i in callables.size():
 		var runner := func():
 			results[i] = await callables[i].call()
-			num_resolved += 1
-			if num_resolved >= callables.size():
+			state.num_resolved += 1
+			if state.num_resolved >= callables.size():
 				all_promise.resolve()
 		runner.call()
-	await all_promise
+	await all_promise.await_result()
 	return results
 
 
@@ -370,11 +308,35 @@ static func pull_signals(handshake: Handshake, signal_stream: PromiseStream):
 	
 
 class PromiseStream:
-	var derp := 123
+	var _queue := []
+	var _promises := []
+  
+
+	func add(value = null) -> void:
+		_queue.push_back(value)
+		for promise in _promises:
+			promise.resolve(true)
 
 
+	func flush() -> Array:
+		var queue := _queue
+		_queue = []
+		return queue
 
+	# Resolves to false if the timeout expired before new data is available, else resolves to true.
+	func wait(timeout = 0) -> bool:
+		if _queue:
+			return true
 
+		var promise := _GotmUtility.ResolvablePromise.new()
+		_promises.push_back(promise)
+		
+		if timeout > 0:
+			promise.set_timeout(timeout, false)
+		
+		var result = await promise.await_result()
+		_promises.erase(promise)
+		return result
 
 
 	
@@ -423,7 +385,7 @@ static func format_signal(data: Dictionary) -> GotmHandshakeSignal:
 
 const ENABLE_VERBOSE_LOGS = false
 static func _log_verbose(message: String) -> void:
-	if ENABLE_VERBOSE_LOGS:
+	if !ENABLE_VERBOSE_LOGS:
 		return
 	print(message)
 

@@ -52,7 +52,8 @@ func stuff():
 	Gotm.project_key = "authenticators/ccG2PZyIak36FjT2COCE"
 	var host := await GotmMultiplayer.create_server()
 	var client := await GotmMultiplayer.create_client(await GotmMultiplayer.get_address())
-
+	if !client:
+		print("failed to connect to host")
 	host.put_var("i am host")
 	client.put_var("i am client")
 	while true:

@@ -172,21 +172,21 @@ static func fetch_event_stream(url: String, on_event: Callable) -> Callable:
 				on_event.call({})
 				return
 
+			var buffer := ""
 			while client.get_status() == HTTPClient.STATUS_BODY:
 				client.poll()
-				var message := client.read_response_body_chunk().get_string_from_utf8()
-				if !message:
-					await get_tree().process_frame
-					continue
-				message = message.replace("\n", "")
-				if !message.begins_with("data: "):
-					continue
-				var data = JSON.parse_string(message.substr("data: ".length()))
-				if !data:
-					var flerp = 123
-				on_event.call({} if !data else data as Dictionary)
-
-
+				buffer += client.read_response_body_chunk().get_string_from_utf8()
+				var start = buffer.find("data: ")
+				var end = buffer.find("\n", start)
+				while start >= 0 && end >= 0:
+					var message := buffer.substr(start, end - start)
+					buffer = buffer.substr(end)
+					var data = JSON.parse_string(message.substr("data: ".length()))
+					on_event.call({} if !data else data as Dictionary)
+					start = buffer.find("data: ")
+					end = buffer.find("\n", start)
+				
+				await get_tree().process_frame
 	poll.call()
 	return dispose
 
@@ -555,6 +555,7 @@ class ResolvablePromise:
 	func resolve(value = null) -> void:
 		if _is_resolved:
 			return
+		_value = value
 		_is_resolved = true
 		_timeouts = []
 		_resolved.emit(value)
@@ -573,3 +574,77 @@ class ResolvablePromise:
 		if !(handle in _timeouts):
 			return
 		resolve(value)
+
+
+static func get_instance_from_address(address: String) -> String:
+	if !address:
+		return ""
+	var packed_buffer := address.substr(2).to_lower().replace(":", "").hex_decode()
+	if packed_buffer.size() != (20 * 6) / 8:
+		return ""
+	
+	var instance := "instances/"
+	var packed_bit_index := 0
+	while packed_bit_index / 8 < packed_buffer.size():
+		var offset := packed_bit_index % 8
+		var packed_index = packed_bit_index / 8
+		var value := 0
+		if offset == 0:
+			value = packed_buffer[packed_index] >> 2
+		elif offset == 6:
+			value = packed_buffer[packed_index] << 4
+			value |= packed_buffer[packed_index + 1] >> 4
+		elif offset == 4:
+			value = packed_buffer[packed_index] << 2
+			value |= packed_buffer[packed_index + 1] >> 6
+		elif offset == 2:
+			value = packed_buffer[packed_index]
+		else:
+			push_error("Unexpected bit offset")
+			return ""
+		value &= 0x3f
+		instance += _global.id_chars[value]
+		packed_bit_index += 6
+	return instance
+	
+
+static func get_address_from_instance(instance: String) -> String:
+	if !instance || !instance.begins_with("instances/"):
+		return ""
+		
+	var id := instance.substr("instances/".length())
+	if id.length() != 20:
+		return ""
+	var packed_buffer := PackedByteArray()
+	packed_buffer.resize((id.length() * 6) / 8)
+	packed_buffer.fill(0)
+	var packed_bit_index := 0
+	for character in id:
+		var value = _global.id_chars.find(character)
+		if value < 0:
+			return ""
+		var offset := packed_bit_index % 8
+		var packed_index = packed_bit_index / 8
+		if offset == 0:
+			packed_buffer[packed_index] = value << 2
+		elif offset == 6:
+			packed_buffer[packed_index] |= value >> 4
+			packed_buffer[packed_index + 1] = value << 4
+		elif offset == 4:
+			packed_buffer[packed_index] |= value >> 2		
+			packed_buffer[packed_index + 1] = value << 6
+		elif offset == 2:
+			packed_buffer[packed_index] |= value
+		else:
+			push_error("Unexpected bit offset")
+			return ""
+		packed_bit_index += 6
+	
+	var hex := packed_buffer.hex_encode()
+	var address := "fc" + hex.substr(0, 2)
+	var hex_index := 2
+	while hex_index < hex.length():
+		address += ":" + hex.substr(hex_index, 4)
+		hex_index += 4
+	return address
+	
