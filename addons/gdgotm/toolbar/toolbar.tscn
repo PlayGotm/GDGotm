@@ -1,0 +1,113 @@
+[gd_scene load_steps=18 format=3 uid="uid://dcy3xjkgff4vs"]
+
+[ext_resource type="Script" path="res://addons/gdgotm/toolbar/toolbar.gd" id="1_rqhu4"]
+[ext_resource type="Script" path="res://addons/gdgotm/toolbar/background.gd" id="2_v2mhq"]
+[ext_resource type="Texture2D" uid="uid://di765x3yexr4s" path="res://addons/gdgotm/toolbar/gotm.svg" id="3_a72mm"]
+[ext_resource type="Texture2D" uid="uid://n7ix6ak67oin" path="res://addons/gdgotm/toolbar/upload.svg" id="4_s7j5g"]
+[ext_resource type="Texture2D" uid="uid://dmr4v6jfktg51" path="res://addons/gdgotm/toolbar/docs.svg" id="5_1l0nj"]
+[ext_resource type="Script" path="res://addons/gdgotm/toolbar/menu.gd" id="6_yhwo5"]
+[ext_resource type="Script" path="res://addons/gdgotm/toolbar/build.gd" id="7_xqtuw"]
+[ext_resource type="Script" path="res://addons/gdgotm/toolbar/deploy.gd" id="8_mdbhf"]
+[ext_resource type="Script" path="res://addons/gdgotm/toolbar/websocket_server.gd" id="9_gegu7"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_kcd3u"]
+corner_radius_top_left = 22
+corner_radius_top_right = 22
+corner_radius_bottom_right = 22
+corner_radius_bottom_left = 22
+
+[sub_resource type="Gradient" id="Gradient_r8qld"]
+colors = PackedColorArray(0.160784, 0.47451, 1, 1, 0.396078, 0.121569, 1, 1)
+
+[sub_resource type="FastNoiseLite" id="FastNoiseLite_jgttl"]
+frequency = 0.005
+
+[sub_resource type="NoiseTexture2D" id="NoiseTexture2D_4gc0f"]
+width = 100
+height = 100
+color_ramp = SubResource("Gradient_r8qld")
+noise = SubResource("FastNoiseLite_jgttl")
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_64fhb"]
+bg_color = Color(0.6, 0.6, 0.6, 0)
+corner_radius_top_left = 22
+corner_radius_top_right = 22
+corner_radius_bottom_right = 22
+corner_radius_bottom_left = 22
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_vo0ye"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_chott"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_yihr3"]
+
+[node name="ToolbarPanel" type="Panel"]
+clip_children = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_kcd3u")
+script = ExtResource("1_rqhu4")
+
+[node name="Background" type="TextureRect" parent="."]
+modulate = Color(1, 1, 1, 0)
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = SubResource("NoiseTexture2D_4gc0f")
+script = ExtResource("2_v2mhq")
+hovered_colors = PackedColorArray(0.160784, 0.47451, 1, 1, 0.396078, 0.121569, 1, 1)
+
+[node name="Button" type="Button" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/normal = SubResource("StyleBoxFlat_64fhb")
+theme_override_styles/hover = SubResource("StyleBoxFlat_64fhb")
+theme_override_styles/pressed = SubResource("StyleBoxEmpty_vo0ye")
+theme_override_styles/disabled = SubResource("StyleBoxEmpty_chott")
+theme_override_styles/focus = SubResource("StyleBoxEmpty_yihr3")
+icon = ExtResource("3_a72mm")
+icon_alignment = 1
+expand_icon = true
+
+[node name="Menu" type="PopupMenu" parent="."]
+title = "Gotm Menu"
+size = Vector2i(231, 156)
+allow_search = false
+item_count = 4
+item_0/text = " Upload to Web Player"
+item_0/icon = ExtResource("4_s7j5g")
+item_0/id = 0
+item_1/text = " Documentation"
+item_1/icon = ExtResource("5_1l0nj")
+item_1/id = 1
+item_2/text = " Gotm.io "
+item_2/icon = ExtResource("3_a72mm")
+item_2/id = 2
+item_3/text = "v2.0.0_a.1.0"
+item_3/id = 100
+item_3/disabled = true
+item_3/separator = true
+script = ExtResource("6_yhwo5")
+
+[node name="Build" type="Node" parent="."]
+script = ExtResource("7_xqtuw")
+
+[node name="Deploy" type="Node" parent="."]
+script = ExtResource("8_mdbhf")
+
+[node name="WebSocketServer" type="Node" parent="Deploy"]
+script = ExtResource("9_gegu7")
+
+[connection signal="pressed" from="Button" to="Menu" method="_on_button_pressed"]
+[connection signal="about_to_popup" from="Menu" to="Menu" method="_set_menu_position"]
+[connection signal="index_pressed" from="Menu" to="Menu" method="_on_index_pressed" flags=18]

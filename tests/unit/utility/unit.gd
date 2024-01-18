@@ -32,8 +32,10 @@ func test(object: Object) -> void:
 func test_all() -> void:
 	print("Running all unit tests...")
 	await test_content()
-	await test_score()
 	await test_leaderboard()
+	await test_lobby()
+	await test_multiplayer()
+	await test_score()
 	await test_utility()
 	print("Unit testing completed.")
 
@@ -43,10 +45,26 @@ func test_content() -> void:
 	await test(load("res://tests/unit/content_unit_test.gd").new())
 
 
+func test_lobby() -> void:
+	if !Gotm.project_key:
+		print("GotmLobby unit test skipped because no project key was provided.")
+		return
+	print("GotmLobby unit test running...")
+	await test(load("res://tests/unit/lobby_unit_test.gd").new())
+	
+
 func test_leaderboard() -> void:
 	print("GotmLeaderboard unit test running...")
 	await test(load("res://tests/unit/leaderboard_unit_test.gd").new())
 
+
+func test_multiplayer() -> void:
+	if !Gotm.project_key:
+		print("GotmMultiplayer unit test skipped because no project key was provided.")
+		return
+	print("GotmMultiplayer unit test running...")
+	await test(load("res://tests/unit/multiplayer_unit_test.gd").new())
+	
 
 func test_score() -> void:
 	print("GotmScore unit test running...")

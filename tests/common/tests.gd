@@ -21,6 +21,7 @@ func switch_test_scenes() -> void:
 
 func _on_gotm_init_pressed() -> void:
 	Gotm.project_key = $UI/FunctionalMenu/ProjectKey.text
+	Gotm.project_key = "authenticators/ccG2PZyIak36FjT2COCE"
 	Gotm.force_local_contents = force_offline
 	Gotm.force_local_marks = force_offline
 	Gotm.force_local_scores = force_offline
@@ -43,9 +44,6 @@ func _on_start_unit_pressed() -> void:
 	test = Test.UNIT
 	$UI/Menu.hide()
 	$UI/FunctionalMenu.show()
-
-
-
 
 
 func stuff():
@@ -76,7 +74,7 @@ var ch1 = p1.create_data_channel("chat", {"id": 1, "negotiated": true})
 var ch2 = p2.create_data_channel("chat", {"id": 1, "negotiated": true})
 
 func _ready():
-	stuff()
+#	stuff()
 	return
 #	multiplayer.multiplayer_peer = p1
 	print(p1.create_data_channel("chat", {"id": 1, "negotiated": true}))
