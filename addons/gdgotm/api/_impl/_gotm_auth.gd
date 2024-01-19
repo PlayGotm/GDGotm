@@ -115,7 +115,7 @@ static func _get_refreshed_project_auth(auth: _GotmAuthData) -> _GotmAuthData:
 
 
 static func _is_auth_valid(auth: _GotmAuthData) -> bool:
-	if !auth || auth.token.is_empty() || !(auth.expired > Time.get_unix_time_from_system() + 60):
+	if !auth || auth.token.is_empty() || !(auth.expired > (Time.get_unix_time_from_system() + 60) * 1000):
 		return false
 	if !auth.project.is_empty() && auth.project_key != Gotm.project_key:
 		return false

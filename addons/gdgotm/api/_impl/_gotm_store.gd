@@ -43,7 +43,7 @@ static func create_request_path(path: String, query: String = "", params: Dictio
 	if options.get("expand"):
 		var expands = options.get("expand").keys()
 		expands.sort()
-		query_object.expand = expands.join(",")
+		query_object.expand = ",".join(expands)
 	return path + _GotmUtility.create_query_string(query_object)
 
 

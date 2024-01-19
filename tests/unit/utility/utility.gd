@@ -61,7 +61,7 @@ static func resource_to_string(resource) -> String:
 		var parts := []
 		for res in resource:
 			parts.append(resource_to_string(res))
-		return "[" + _GotmUtility.join(parts, ",") + "]"
+		return "[" + ",".join(parts) + "]"
 	if resource is Object:
 		if resource.get("id"):
 			return resource.id

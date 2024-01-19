@@ -382,15 +382,6 @@ static func is_strictly_equal(a, b) -> bool:
 	return typeof(a) == typeof(b) && a == b
 
 
-static func join(array: Array, separator: String = ",") -> String:
-	var string = ""
-	for i in range(0, array.size()):
-		string += array[i]
-		if i < array.size() - 1:
-			string += separator
-	return string
-
-
 static func parse_url(url: String) -> Dictionary:
 	var url_parts = url.split("/")
 	var origin = url_parts[0] + "//" + url_parts[2]
@@ -445,14 +436,14 @@ static func to_stable_json(value) -> String:
 		var child_strings := []
 		for child in value:
 			child_strings.append(to_stable_json(child))
-		return "[" + join(child_strings, ",") + "]"
+		return "[" + ",".join(child_strings) + "]"
 	if value is Dictionary:
 		var keys = value.keys()
 		keys.sort()
 		var child_strings := []
 		for key in keys:
 			child_strings.append("\"" + key + "\":" + to_stable_json(value[key]))
-		return "{" + join(child_strings, ",") + "}"
+		return "{" + ",".join(child_strings) + "}"
 	return JSON.stringify(value)
 
 

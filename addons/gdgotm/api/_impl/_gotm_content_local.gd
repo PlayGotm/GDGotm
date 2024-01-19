@@ -134,7 +134,7 @@ static func _get_content_value(prop: String, content: Dictionary, undefined_valu
 			if parts.is_empty():
 				return ""
 			parts.resize(parts.size() - 1)
-			return _GotmUtility.join(parts, "/")
+			return "/".join(parts)
 
 		"extension":
 			var key: String = content.key
@@ -145,7 +145,7 @@ static func _get_content_value(prop: String, content: Dictionary, undefined_valu
 			if dot_split.size() <= 1:
 				return ""
 			dot_split.remove_at(0)
-			return _GotmUtility.join(dot_split, ".")
+			return ".".join(dot_split)
 
 		"size":
 			var blob := _LocalStore.fetch(content.data)
