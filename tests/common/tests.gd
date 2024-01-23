@@ -21,7 +21,6 @@ func switch_test_scenes() -> void:
 
 func _on_gotm_init_pressed() -> void:
 	Gotm.project_key = $UI/FunctionalMenu/ProjectKey.text
-	Gotm.project_key = "authenticators/ccG2PZyIak36FjT2COCE"
 	Gotm.force_local_contents = force_offline
 	Gotm.force_local_marks = force_offline
 	Gotm.force_local_scores = force_offline
@@ -47,7 +46,6 @@ func _on_start_unit_pressed() -> void:
 
 
 func stuff():
-	Gotm.project_key = "authenticators/ccG2PZyIak36FjT2COCE"
 	var host := await GotmMultiplayer.create_server()
 	var client := await GotmMultiplayer.create_client(await GotmMultiplayer.get_address())
 	if !client:
