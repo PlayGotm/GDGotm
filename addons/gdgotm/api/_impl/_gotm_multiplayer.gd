@@ -15,8 +15,7 @@ static func get_address() -> String:
 static func create_client(address: String) -> WebRTCMultiplayerPeer:
 	if !_check_project_key():
 		return
-	var multiplayer := WebRTCMultiplayerPeer.new()
-	multiplayer.create_client(multiplayer.generate_unique_id())
+
 	var instance := (await _GotmAuth.get_auth_async()).instance
 	var target := _GotmUtility.get_instance_from_address(address)
 	var start_signal := format_signal(await _GotmStore.create("handshakeSignals", {"target": target, "type": "start"}))
@@ -30,6 +29,8 @@ static func create_client(address: String) -> WebRTCMultiplayerPeer:
 				incoming_signal_stream.add(sig.payload)				
 	var dispose_signal_listener := _GotmUtility.fetch_event_stream(_Gotm.api_listen_origin + "/handshakeSignals?query=byInitiator&initiator=" + instance + "&handshakeId=" + start_signal.handshake_id, on_signals)
 	
+	var multiplayer := WebRTCMultiplayerPeer.new()
+	multiplayer.create_client(_get_peer_id_from_signal(start_signal))
 	var dispatch := func():
 		await _perform_handshake(multiplayer, true, start_signal, incoming_signal_stream)
 		dispose_signal_listener.call()
@@ -74,8 +75,14 @@ static func create_server() -> WebRTCMultiplayerPeer:
 	return multiplayer
 
 
+static func _get_peer_id_from_signal(sig: GotmHandshakeSignal) -> int:
+	if !sig:
+		return 0
+	return sig.handshake_id.hash()
+
+
 static func _perform_handshake(multiplayer: WebRTCMultiplayerPeer, is_initiator: bool, start_signal: GotmHandshakeSignal, incoming_signal_stream: PromiseStream) -> bool:
-	var handshake := Handshake.new(multiplayer, is_initiator, JSON.parse_string(start_signal.payload))
+	var handshake := Handshake.new(multiplayer, is_initiator, start_signal)
 	var poll_state := {"is_done": false}
 	var poller := func():
 		while !poll_state.is_done:
@@ -109,14 +116,14 @@ class Handshake:
 	var _multiplayer: WebRTCMultiplayerPeer
 	var _id := 0
 
-	func _init(multiplayer: WebRTCMultiplayerPeer, is_initiator: bool, config: Dictionary) -> void:
+	func _init(multiplayer: WebRTCMultiplayerPeer, is_initiator: bool, start_signal: GotmHandshakeSignal) -> void:
 		_connection_promise = _GotmUtility.ResolvablePromise.new()
 		_is_initiator = !!is_initiator
 		_peer = WebRTCPeerConnection.new()
 		_multiplayer = multiplayer
 		_reset_signal_promise()
 
-		_id = 1 if is_initiator else multiplayer.generate_unique_id()
+		_id = 1 if is_initiator else _GotmMultiplayer._get_peer_id_from_signal(start_signal)
 
 		var on_signal := func(sig: Dictionary) -> void:
 			var signal_string := JSON.stringify(sig)
@@ -153,7 +160,7 @@ class Handshake:
 			_signal_promise.resolve(false)
 			_connection_promise.resolve(true)
 		)
-		_peer.initialize(config)
+		_peer.initialize(JSON.parse_string(start_signal.payload))
 		multiplayer.add_peer(_peer, _id)
 		if is_initiator:
 			_peer.create_offer()
