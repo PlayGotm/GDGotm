@@ -78,7 +78,7 @@ static func create_server() -> WebRTCMultiplayerPeer:
 static func _get_peer_id_from_signal(sig: GotmHandshakeSignal) -> int:
 	if !sig:
 		return 0
-	return sig.handshake_id.hash()
+	return maxi(sig.handshake_id.hash() & ((1 << 31) - 1), 2) 
 
 
 static func _perform_handshake(multiplayer: WebRTCMultiplayerPeer, is_initiator: bool, start_signal: GotmHandshakeSignal, incoming_signal_stream: PromiseStream) -> bool:
